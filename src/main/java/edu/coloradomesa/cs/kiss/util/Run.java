@@ -7,14 +7,14 @@ public class Run {
     public static void main(String[] _args) throws ClassNotFoundException {
         String[] args = null;
 
-        String mainClassName = "Main"; // default class is "Main" in default package
+        String className = "App"; // default class is "App" in default package
                 
-        if (System.getenv("JAVA_MAIN") != null) { // env override
-            mainClassName = System.getenv("JAVA_MAIN");
+        if (System.getenv("JAVA_APP") != null) { // env override
+            className = System.getenv("JAVA_APP");
         }
         
-        if (_args.length > 1 && _args[0].equals("--main")) { 
-            mainClassName = _args[1];
+        if (_args.length > 1 && _args[0].equals("--app")) { 
+            className = _args[1];
             args = new String[_args.length-2];
             System.arraycopy(_args,2,args,0,args.length);
         } else {
@@ -22,56 +22,57 @@ public class Run {
             System.arraycopy(args,0,_args,0,args.length);
         }
 
-        Class mainClass = Class.forName(mainClassName);
+        Class appClass = Class.forName(className);
 
-        Object main = null;
-		try {
-			main = mainClass.getConstructor(String[].class).newInstance(new Object[] { args });
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-				| NoSuchMethodException | SecurityException e2) {
-		}
+        Object app = null;
+        try {
+            app = appClass.getConstructor(String[].class).newInstance(new Object[] { args });
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+                 | NoSuchMethodException | SecurityException e2) {
+        }
+        
+        if (app == null) {
+            try { // construct with default (no arg) constructor
+                app = appClass.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new RuntimeException("Could not construct "
+                                           + appClass.getName()
+                                           + ". Is the default or String[] constructor not public?");
+            }
+        }
 
-		if (main == null) {
-			try { // construct with default (no arg) constructor
-				main = mainClass.newInstance();
-			} catch (InstantiationException | IllegalAccessException e) {
-				throw new RuntimeException("Could not construct " + mainClass.getName()
-						+ ". Is the default or String[] constructor not public?");
-			}
-		}
+        for (Method method : app.getClass().getDeclaredMethods()) {
+            if (method.getName().startsWith("test") && method.getParameterTypes().length == 0) {
+                try {
+                    method.invoke(app);
+                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
 
-		for (Method method : main.getClass().getDeclaredMethods()) {
-			if (method.getName().startsWith("test") && method.getParameterTypes().length == 0) {
-				try {
-					method.invoke(main);
-				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-					e.printStackTrace();
-				}
-			}
-		}
+        Method run = null;
+        try {
+            run = app.getClass().getMethod("run");
+        } catch (NoSuchMethodException | SecurityException e1) {
+        }
+        
+        if (run != null) {
+            try {
+                run.invoke(app);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException("Make " + run + " in " + app.getClass().getName() + " public");
+            } catch (IllegalArgumentException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
 
-		Method run = null;
-		try {
-			run = main.getClass().getMethod("run");
-		} catch (NoSuchMethodException | SecurityException e1) {
-		}
-
-		if (run != null) {
-			try {
-				run.invoke(main);
-			} catch (IllegalAccessException e) {
-				throw new RuntimeException("Make " + run + " in " + main.getClass().getName() + " public");
-			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
-
-	public static void sleep(long millis) {
+    public static void sleep(long millis) {
 		try {
 			Thread.sleep(millis);
 		} catch (InterruptedException e) {
