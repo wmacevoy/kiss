@@ -1,2 +1,0 @@
-# kiss
-Java simplified
