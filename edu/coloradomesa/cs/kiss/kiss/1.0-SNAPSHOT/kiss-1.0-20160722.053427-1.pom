@@ -21,8 +21,6 @@
     </distributionManagement>
   
   <build>
-
-    
     <plugins>
       <plugin>
         <groupId>com.github.github</groupId>
@@ -66,7 +64,32 @@
           <target>1.7</target>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.5.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <executable>java</executable>
+          <arguments>
+            <argument>-cp</argument>
+            <classpath/>
+            <argument>-ea</argument><!-- enable assertions -->
+            <argument>kiss.util.Run</argument>
+            <argument>--app</argument>
+            <argument>kiss.util.Test</argument><!-- the app class -->
+          </arguments>
+        </configuration>
+      </plugin>
+
     </plugins>
+
   </build>
   <dependencies>
     <dependency>
