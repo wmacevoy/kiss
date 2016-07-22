@@ -1,4 +1,4 @@
-package edu.coloradomesa.cs.kiss.util;
+package kiss.util;
 
 import java.io.IOException;
 import java.io.InputStream;

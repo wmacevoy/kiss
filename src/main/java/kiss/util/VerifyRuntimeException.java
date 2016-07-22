@@ -1,4 +1,4 @@
-package edu.coloradomesa.cs.kiss.util;
+package kiss.util;
 
 public class VerifyRuntimeException extends RuntimeException {
 	VerifyRuntimeException(String message) {

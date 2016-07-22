@@ -1,7 +1,7 @@
 // https://cs.gmu.edu/~sean/research/mersenne/MersenneTwisterFast.java
 // package modified && main() removed
 
-package edu.coloradomesa.cs.kiss.util;
+package kiss.util;
 
 
 import java.io.*;

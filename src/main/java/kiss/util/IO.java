@@ -1,4 +1,4 @@
-package edu.coloradomesa.cs.kiss.util;
+package kiss.util;
 
 import java.io.Closeable;
 import java.io.File;
@@ -312,6 +312,24 @@ public class IO {
         out().println(value);
     }
 
+    static void printva(PrintStream ps, Object args[]) {
+        for (int i=0; i<args.length; ++i) {
+            if (i>0) ps.print(",");
+            ps.print(format(args[i]));
+        }
+    }
+
+    public static void printva(Object[] args) {
+        PrintStream ps = out();
+        printva(ps,args);
+    }
+
+    public static void printlnva(Object[] args) {
+        PrintStream ps = out();
+        printva(ps,args);
+        ps.println();
+    }
+    
     public static String readLine() {
     	Scanner in=in();
     	if (in.hasNextLine()) {

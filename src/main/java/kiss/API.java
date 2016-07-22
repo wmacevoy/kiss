@@ -1,11 +1,11 @@
-package edu.coloradomesa.cs.kiss;
+package kiss;
 
 import java.io.Closeable;
 import java.io.File;
 
-import edu.coloradomesa.cs.kiss.util.IO;
-import edu.coloradomesa.cs.kiss.util.RNG;
-import edu.coloradomesa.cs.kiss.util.Run;
+import kiss.util.IO;
+import kiss.util.RNG;
+import kiss.util.Run;
 
 public class API {
 	public static Closeable outVerify(String filename) {
@@ -180,6 +180,14 @@ public class API {
 		IO.println(value);
 	}
 
+	public static void print(Object... value) {
+            IO.printva(value);
+	}
+
+	public static void println(Object... value) {
+            IO.printlnva(value);
+	}
+    
 	public static String readLine() {
 		return IO.readLine();
 	}

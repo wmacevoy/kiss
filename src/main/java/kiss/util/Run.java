@@ -1,10 +1,12 @@
-package edu.coloradomesa.cs.kiss.util;
+package kiss.util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.DecimalFormat;
+import java.util.Date;
 
 public class Run {
-    public static void main(String[] _args) throws ClassNotFoundException {
+    public static void main(String[] _args) throws ClassNotFoundException, java.lang.reflect.InvocationTargetException {
         String[] args = null;
 
         String className = "App"; // default class is "App" in default package
@@ -41,15 +43,29 @@ public class Run {
             }
         }
 
+        kiss.util.RNG.seed(0);
+        DecimalFormat df = new DecimalFormat("0.00");
+        
         for (Method method : app.getClass().getDeclaredMethods()) {
             if (method.getName().startsWith("test") && method.getParameterTypes().length == 0) {
                 try {
+                    Date started = new Date();
+                    System.out.println(started+" "+method.getName()+": started");
                     method.invoke(app);
-                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+
+                    Date ended = new Date();
+                    double elapsed =
+                        (ended.getTime()-started.getTime())/1000.0;
+
+
+                    System.out.println(ended+" "+method.getName()+": ended in " + df.format(elapsed) + " second(s)");
+                } catch (IllegalAccessException | IllegalArgumentException e) {
                     e.printStackTrace();
                 }
             }
         }
+
+        kiss.util.RNG.seed(java.lang.System.currentTimeMillis());
 
         Method run = null;
         try {

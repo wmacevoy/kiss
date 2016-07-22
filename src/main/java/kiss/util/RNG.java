@@ -1,4 +1,4 @@
-package edu.coloradomesa.cs.kiss.util;
+package kiss.util;
 
 public class RNG {
 	static ThreadLocal<MersenneTwisterFast> rng = new ThreadLocal<MersenneTwisterFast>() {
@@ -17,9 +17,15 @@ public class RNG {
 	}
 
 	// return a random integer between a and b (including ends)
+        // if b <= a, just returns a
 	public static int random(int a, int b) {
-		long n = ((long) b) - ((long) a) + 1;
-		return (int) (rng.get().nextLong() % n + a);
+            if (a <= b) {
+                long n = ((long) b) - ((long) a) + 1;
+		return (int)
+                    ((rng.get().nextLong() & Long.MAX_VALUE) % n + a);
+            } else {
+                throw new IllegalArgumentException("random(" + a + "," + b + ") does not make sense.");
+            }
 	}
 
 	// return a random integer between 1..n
