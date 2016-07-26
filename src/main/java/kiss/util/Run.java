@@ -7,6 +7,22 @@ import java.util.Date;
 
 public class Run {
     public static void main(String[] _args) throws ClassNotFoundException, java.lang.reflect.InvocationTargetException {
+
+        // 0. The default app object is App (default package).  You can
+        //    choose another object using the --app <class> command line
+        //    option or the JAVA_APP environment variable.
+        //
+        // 1. Contruct app object.  Use the String[] args constructor
+        //    if it is available.  Otherwise, use the default constructor.
+        // 
+        //
+        // 2. Invoke testXXX() methods.  For reproducability, the
+        //    random number seed is set to 1 before each test.
+        //
+        // 3. Call the run() method.
+        //
+        // 4. Call the close() method (even if a test or run fails)
+        
         String[] args = null;
 
         String className = "App"; // default class is "App" in default package
@@ -28,73 +44,103 @@ public class Run {
 
         Object app = null;
         try {
-            app = appClass.getConstructor(String[].class).newInstance(new Object[] { args });
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-                 | NoSuchMethodException | SecurityException e2) {
-        }
-        
-        if (app == null) {
-            try { // construct with default (no arg) constructor
-                app = appClass.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw new RuntimeException("Could not construct "
-                                           + appClass.getName()
-                                           + ". Is the default or String[] constructor not public?");
+            try {
+                app = appClass.getConstructor(String[].class).newInstance(new Object[] { args });
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+                     | NoSuchMethodException | SecurityException e2) {
             }
-        }
+            
+            if (app == null) {
+                try { // construct with default (no arg) constructor
+                    app = appClass.newInstance();
+                } catch (InstantiationException | IllegalAccessException e) {
+                    throw new RuntimeException("Could not construct "
+                                               + appClass.getName()
+                                               + ". Is the default or String[] constructor not public?");
+                }
+            }
 
-        kiss.util.RNG.seed(0);
-        DecimalFormat df = new DecimalFormat("0.00");
+            DecimalFormat df = new DecimalFormat("0.00");
         
-        for (Method method : app.getClass().getDeclaredMethods()) {
-            if (method.getName().startsWith("test") && method.getParameterTypes().length == 0) {
+            for (Method method : app.getClass().getDeclaredMethods()) {
+                if (method.getName().startsWith("test") && method.getParameterTypes().length == 0) {
+                    try {
+                        Date started = new Date();
+                        System.out.println(started+" "+method.getName()+": started");
+                        kiss.API.seed(1);
+                        method.invoke(app);
+
+                        Date ended = new Date();
+                        double elapsed =
+                            (ended.getTime()-started.getTime())/1000.0;
+
+
+                        System.out.println(ended+" "+method.getName()+": ended in " + df.format(elapsed) + " second(s)");
+                    } catch (IllegalAccessException | IllegalArgumentException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            Method run = null;
+            try {
+                run = app.getClass().getMethod("run");
+            } catch (NoSuchMethodException | SecurityException e1) {
+            }
+        
+            if (run != null) {
                 try {
-                    Date started = new Date();
-                    System.out.println(started+" "+method.getName()+": started");
-                    method.invoke(app);
-
-                    Date ended = new Date();
-                    double elapsed =
-                        (ended.getTime()-started.getTime())/1000.0;
-
-
-                    System.out.println(ended+" "+method.getName()+": ended in " + df.format(elapsed) + " second(s)");
-                } catch (IllegalAccessException | IllegalArgumentException e) {
+                    kiss.API.seed(kiss.API.time());
+                    run.invoke(app);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException("Make " + run + " in " + app.getClass().getName() + " public");
+                } catch (IllegalArgumentException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
-        }
-
-        kiss.util.RNG.seed(java.lang.System.currentTimeMillis());
-
-        Method run = null;
-        try {
-            run = app.getClass().getMethod("run");
-        } catch (NoSuchMethodException | SecurityException e1) {
-        }
+        } finally {
+            if (app != null) {
+                Method close = null;
+                try {
+                    close = app.getClass().getMethod("close");
+                } catch (NoSuchMethodException | SecurityException e1) {
+                }
         
-        if (run != null) {
-            try {
-                run.invoke(app);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException("Make " + run + " in " + app.getClass().getName() + " public");
-            } catch (IllegalArgumentException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                if (close != null) {
+                    try {
+                        close.invoke(app);
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException("Make " + close + " in " + app.getClass().getName() + " public");
+                    } catch (IllegalArgumentException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (InvocationTargetException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
             }
         }
     }
 
-    public static void sleep(long millis) {
-		try {
-			Thread.sleep(millis);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+    public static void sleep(double duration) {
+        if (duration > 0) {
+            try {
+                Thread.sleep((int)java.lang.Math.round(duration*1000));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Thread.yield();
+        }
+    }
+
+    public static double time() {
+        return java.lang.System.currentTimeMillis()/1000.0;
+    }
 
 }
