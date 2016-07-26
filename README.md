@@ -50,7 +50,7 @@ Any `testXXX` method is automatically called before the `run` method.  Want to w
 
 ## Randomness a kindergardener understands
 
-`int die=random(1,6)` is a die roll and `seed(1)` resets the pseudo-random sequence for testability.
+`int die=random(1,6)` is a die roll and `seed(1)` resets the pseudo-random sequence for testability.  The random-number sequence is reset with `seed(1)` before each `textXXX()` and reset to a cryptographically strong PRNG with `seed()` before invoking `run()`.
 
 ## Just math
 

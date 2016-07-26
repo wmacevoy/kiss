@@ -67,7 +67,7 @@ public class Run {
                     try {
                         Date started = new Date();
                         System.out.println(started+" "+method.getName()+": started");
-                        kiss.API.seed(1);
+                        kiss.API.seed();
                         method.invoke(app);
 
                         Date ended = new Date();
