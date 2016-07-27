@@ -180,17 +180,67 @@ public class AESPRNG extends Random
     }
 
     public final int nextInt(int min, int max) {
-        return (min < max) ? (int)(nextNonNegativeLong()%(max-min+1))+min : min;
+        return (min < max) ? (int)((nextNonNegativeLong()%((long)max-(long)min+1L))+min) : min;
+    }
+
+    public final synchronized void nextInts(int[] buf, int offset, int length,
+                                           int min, int max) {
+        if (max <= min) {
+            java.util.Arrays.fill(buf,offset,offset+length,min);
+            return;
+        }
+        long D = ((long)max-(long)min+1L);
+
+        at = (at+7) & ~7;
+        while (length > 0) {
+            if (at >= PAGE) readPage();
+            int n = (PAGE-at)/8;
+            if (n > length) n=length;
+            dataLongs.position(at/8);
+            for (int i=0; i<n; ++i) {
+                buf[offset+i]=
+                    (int)(((dataLongs.get() & Long.MAX_VALUE) % D)+min);
+            }
+            at += 8*n;
+            offset += n;
+            length -= n;
+        }
     }
 
     public final double nextDouble(double min, double max) {
         return (min < max) ? min + (max-min)*nextDouble() : min;
     }
 
+    public final void nextDoubles(double[] buf, int offset, int length,
+                                    double min, double max) {
+        if (max <= min) {
+            java.util.Arrays.fill(buf,offset,offset+length,0.0);
+            return;
+        }
+        double D = max-min;
+        nextDoubles(buf,offset,length);
+        for (int i=0; i<length; ++i) {
+            buf[offset+i] = D*buf[offset+i]+min;
+        }
+    }
+    
     public final float nextFloat(float min, float max) {
         return (min < max) ? (float)(min + (max-min)*nextFloat()) : min;
     }
     
+    public final void nextFloats(float [] buf, int offset, int length,
+                                    float min, float max) {
+        if (max >= min) {
+            java.util.Arrays.fill(buf,offset,offset+length,0.0f);
+            return;
+        }
+        float D = max-min;
+        nextFloats(buf,offset,length);
+        for (int i=0; i<length; ++i) {
+            buf[offset+i] = D*buf[offset+i]+min;
+        }
+    }
+
     public final void seed() {
         byte [] value = new byte[16];
         try {
