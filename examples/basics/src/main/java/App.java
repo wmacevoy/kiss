@@ -51,14 +51,8 @@ public class App {
 
     public void testCraps()
     {
-        seed(1);
-        println(craps());
-        println(craps());
-        println(craps());
-        
-        seed(1); // repeating random sequence for testability
-        assert craps() == "Natural";
-        assert craps() == "Easy Ten";
+        assert craps() == "Ace Deuce";
+        assert craps() == "Nina";
         assert craps() == "Nina";
     }
 
@@ -73,7 +67,6 @@ public class App {
     public void testDie() {
         for (int i=0; i<1000; ++i) {
             int die=random(1,6);
-            println("die: " + die);
             assert (1 <= die);
             assert (die <= 6);
         }
