@@ -231,7 +231,7 @@ public class AESPRNG extends Random
     public final void nextDoubles(double[] buf, int offset, int length,
                                     double min, double max) {
         if (max <= min) {
-            java.util.Arrays.fill(buf,offset,offset+length,0.0);
+            java.util.Arrays.fill(buf,offset,offset+length,min);
             return;
         }
         double D = max-min;
@@ -250,7 +250,7 @@ public class AESPRNG extends Random
     public final void nextFloats(float [] buf, int offset, int length,
                                     float min, float max) {
         if (max >= min) {
-            java.util.Arrays.fill(buf,offset,offset+length,0.0f);
+            java.util.Arrays.fill(buf,offset,offset+length,min);
             return;
         }
         float D = max-min;
