@@ -8,7 +8,7 @@ import kiss.util.RNG;
 import kiss.util.Run;
 
 public class API {
-	public static Closeable outVerify(String filename) {
+        public static Closeable outVerify(String filename) {
 		return IO.outVerify(filename);
 	}
 
@@ -216,29 +216,29 @@ public class API {
 		return IO.readDouble();
 	}
 
-	public static void seed() {
-		RNG.seed();
-	}
+        public static void seed() {
+            RNG.seed();
+        }
 
-	public static void seed(long value) {
-		RNG.seed(value);
-	}
+        public static void seed(double value) {
+            RNG.seed(value);
+        }
 
 	public static int random(int a, int b) {
 		return RNG.random(a, b);
-	}
-
-	public static int random(int n) {
-		return RNG.random(n);
 	}
 
 	public static double random() {
 		return RNG.random();
 	}
 
-	public static void sleep(int millis) {
-		Run.sleep(millis);
+	public static void sleep(double duration) {
+		Run.sleep(duration);
 	}
+
+        public static double time() {
+               return Run.time();
+        }
 
 	public static final double E = Math.E;
 	public static final double PI = Math.PI;
