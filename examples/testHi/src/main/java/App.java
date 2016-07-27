@@ -3,24 +3,20 @@ import static kiss.API.*;
 public class App {
 
     // all test...() methods are invoked before run() is invoked
-    public void testHi() {
+    public void testRun() {
         // create file with expected output
         outOpen("hi.out");
         println("Hello, World!");
         outClose();
 
-        // verify that hi() produces that output
+        // verify that run() produces that output
         outVerify("hi.out");
-        hi();
+        run();
         outClose();
     }
 
-    public void hi()
+    public void run()
     {
         println("Hello, World!");
-    }
-
-    public void run() {
-        println("All tests passed.");
     }
 }

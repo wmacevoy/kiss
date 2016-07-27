@@ -65,13 +65,40 @@ public class App {
         return true;
     }
 
+    public void testDie() {
+        for (int i=0; i<1000; ++i) {
+            int die=random(1,6);
+            println("die: " + die);
+            assert (1 <= die);
+            assert (die <= 6);
+        }
+    }
+
     public void testIsPrime() {
         assert isPrime(3) == true;
         assert isPrime(17) == true;
         assert isPrime(20) == false;
     }
 
+    public void useIsPrime()
+    {
+        print("What number do you want to check as prime? ");
+        int number = readInteger();
+        if (isPrime(number)) {
+            println(number + " is prime.");
+        } else {
+            println(number + " is not prime.");
+        }
+    }
+
+    public void useCraps()
+    {
+        println("First roll: " + craps());
+        println("Second roll: " + craps());
+    }
+
     public void run() {
-        println("All tests passed.");
+        useIsPrime();
+        useCraps();
     }
 }
