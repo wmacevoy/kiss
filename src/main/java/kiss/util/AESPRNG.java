@@ -9,8 +9,9 @@ import java.io.FileInputStream;
 import java.security.SecureRandom;
 import java.util.Random;
 
-// When using bulk random numbers, this is about 20% slower than Random
-// but it produces crypographically strong psuedo-random number sequences.
+/** When using bulk random numbers, this is about 20% slower than Random
+ *  but AESPRNG produces crypographically strong psuedo-random
+ *  number sequences. */
 
 public class AESPRNG extends Random
 {
@@ -65,6 +66,7 @@ public class AESPRNG extends Random
         return ans;
     }
 
+    /** [Long.MIN_VALUE,Long.MAX_VALUE] */                        
     public synchronized final void nextLongs(long[] buf, int offset, int length) {
         at = (at+7) & ~7;
         while (length > 0) {
@@ -79,6 +81,7 @@ public class AESPRNG extends Random
         }
     }
 
+    /** [0,Long.MAX_VALUE] */
     public final void nextNonNegativeLongs(long[] buf, int offset, int length) {
         nextLongs(buf,offset,length);
         for (int i=0; i<length; ++i) {
@@ -86,6 +89,7 @@ public class AESPRNG extends Random
         }
     }
 
+    /** [Long.MIN_VALUE,Long.MAX_VALUE] */                    
     public synchronized final long nextLong() {
         at = (at+7) & ~7;
         if (at >= PAGE) readPage();
@@ -94,10 +98,12 @@ public class AESPRNG extends Random
         return ans;
     }
 
+    /** [0,Long.MAX_VALUE] */                
     public final long nextNonNegativeLong() {
         return nextLong() & Long.MAX_VALUE;
     }
 
+    /** [Integer.MIN_VALUE,Integer.MAX_VALUE] */            
     public synchronized final void nextInts(int[] buf, int offset, int length) {
         at = (at+3) & ~3;
         while (length > 0) {
@@ -112,6 +118,7 @@ public class AESPRNG extends Random
         }
     }
 
+    /** [0,Integer.MAX_VALUE] */        
     public final void nextNonNegativeInts(int[] buf, int offset, int length) {
         nextInts(buf,offset,length);
         for (int i=0; i<length; ++i) {
@@ -119,6 +126,7 @@ public class AESPRNG extends Random
         }
     }
 
+    /** [Integer.MIN_VALUE,Integer.MAX_VALUE] */    
     public synchronized final int nextInt() {
         at = (at+3) & ~3;
         if (at >= PAGE) readPage();
@@ -127,10 +135,12 @@ public class AESPRNG extends Random
         return ans;
     }
 
+    /** [0,Integer.MAX_VALUE] */
     public final int nextNonNegativeInt() {
         return nextInt() & Integer.MAX_VALUE;
     }
 
+    /** [0,1) */        
     public synchronized final void nextDoubles(double[] buf, int offset, int length)
     {
         at = (at+7) & ~7;
@@ -148,6 +158,7 @@ public class AESPRNG extends Random
         }
     }
 
+    /** [0,1) */        
     public final double nextDouble() {
         // IEEE 754 double has 52 bits in the mantessa,
         // so 53 bits of precision.  To this precision,
@@ -155,6 +166,7 @@ public class AESPRNG extends Random
         return (nextLong() & ((1L<<53)-1))/((double)(1L<<53));
     }
 
+    /** [0,1) */        
     public synchronized final void nextFloats(float[] buf, int offset, int length)
     {
         at = (at+3) & ~3;
@@ -172,6 +184,7 @@ public class AESPRNG extends Random
         }
     }
 
+    /** [0,1) */    
     public final float nextFloat() {
         // IEEE 754 double has 23 bits in the mantessa,
         // so 24 bits of precision.  To this precision,
@@ -179,10 +192,12 @@ public class AESPRNG extends Random
         return (nextInt() & ((1<<24)-1))/((float)(1<<24));
     }
 
+    /** [min,max] */    
     public final int nextInt(int min, int max) {
         return (min < max) ? (int)((nextNonNegativeLong()%((long)max-(long)min+1L))+min) : min;
     }
 
+    /** [min,max] */
     public final synchronized void nextInts(int[] buf, int offset, int length,
                                            int min, int max) {
         if (max <= min) {
@@ -207,10 +222,12 @@ public class AESPRNG extends Random
         }
     }
 
+    /** [min,max) */    
     public final double nextDouble(double min, double max) {
         return (min < max) ? min + (max-min)*nextDouble() : min;
     }
 
+    /** [min,max) */    
     public final void nextDoubles(double[] buf, int offset, int length,
                                     double min, double max) {
         if (max <= min) {
@@ -223,11 +240,13 @@ public class AESPRNG extends Random
             buf[offset+i] = D*buf[offset+i]+min;
         }
     }
-    
+
+    /** [min,max) */
     public final float nextFloat(float min, float max) {
         return (min < max) ? (float)(min + (max-min)*nextFloat()) : min;
     }
-    
+
+    /** [min,max) */    
     public final void nextFloats(float [] buf, int offset, int length,
                                     float min, float max) {
         if (max >= min) {
