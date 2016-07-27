@@ -99,3 +99,47 @@ produce a strongly random sequence before this.
 
 All the steps after the construction are optional.
 
+* `sleep(double duration)` --- Pauses the application for the given number of seconds (without wasting CPU time).
+
+* `double time()` --- Returns the seconds since midnight, January 1, 1970 UTC.  Calling this twice and taking the difference is useful for interval timing.
+
+* `APP_NAME` --- The name of the application class (just `"App"` by default)
+
+* `APP_ARGS` --- The command line arguments.
+
+* `APP` --- Once the application object is constructed, this is a global reference to the application object.
+
+### IO
+
+* `outOpen(String filename)` --- redirects print/ln() output to the specified
+  file.  These can be nested and each thread is independent.  There must be a
+  matching `outClose()` to close the file.
+
+* `inOpen(String filename)` --- redirects readXXX() to use this input file.  Thse can be nested and each thread is independent.  There must be a matching `inClose()` to close the file.
+
+* `outVerify(String filename)` --- compares print/ln() output to the contents of this file.  `readXXX()` are also matched so you should be able to copy your console dialog into a verify file to create an expected contract.  Like outOpen, this can be nested and each thread is independent, and must be matched by outClose() to stop the verification.  Verification failures throw an error at the point a mismatch is detected.
+
+* `format(...)` --- a way to convert objects to printable strings similar to the print() statements below.  They do a better job than the java PrintStream methods on structured objects like arrays and lists.
+
+* `print/ln(...)` --- like format, but sends the formatted strings to the current output stream (`System.out` by default).  You can change the default with `outOpen` and `outVerify`.
+
+* `readXXX(...)` --- uses a `java.util.Scanner` on the current input stream (`System.in` by default).  You can change the default with `inOpen`.
+
+### Math
+
+All the math functions and constants are imported, with the exception of `Math.random()` and `Math.random(int n)` which is improved.
+
+### RNG
+
+A fast (almost as fast as the standard random number generator) but crytographically strong pseudo-random number generator is provided by default.  Calling `seed()` strongly sets the seed, while `seed(double value)` sets it to a reproducable sequence.
+
+* `int random(int a, int b)` --- generates a uniformly random integer in the interval, including the endpoints.  If b<=a, this always returns a.
+
+* `double random()` --- returns a uniformly random double in the interval [0,1).
+
+* `seed()` --- seeds the PRNG with a 128-bit strong random seed.
+
+* `seed(double value)` --- seeds the PRNG for a reproducable sequence.
+
+  
+
