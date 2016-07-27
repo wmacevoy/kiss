@@ -77,3 +77,25 @@ public class App {
     }
 }
 ```
+
+## Goodness by section
+
+### Run
+
+The `Run` part of the kiss API simplifies starting and controlling the execution of your application.  It contains a `main()` method to launch your application which does the following
+
+1. Run looks for the main object of your application.  This is `App` in the default (no declaration) package.  If you want to run some other class, just pass the `--app <classname>` argument on the command line, or specifiy it with the `JAVA_APP` environment variable.
+
+2. Run constructs an instance of the application class using the default constructor.  The constructor (or anywhere else) can use APP_ARGS to access command line arguments and APP_NAME contains the class name of the application object.  After the instance is constructed (at the end of this step), APP is a global reference to the application object.
+
+3. Run invokes all testXXX methods in order of declaration.  The random
+number generator is reset with seed(1) before each test to help make the
+tests reproducable.
+
+4. Run invokes the run method.  The kiss random number generator is set to
+produce a strongly random sequence before this.
+
+5. Run invokes the close method, even if there was an error in a test or run.
+
+All the steps after the construction are optional.
+
