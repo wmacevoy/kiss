@@ -43,6 +43,8 @@ public class VerifyOutputStream extends OutputStream {
 					break;
 			}
 			mismatch = at + i;
+                        verify.close();
+			throw new VerifyRuntimeException("mismatch at byte offset " + mismatch);                        
 		}
 	}
 
