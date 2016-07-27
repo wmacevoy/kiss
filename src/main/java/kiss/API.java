@@ -232,7 +232,11 @@ public class API {
 		return RNG.random();
 	}
 
-	public static void sleep(double duration) {
+        public static String[] APP_ARGS; // updated by Run.main
+        public static String APP_NAME; // updated by Run.main    
+        public static Object APP; // updated by Run.main
+
+        public static void sleep(double duration) {
 		Run.sleep(duration);
 	}
 

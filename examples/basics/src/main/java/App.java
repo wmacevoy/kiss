@@ -51,6 +51,11 @@ public class App {
 
     public void testCraps()
     {
+        seed(1);
+        println(craps());
+        println(craps());
+        println(craps());
+        
         seed(1); // repeating random sequence for testability
         assert craps() == "Natural";
         assert craps() == "Easy Ten";

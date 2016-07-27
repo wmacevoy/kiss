@@ -23,9 +23,8 @@ public class Run {
         //
         // 4. Call the close() method (even if a test or run fails)
         
-        String[] args = null;
-
         String className = "App"; // default class is "App" in default package
+        String[] args;
                 
         if (System.getenv("JAVA_APP") != null) { // env override
             className = System.getenv("JAVA_APP");
@@ -41,24 +40,20 @@ public class Run {
         }
 
         Class appClass = Class.forName(className);
+        kiss.API.APP_NAME=className;
+        kiss.API.APP_ARGS=java.util.Arrays.copyOf(args,args.length);
 
         Object app = null;
         try {
-            try {
-                app = appClass.getConstructor(String[].class).newInstance(new Object[] { args });
-            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-                     | NoSuchMethodException | SecurityException e2) {
+            try { // construct with default (no arg) constructor
+                app = appClass.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new RuntimeException("Could not construct "
+                                           + appClass.getName()
+                                           + ". Is the default or String[] constructor not public?");
             }
-            
-            if (app == null) {
-                try { // construct with default (no arg) constructor
-                    app = appClass.newInstance();
-                } catch (InstantiationException | IllegalAccessException e) {
-                    throw new RuntimeException("Could not construct "
-                                               + appClass.getName()
-                                               + ". Is the default or String[] constructor not public?");
-                }
-            }
+
+            kiss.API.APP=app;
 
             DecimalFormat df = new DecimalFormat("0.00");
         
