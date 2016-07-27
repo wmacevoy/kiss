@@ -103,11 +103,11 @@ All the steps after the construction are optional.
 
 * `double time()` --- Returns the seconds since midnight, January 1, 1970 UTC.  Calling this twice and taking the difference is useful for interval timing.
 
-* `APP_NAME` --- The name of the application class (just `"App"` by default)
+* `String APP_NAME` --- The name of the application class (just `"App"` by default)
 
-* `APP_ARGS` --- The command line arguments.
+* `String[] APP_ARGS` --- The command line arguments.
 
-* `APP` --- Once the application object is constructed, this is a global reference to the application object.
+* `Object APP` --- Once the application object is constructed, this is a global reference to the application object.
 
 ### IO
 
