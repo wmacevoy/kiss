@@ -3,8 +3,8 @@
 ## kiss Java
 
 The goal is to make the launching and testing of java programs for beginners
-easy: no explainations of static methods, simplified IO, and a simple
-test framework beginners can use to write and validate their code.
+easy: no explanations of static methods, simplified IO, and a simple
+test framework that beginners can use to write and validate their code.
 
 In order to keep it simple, I have incorporated all this into one library, `kiss`, so students do not have to download other library dependencies and have a single import statement to start using it.  Here is the hello world program:
 
@@ -48,7 +48,7 @@ class App {
 ```
 Any `testXXX` method is automatically called before the `run` method.  Want to write a test?  Just write the test!
 
-## Randomness a kindergardener understands
+## Randomness a kindergartener understands
 
 `int die=random(1,6)` is a die roll and `seed(1)` resets the pseudo-random sequence for testability.  The random-number sequence is reset with `seed(1)` before each `textXXX()` and reset to a cryptographically strong PRNG with `seed()` before invoking `run()`.
 
@@ -58,7 +58,7 @@ The java.Math static methods are effectively also imported, so you just use `sqr
 
 ## File IO sucks less.
 
-Here is a java program that makes an CSV file with 100 die rolls pairs:
+Here is a java program that makes a CSV file with 100 die rolls pairs:
 
 ```java
 import static kiss.API.*;
@@ -84,7 +84,7 @@ class App {
 
 The `Run` part of the kiss API simplifies starting and controlling the execution of your application.  It contains a `main()` method to launch your application which does the following
 
-1. Run looks for the application class.  This is `App` in the default (no declaration) package.  If you want to use some other class, just pass the `--app <classname>` argument on the command line, or specifiy it with the `JAVA_APP` environment variable.
+1. Run looks for the application class.  This is `App` in the default (no declaration) package.  If you want to use some other class, just pass the `--app <classname>` argument on the command line, or specify it with the `JAVA_APP` environment variable.
 
 2. Run constructs an instance of the application class using the default constructor.  The constructor (or anywhere else) can use APP_ARGS to access command line arguments and APP_NAME contains the class name of the application object.  After the instance is constructed (at the end of this step), APP is a global reference to the application object.
 
@@ -131,7 +131,7 @@ All the math functions and constants are imported, with the exception of `Math.r
 
 ### RNG
 
-A fast (almost as fast as the standard random number generator) but crytographically strong pseudo-random number generator is provided by default.  Calling `seed()` strongly sets the seed, while `seed(double value)` sets it to a reproducable sequence.
+A fast (almost as fast as the standard random number generator) but cryptographically strong pseudo-random number generator is provided by default.  Calling `seed()` strongly sets the seed, while `seed(double value)` sets it to a reproducible sequence.
 
 * `int random(int a, int b)` --- generates a uniformly random integer in the interval, including the endpoints.  If b<=a, this always returns a.
 
@@ -139,7 +139,7 @@ A fast (almost as fast as the standard random number generator) but crytographic
 
 * `seed()` --- seeds the PRNG with a 128-bit strong random seed.
 
-* `seed(double value)` --- seeds the PRNG for a reproducable sequence.
+* `seed(double value)` --- seeds the PRNG for a reproducible sequence.
 
   
 
