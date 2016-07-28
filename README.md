@@ -89,8 +89,8 @@ The `Run` part of the kiss API simplifies starting and controlling the execution
 2. Run constructs an instance of the application class using the default constructor.  The constructor (or anywhere else) can use APP_ARGS to access command line arguments and APP_NAME contains the class name of the application object.  After the instance is constructed (at the end of this step), APP is a global reference to the application object.
 
 3. Run invokes all testXXX() methods in order of declaration.  The random
-number generator is reset with seed(1) before each test to help make the
-tests reproducable.
+number generator is reset with `seed(1)` before each test to help make the
+tests reproducible.
 
 4. Run invokes the run() method.  The random number generator is set to
 produce a strongly random sequence before this.
