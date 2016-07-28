@@ -56,7 +56,7 @@ Any `testXXX` method is automatically called before the `run` method.  Want to w
 
 The java.Math static methods are effectively also imported, so you just use `sqrt`, not `Math.sqrt`.  Peppering 'Math.' in all your formulas does not make you smarter or the code easier to read.
 
-## File IO sucks less.
+## Seriously Simple Output
 
 Here is a java program that makes a CSV file with 100 die rolls pairs:
 
@@ -76,6 +76,32 @@ class App {
        outClose();
     }
 }
+```
+
+## Easy Input
+
+```java
+import static kiss.API.*;
+
+class App {
+    void run() {
+       print("time(seconds)? ");
+       double t = readDouble();
+       print("gravity(meters/second^2)? ");
+       double g = readDouble();
+       double d =0.5*g*pow(t,2);
+       println("It fell " + d + " meters.");
+    }
+}
+```
+
+You can get input from a file with
+
+```java
+inOpen(filename);
+XX value = readXX();
+...
+inClose();
 ```
 
 ## Goodness by section
