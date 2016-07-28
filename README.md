@@ -22,7 +22,7 @@ class App {
 }
 ```
 
-To see the classic message, you need the (kiss-1.0-SNAPSHOT.jar kiss) library in your project and use "kiss.util.Run" as your main class.  If you use maven (supported by most common IDE's) there are pre-built `pom.xml` files in the example projects.
+To see the classic message, you need the kiss jar file in your project and use "kiss.util.Run" as your main class.  If you use maven (supported by most common IDE's) there are pre-built `pom.xml` files in the example projects.
 
 ## Test Hello World
 
