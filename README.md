@@ -56,7 +56,7 @@ Any `testXXX` method is automatically called before the `run` method.  Want to w
 
 The java.Math static methods are effectively also imported, so you just use `sqrt`, not `Math.sqrt`.  Peppering 'Math.' in all your formulas does not make you smarter or the code easier to read.
 
-## Seriously Simple Output
+## Obvious Output
 
 Here is a java program that makes a CSV file with 100 die rolls pairs:
 
@@ -78,7 +78,7 @@ class App {
 }
 ```
 
-## Easy Input
+## Intuitive Input
 
 ```java
 import static kiss.API.*;
