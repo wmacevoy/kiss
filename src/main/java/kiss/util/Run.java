@@ -2,11 +2,14 @@ package kiss.util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Constructor;
 import java.text.DecimalFormat;
 import java.util.Date;
 
 public class Run {
     public static void main(String[] _args) throws ClassNotFoundException, java.lang.reflect.InvocationTargetException {
+
+        ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
 
         // 0. The default app object is App (default package).  You can
         //    choose another object using the --app <class> command line
@@ -40,14 +43,20 @@ public class Run {
         }
 
         Class appClass = Class.forName(className);
+        
         kiss.API.APP_NAME=className;
         kiss.API.APP_ARGS=java.util.Arrays.copyOf(args,args.length);
 
         Object app = null;
         try {
             try { // construct with default (no arg) constructor
-                app = appClass.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
+                Constructor constructor = appClass.getConstructor();
+                try {
+                    constructor.setAccessible(true);
+                } catch (Exception e) {}
+                
+                app = constructor.newInstance();
+            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException e) {
                 throw new RuntimeException("Could not construct "
                                            + appClass.getName()
                                            + ". Is the default or String[] constructor not public?");
@@ -63,6 +72,10 @@ public class Run {
                         Date started = new Date();
                         System.out.println(started+" "+method.getName()+": started");
                         kiss.API.seed();
+                        try {
+                            method.setAccessible(true);
+                        } catch (Exception e) {}
+                        
                         method.invoke(app);
 
                         Date ended = new Date();
@@ -86,6 +99,9 @@ public class Run {
             if (run != null) {
                 try {
                     kiss.API.seed(kiss.API.time());
+                    try {
+                        run.setAccessible(true);
+                    } catch (Exception e) {}
                     run.invoke(app);
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException("Make " + run + " in " + app.getClass().getName() + " public");
@@ -107,6 +123,9 @@ public class Run {
         
                 if (close != null) {
                     try {
+                        try {
+                            close.setAccessible(true);
+                        } catch (Exception e) {}
                         close.invoke(app);
                     } catch (IllegalAccessException e) {
                         throw new RuntimeException("Make " + close + " in " + app.getClass().getName() + " public");
@@ -137,5 +156,4 @@ public class Run {
     public static double time() {
         return java.lang.System.currentTimeMillis()/1000.0;
     }
-
 }
