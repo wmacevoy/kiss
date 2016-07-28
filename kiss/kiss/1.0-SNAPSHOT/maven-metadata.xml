@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata modelVersion="1.1.0">
-  <groupId>edu.coloradomesa.cs.kiss</groupId>
+  <groupId>kiss</groupId>
   <artifactId>kiss</artifactId>
   <version>1.0-SNAPSHOT</version>
   <versioning>
     <snapshot>
-      <timestamp>20160728.080202</timestamp>
+      <timestamp>20160728.155509</timestamp>
       <buildNumber>1</buildNumber>
     </snapshot>
-    <lastUpdated>20160728080202</lastUpdated>
+    <lastUpdated>20160728155509</lastUpdated>
     <snapshotVersions>
       <snapshotVersion>
         <extension>jar</extension>
-        <value>1.0-20160728.080202-1</value>
-        <updated>20160728080202</updated>
+        <value>1.0-20160728.155509-1</value>
+        <updated>20160728155509</updated>
       </snapshotVersion>
       <snapshotVersion>
         <extension>pom</extension>
-        <value>1.0-20160728.080202-1</value>
-        <updated>20160728080202</updated>
+        <value>1.0-20160728.155509-1</value>
+        <updated>20160728155509</updated>
       </snapshotVersion>
     </snapshotVersions>
   </versioning>

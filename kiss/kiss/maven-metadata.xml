@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata>
-  <groupId>edu.coloradomesa.cs.kiss</groupId>
+  <groupId>kiss</groupId>
   <artifactId>kiss</artifactId>
   <versioning>
     <versions>
       <version>1.0-SNAPSHOT</version>
     </versions>
-    <lastUpdated>20160728080202</lastUpdated>
+    <lastUpdated>20160728155509</lastUpdated>
   </versioning>
 </metadata>
