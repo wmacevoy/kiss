@@ -56,7 +56,7 @@ Any `testXXX` method is automatically called before the `run` method.  Want to w
 
 `int die=random(1,6)` is a die roll and `seed(1)` resets the pseudo-random sequence for testability.  The random-number sequence is reset with `seed(1)` before each `textXXX()` and reset to a cryptographically strong PRNG with `seed()` before invoking `run()`.
 
-## Just math
+## ~~Math.~~math
 
 The java.Math static methods are effectively also imported, so you just use `sqrt`, not `Math.sqrt`.  Peppering 'Math.' in all your formulas does not make you smarter or the code easier to read.
 
