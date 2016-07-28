@@ -1,12 +1,18 @@
 # kiss java API
 
+## Download
+
+Github: [https://github.com/wmacevoy/kiss]
+
+Jar: [kiss-0.0.1.jar](https://github.com/wmacevoy/kiss/blob/master/kiss-0.0.1.jar?raw=true)
+
 ## kiss Java
 
 The goal is to make the launching and testing of java programs for beginners
 easy: no explanations of static methods, simplified IO, and a simple
 test framework that beginners can use to write and validate their code.
 
-In order to keep it simple, I have incorporated all this into one library, `kiss`, so students do not have to download other library dependencies and have a single import statement to start using it.  Here is the hello world program:
+In order to keep it simple, this is incorporated into one library, `kiss`, so students do not have to download other library dependencies and have a single import statement to start using it.  Here is the hello world program:
 
 ```java
 import static kiss.API.*;
