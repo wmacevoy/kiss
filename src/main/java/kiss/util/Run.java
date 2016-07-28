@@ -49,17 +49,19 @@ public class Run {
 
         Object app = null;
         try {
-            try { // construct with default (no arg) constructor
+            try {
                 Constructor constructor = appClass.getConstructor();
-                try {
-                    constructor.setAccessible(true);
-                } catch (Exception e) {}
+                
+                if (!constructor.isAccessible()) {
+                    try {
+                        constructor.setAccessible(true);
+                    } catch (Exception e) {}
+                }
                 
                 app = constructor.newInstance();
             } catch (InstantiationException | IllegalAccessException | NoSuchMethodException e) {
                 throw new RuntimeException("Could not construct "
-                                           + appClass.getName()
-                                           + ". Is the default or String[] constructor not public?");
+                                           + appClass.getName() + ".");
             }
 
             kiss.API.APP=app;
@@ -69,9 +71,9 @@ public class Run {
             for (Method method : app.getClass().getDeclaredMethods()) {
                 if (method.getName().startsWith("test") && method.getParameterTypes().length == 0) {
                     try {
+                        kiss.API.seed(1);
                         Date started = new Date();
                         System.out.println(started+" "+method.getName()+": started");
-                        kiss.API.seed();
                         try {
                             method.setAccessible(true);
                         } catch (Exception e) {}
@@ -86,7 +88,11 @@ public class Run {
                         System.out.println(ended+" "+method.getName()+": ended in " + df.format(elapsed) + " second(s)");
                     } catch (IllegalAccessException | IllegalArgumentException e) {
                         e.printStackTrace();
+                    } catch (InvocationTargetException e) {
+                        e.getCause().printStackTrace();
+                        System.exit(1);
                     }
+
                 }
             }
 
@@ -98,7 +104,7 @@ public class Run {
         
             if (run != null) {
                 try {
-                    kiss.API.seed(kiss.API.time());
+                    kiss.API.seed();
                     try {
                         run.setAccessible(true);
                     } catch (Exception e) {}
@@ -110,7 +116,7 @@ public class Run {
                     e.printStackTrace();
                 } catch (InvocationTargetException e) {
                     // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    e.getCause().printStackTrace();
                 }
             }
         } finally {

@@ -61,7 +61,7 @@ public class IO {
         return OUT_CLOSE;
 
     }
-    
+
     public static Closeable outOpen(String filename) {
     	return outOpen(new File(filename));
     }

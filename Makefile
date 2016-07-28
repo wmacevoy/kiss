@@ -22,4 +22,3 @@ test : # mvn exec:exec
 	java -jar  "target/$(JAR)" --app kiss.util.Test
 	if [ ! -d tmp ] ; then mkdir tmp ; fi
 	cd tmp; for dir in ../examples/*; do if [ -d "$$dir" ] ; then echo "$$dir..."; java -cp "../target/$(JAR):$$dir/target/classes" kiss.util.Run < /dev/null; fi ; done
-

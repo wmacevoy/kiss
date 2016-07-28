@@ -1,6 +1,6 @@
 import static kiss.API.*;
 
-public class App {
+class App {
     public void run() {
         println("Hello, World!");
     }

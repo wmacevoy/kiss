@@ -298,6 +298,7 @@ public class AESPRNG extends Random
             ex.printStackTrace();
             throw new Error("Failing to set aes key is inconceivable.");
         }
+        at = PAGE;
         ctr = 0;
         gaussianAt = 0;
         gaussianN  = 0;
