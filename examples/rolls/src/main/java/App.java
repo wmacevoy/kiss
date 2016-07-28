@@ -1,7 +1,7 @@
 import static kiss.API.*;
 
-public class App {
-    public void run() {
+class App {
+    void run() {
        outOpen("rolls.csv");
        println("i,d1,d2,sum");
        for (int i=1; i<=100; ++i) {

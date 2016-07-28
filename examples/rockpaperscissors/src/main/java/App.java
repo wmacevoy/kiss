@@ -1,12 +1,12 @@
 import static kiss.API.*;
 
-public class App {
+class App {
     enum Choice { Rock, Paper, Scissors, Quit }
     
-    public Choice computer;
-    public Choice person;
+    Choice computer;
+    Choice person;
 
-    public void computerPick() {
+    void computerPick() {
         switch(random(1,3)) {
         case 1: computer = Choice.Rock; break;
         case 2: computer = Choice.Paper; break;
@@ -14,7 +14,7 @@ public class App {
         }
     }
 
-    public void personPick() {
+    void personPick() {
         person = null;
         while (person == null) {
             print("Rock, Paper, Scissors, or Quit? ");
@@ -27,7 +27,7 @@ public class App {
         }
     }
 
-    public boolean beats(Choice a, Choice b) {
+    boolean beats(Choice a, Choice b) {
         switch(a) {
         case Rock: return b == Choice.Scissors;
         case Paper: return b == Choice.Rock;
@@ -36,7 +36,7 @@ public class App {
         throw new Error("Inconceivable!");
     }
 
-    public void resolveWinner() {
+    void resolveWinner() {
         print(person + " vs. " + computer + ": ");
         if (beats(person,computer)) {
             println("you win!");
@@ -47,7 +47,7 @@ public class App {
         }
     }
 
-    public void run() {
+    void run() {
         for (;;) {
             computerPick();
             personPick();

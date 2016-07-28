@@ -170,7 +170,7 @@ public class IO {
                     throw new IllegalArgumentException("Unknown array type (should not happen)");
                 }
             }
-        } else if (object instanceof Map) {
+        } else if (object instanceof Map<?,?>) {
             Set<Map.Entry> set = ((Map) object).entrySet();
             ans.append("[");
             boolean first = true;

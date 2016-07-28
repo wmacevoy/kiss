@@ -7,7 +7,7 @@ lib :   # mvn compile
 
 .PHONY: examples
 examples :
-	for dir in examples/*; do if [ -d "$$dir" ] ; then echo "$$dir..."; javac -cp "target/$(JAR):$$dir/target/classes" -d "$$dir/target/classes" -s "$$dir/src/main/java" $$(find "$$dir/src/main/java" -regex '[^._].*\.java$$'); fi ; done
+	for dir in examples/*; do if [ -d "$$dir" ] ; then echo "$$dir..."; javac -cp "target/classes:$$dir/target/classes" -d "$$dir/target/classes" -s "$$dir/src/main/java" $$(find "$$dir/src/main/java" -regex '[^._].*\.java$$'); fi ; done
 
 .PHONY: clean
 clean : # mvn clean
@@ -19,6 +19,6 @@ deploy :
 
 .PHONY: test
 test : # mvn exec:exec
-	java -jar  "target/$(JAR)" --app kiss.util.Test
+	java -cp target/classes kiss.util.Run --app kiss.util.Test
 	if [ ! -d tmp ] ; then mkdir tmp ; fi
-	cd tmp; for dir in ../examples/*; do if [ -d "$$dir" ] ; then echo "$$dir..."; java -cp "../target/$(JAR):$$dir/target/classes" kiss.util.Run < /dev/null; fi ; done
+	cd tmp; for dir in ../examples/*; do if [ -d "$$dir" ] ; then echo "$$dir..."; java -cp "../target/classes:$$dir/target/classes" kiss.util.Run < /dev/null; fi ; done

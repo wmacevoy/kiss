@@ -7,7 +7,7 @@ import java.text.DecimalFormat;
 import java.util.Date;
 
 public class Run {
-    public static void main(String[] _args) throws ClassNotFoundException, java.lang.reflect.InvocationTargetException {
+    public static void main(String[] _args) throws Exception {
 
         ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
 
@@ -42,107 +42,56 @@ public class Run {
             System.arraycopy(args,0,_args,0,args.length);
         }
 
-        Class appClass = Class.forName(className);
+        Class<?> appClass = Class.forName(className);
         
         kiss.API.APP_NAME=className;
         kiss.API.APP_ARGS=java.util.Arrays.copyOf(args,args.length);
 
         Object app = null;
+        Method run = null;
+        Method close = null;
+        
         try {
-            try {
-                Constructor constructor = appClass.getConstructor();
-                
-                if (!constructor.isAccessible()) {
-                    try {
-                        constructor.setAccessible(true);
-                    } catch (Exception e) {}
-                }
-                
-                app = constructor.newInstance();
-            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException e) {
-                throw new RuntimeException("Could not construct "
-                                           + appClass.getName() + ".");
-            }
+            Constructor<?> constructor = appClass.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            app = constructor.newInstance();
 
             kiss.API.APP=app;
 
             DecimalFormat df = new DecimalFormat("0.00");
-        
+
             for (Method method : app.getClass().getDeclaredMethods()) {
-                if (method.getName().startsWith("test") && method.getParameterTypes().length == 0) {
-                    try {
-                        kiss.API.seed(1);
-                        Date started = new Date();
-                        System.out.println(started+" "+method.getName()+": started");
-                        try {
-                            method.setAccessible(true);
-                        } catch (Exception e) {}
-                        
-                        method.invoke(app);
+                if (method.getName().equals("run")) {
+                    run = method;
+                } else if (method.getName().equals("close")) {
+                    close = method;
+                } else if (method.getName().startsWith("test")
+                           && method.getParameterTypes().length == 0) {
 
-                        Date ended = new Date();
-                        double elapsed =
-                            (ended.getTime()-started.getTime())/1000.0;
+                    kiss.API.seed(1);
+                    method.setAccessible(true);
+                    
+                    Date started = new Date();
+                    System.out.println(started+" "+method.getName()+": started");
+                    method.invoke(app);
 
-
-                        System.out.println(ended+" "+method.getName()+": ended in " + df.format(elapsed) + " second(s)");
-                    } catch (IllegalAccessException | IllegalArgumentException e) {
-                        e.printStackTrace();
-                    } catch (InvocationTargetException e) {
-                        e.getCause().printStackTrace();
-                        System.exit(1);
-                    }
-
+                    Date ended = new Date();
+                    
+                    double elapsed = (ended.getTime()-started.getTime())/1000.0;
+                    
+                    System.out.println(ended+" "+method.getName()+": ended in " + df.format(elapsed) + " second(s)");
                 }
             }
 
-            Method run = null;
-            try {
-                run = app.getClass().getMethod("run");
-            } catch (NoSuchMethodException | SecurityException e1) {
-            }
-        
             if (run != null) {
-                try {
-                    kiss.API.seed();
-                    try {
-                        run.setAccessible(true);
-                    } catch (Exception e) {}
-                    run.invoke(app);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException("Make " + run + " in " + app.getClass().getName() + " public");
-                } catch (IllegalArgumentException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    // TODO Auto-generated catch block
-                    e.getCause().printStackTrace();
-                }
+                kiss.API.seed();
+                run.setAccessible(true);                    
+                run.invoke(app);
             }
         } finally {
-            if (app != null) {
-                Method close = null;
-                try {
-                    close = app.getClass().getMethod("close");
-                } catch (NoSuchMethodException | SecurityException e1) {
-                }
-        
-                if (close != null) {
-                    try {
-                        try {
-                            close.setAccessible(true);
-                        } catch (Exception e) {}
-                        close.invoke(app);
-                    } catch (IllegalAccessException e) {
-                        throw new RuntimeException("Make " + close + " in " + app.getClass().getName() + " public");
-                    } catch (IllegalArgumentException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    } catch (InvocationTargetException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
+            if (app != null && close != null) {
+                close.setAccessible(true);
+                close.invoke(app);
             }
         }
     }

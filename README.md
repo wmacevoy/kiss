@@ -11,8 +11,8 @@ In order to keep it simple, I have incorporated all this into one library, `kiss
 ```java
 import static kiss.API.*;
 
-public class App {
-    public void run() {
+class App {
+    void run() {
         println("Hello, World!");
     }
 }
@@ -27,20 +27,20 @@ So it is not hard to say hello.  Now let's test it.
 ```java
 import static kiss.API.*;
 
-public class App {
-    public void testRun() {
+class App {
+    void testRun() {
         // create a file with the output we expect
-        outOpen("testRun.verify");
+        outOpen("run.verify");
         println("Hello, World!");
         outClose();
 
         // call run() to check that it matches
-        outVerify("testRun.verify");
+        outVerify("run.verify");
         run();
         outClose();
     }
 
-    public void run()
+    void run()
     {
         println("Hello, World!");
     }
@@ -63,8 +63,8 @@ Here is a java program that makes an CSV file with 100 die rolls pairs:
 ```java
 import static kiss.API.*;
 
-public class App {
-    public void run() {
+class App {
+    void run() {
        outOpen("rolls.csv");
        println("i,d1,d2,sum");
        for (int i=1; i<=100; ++i) {
@@ -88,11 +88,11 @@ The `Run` part of the kiss API simplifies starting and controlling the execution
 
 2. Run constructs an instance of the application class using the default constructor.  The constructor (or anywhere else) can use APP_ARGS to access command line arguments and APP_NAME contains the class name of the application object.  After the instance is constructed (at the end of this step), APP is a global reference to the application object.
 
-3. Run invokes all testXXX methods in order of declaration.  The random
+3. Run invokes all testXXX() methods in order of declaration.  The random
 number generator is reset with seed(1) before each test to help make the
 tests reproducable.
 
-4. Run invokes the run method.  The kiss random number generator is set to
+4. Run invokes the run() method.  The random number generator is set to
 produce a strongly random sequence before this.
 
 5. Run invokes the close method, even if there was an error in a test or run.
