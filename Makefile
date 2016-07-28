@@ -1,9 +1,16 @@
-JAR=kiss-1.0-SNAPSHOT.jar
+VER_MAJOR=0
+VER_MINOR=0
+VER_PATCH=1
+VER=$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)
+
+JAR=kiss-$(VER_MAJOR).$(1.0-SNAPSHOT.jar
 .PHONY: lib
 lib :   # mvn compile
+	if [ ! -d tmp ] ; then mkdir tmp; fi
 	if [ ! -d target/classes ] ; then mkdir target/classes ; fi
 	javac -Xlint:unchecked -cp target/classes -d target/classes -s src/main/java $$(find src/main/java -regex '[^._].*\.java$$')
-	jar cfe target/$(JAR) kiss.util.Run -C target/classes .
+	jar cfe kiss-$(VER).jar kiss.util.Run -C target/classes .
+	openssl dgst -out kiss-$(VER).jar.sha256 -sha256 kiss-$(VER).jar
 
 .PHONY: examples
 examples :
@@ -15,6 +22,13 @@ clean : # mvn clean
 	/bin/rm -rf $$(find . -name '*~' -o -name '._*')
 
 deploy :
+	mvn clean
+	mvn compile
+	jar cfe kiss-$(VER).jar kiss.util.Run -C target/classes .
+	openssl dgst -out kiss-$(VER).jar.sha256 -sha256 kiss-$(VER).jar
+	git add -f kiss-$(VER).jar kiss-$(VER).jar.sha256
+	git commit -m "deploy `date`"
+	git push
 	mvn deploy
 
 .PHONY: test
