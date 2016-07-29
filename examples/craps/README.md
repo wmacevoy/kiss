@@ -1,4 +1,6 @@
-# basics - kiss basics
+# craps - kiss craps 
+
+Shows how PRNG is repeatable for tests, but random for run
 
 To build application to target directory:
 
