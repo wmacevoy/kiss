@@ -2,7 +2,7 @@
 
 ## Download
 
-[kiss-0.0.1.jar](https://github.com/wmacevoy/kiss/blob/master/kiss-0.0.1.jar?raw=true)
+[kiss-0.1.1.jar](https://github.com/wmacevoy/kiss/blob/master/kiss-0.1.1.jar?raw=true)
 
 ## kiss Java
 
