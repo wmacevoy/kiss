@@ -25,23 +25,44 @@ public class Run {
         // 3. Call the run() method.
         //
         // 4. Call the close() method (even if a test or run fails)
-        
+
+        boolean doTest = true;
+        boolean doRun = true;
         String className = "App"; // default class is "App" in default package
         String[] args;
                 
         if (System.getenv("JAVA_APP") != null) { // env override
             className = System.getenv("JAVA_APP");
         }
-        
-        if (_args.length > 1 && _args[0].equals("--app")) { 
-            className = _args[1];
-            args = new String[_args.length-2];
-            System.arraycopy(_args,2,args,0,args.length);
-        } else {
-            args = new String[_args.length];
-            System.arraycopy(args,0,_args,0,args.length);
+
+        int argi;
+        for (argi=0; argi < _args.length; ++argi) {
+            if (_args[argi].equals("--")) {
+                ++argi;
+                break;
+            }
+
+            if (_args[argi].equals("--norun")) {
+                doRun = false;
+                continue;
+            }
+
+            if (_args[argi].equals("--notest")) {
+                doTest = false;
+                continue;
+            }
+
+            if (_args[argi].equals("--app")) {
+                className = _args[++argi];
+                continue;
+            }
+
+            break;
         }
 
+        args = new String[_args.length - argi];
+        System.arraycopy(_args,argi,args,0,args.length);
+        
         Class<?> appClass = Class.forName(className);
         
         kiss.API.APP_NAME=className;
@@ -65,7 +86,7 @@ public class Run {
                     run = method;
                 } else if (method.getName().equals("close")) {
                     close = method;
-                } else if (method.getName().startsWith("test")
+                } else if (doTest && method.getName().startsWith("test")
                            && method.getParameterTypes().length == 0) {
 
                     kiss.API.seed(1);
@@ -83,7 +104,7 @@ public class Run {
                 }
             }
 
-            if (run != null) {
+            if (doRun && run != null) {
                 kiss.API.seed();
                 run.setAccessible(true);                    
                 run.invoke(app);

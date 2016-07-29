@@ -120,10 +120,11 @@ The `Run` part of the kiss API simplifies starting and controlling the execution
 
 3. Run invokes all testXXX() methods in order of declaration.  The random
 number generator is reset with `seed(1)` before each test to help make the
-tests reproducible.
+tests reproducible.  You can skip invoking tests with the `--notest` option.
 
 4. Run invokes the run() method.  The random number generator is set to
-produce a strongly random sequence before this.
+produce a strongly random sequence before this.  You can skip invoking
+run with the `--norun` option.
 
 5. Run invokes the close method, even if there was an error in a test or run.
 

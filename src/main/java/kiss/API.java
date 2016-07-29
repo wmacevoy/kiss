@@ -204,6 +204,11 @@ public class API {
 		return IO.readInteger();
 	}
 
+        /** synonym for readInteger */
+	public static Integer readInt() {
+		return IO.readInteger();
+	}
+    
 	public static Long readLong() {
 		return IO.readLong();
 	}
