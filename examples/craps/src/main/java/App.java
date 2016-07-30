@@ -1,21 +1,29 @@
 import static kiss.API.*;
 
 class App {
+    Die die1 = test(new Die());
+    Die die2 = test(new Die());
+
+    void roll() {
+        die1.roll();
+        die2.roll();
+    }
+    
     String craps() // craps dice toss
     {
-        int die1=random(1,6);
-        int die2=random(1,6);
-
-        switch(die1+die2) {
+        roll();
+        boolean same = (die1.getValue() == die2.getValue());
+        int sum = die1.getValue()+die2.getValue();
+        switch(sum) {
         case 2: return "Snake Eyes";
         case 3: return "Ace Deuce";
-        case 4: return (die1 == die2) ? "Hard Four" : "Easy Four";
+        case 4: return same ? "Hard Four" : "Easy Four";
         case 5: return "Fever Five";
-        case 6: return (die1 == die2) ? "Hard Six" : "Easy Six";
+        case 6: return same ? "Hard Six" : "Easy Six";
         case 7: return "Natural";
-        case 8: return (die1 == die2) ? "Hard Eight" : "Easy Eight";
+        case 8: return same ? "Hard Eight" : "Easy Eight";
         case 9: return "Nina";
-        case 10: return (die1 == die2) ? "Hard Ten" : "Easy Ten";
+        case 10: return same ? "Hard Ten" : "Easy Ten";
         case 11: return "Yo";
         case 12: return "Boxcars";
         }

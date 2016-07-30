@@ -241,6 +241,19 @@ public class API {
         public static String APP_NAME; // updated by Run.main    
         public static Object APP; // updated by Run.main
 
+    public static <T> T test(T object) {
+        return Run.test(object);
+    }
+    public static <T> T untest(T object) {
+        return object;
+    }
+    public static <T> T testAlways(T object) {
+        return Run.testAlways(object);
+    }
+    public static <T> T untestAlways(T object) {
+        return object;
+    }
+
         public static void sleep(double duration) {
 		Run.sleep(duration);
 	}
