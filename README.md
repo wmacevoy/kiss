@@ -1,4 +1,4 @@
-<img style="float: right;" src="java-kiss.png">
+<img align="right" src="java-kiss.png">
 
 # java kiss API
 
