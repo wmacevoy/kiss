@@ -1,4 +1,7 @@
-# kiss java API
+<img style="float: right;" src="kiss/java-kiss.png">
+
+# java kiss API
+
 
 ## Download
 
@@ -180,3 +183,4 @@ A fast (almost as fast as the standard random number generator) but cryptographi
 
   
 
+[logo]: kiss/java-kiss.png "Java Dave with Kiss"
