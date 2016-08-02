@@ -2,20 +2,9 @@ import static kiss.API.*;
 
 class App {
     void testHiAda() {
-        // create a file with test input
-        outOpen("hi.in");
-        println("Ada");
-        outClose();
-
-        // create a file with expected output
-        outOpen("hi.out");
-        println("What is your name? Ada");
-        println("Hello, Ada!");
-        outClose();
-
-        inOpen("hi.in"); // future input
-        outVerify("hi.out"); // expected output
-        hi(); 
+        inProvide("Ada");
+        outExpect("What is your name? Hello, Ada!");
+        hi();
         outClose();
         inClose();
     }

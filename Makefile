@@ -1,6 +1,6 @@
 VER_MAJOR=0
-VER_MINOR=1
-VER_PATCH=1
+VER_MINOR=2
+VER_PATCH=0
 VER=$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)
 
 JAR=kiss-$(VER_MAJOR).$(1.0-SNAPSHOT.jar
@@ -13,15 +13,15 @@ lib :   # mvn compile
 	openssl dgst -out kiss-$(VER).jar.sha256 -sha256 kiss-$(VER).jar
 
 .PHONY: examples
-examples :
+examples:
 	for dir in examples/*; do if [ -d "$$dir" ] ; then echo "$$dir..."; javac -cp "target/classes:$$dir/target/classes" -d "$$dir/target/classes" -s "$$dir/src/main/java" $$(find "$$dir/src/main/java" -regex '[^._].*\.java$$'); fi ; done
 
 .PHONY: clean
-clean : # mvn clean
+clean: # mvn clean
 	/bin/rm -rf tmp/* target/$(JAR) target/classes/* examples/target/classes/*
 	/bin/rm -rf $$(find . -name '*~' -o -name '._*')
 
-deploy :
+deploy:
 	mvn clean
 	mvn compile
 	jar cfe kiss-$(VER).jar kiss.util.Run -C target/classes .

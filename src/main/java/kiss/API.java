@@ -8,6 +8,14 @@ import kiss.util.RNG;
 import kiss.util.Run;
 
 public class API {
+        public static final String EOL = IO.EOL;
+        public static Closeable outExpect(Object... args) {
+            return IO.outExpectVarArgs(args);
+        }
+        
+        public static Closeable inProvide(Object... args) {
+            return IO.inProvideVarArgs(args);
+        }
         public static Closeable outVerify(String filename) {
 		return IO.outVerify(filename);
 	}
@@ -181,18 +189,26 @@ public class API {
 	}
 
 	public static void print(Object... value) {
-            IO.printva(value);
+            IO.printVarArgs(value);
 	}
 
 	public static void println(Object... value) {
-            IO.printlnva(value);
+            IO.printlnVarArgs(value);
 	}
+
+        public static String readEOL() {
+            return IO.readEOL();
+        }
     
 	public static String readLine() {
 		return IO.readLine();
 	}
 
-	public static Boolean readBoolean() {
+	public static String readString() {
+		return IO.readString();
+	}
+
+    public static Boolean readBoolean() {
 		return IO.readBoolean();
 	}
 

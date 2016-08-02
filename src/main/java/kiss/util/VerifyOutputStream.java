@@ -44,7 +44,7 @@ public class VerifyOutputStream extends OutputStream {
 			}
 			mismatch = at + i;
                         verify.close();
-			throw new VerifyRuntimeException("mismatch at byte offset " + mismatch);                        
+			throw new VerifyRuntimeException("mismatch at byte offset " + mismatch + " expected '" + ((char)data[i]) + "' (char code " + ((int) data[i]) + ") but got '" + ((char)rdata[i]) + "' (char code " + ((int) rdata[i]) + ")");
 		}
 	}
 
@@ -56,10 +56,11 @@ public class VerifyOutputStream extends OutputStream {
 
 	public void close() throws IOException {
 		if (mismatch == Long.MAX_VALUE) {
-			int ch = verify.read();
-			if (ch != -1) {
-				mismatch = at;
-			}
+                    int ch = verify.read();
+                    if (ch != -1) {
+                        mismatch = at;
+                        throw new VerifyRuntimeException("mismatch at byte offset " + mismatch + ", expected EOF but got '" + ((char) ch) + "' (code " + ch + ")");
+                    }
 		}
 		verify.close();
 		if (!matches()) {

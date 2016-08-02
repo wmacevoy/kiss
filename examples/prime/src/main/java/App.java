@@ -1,6 +1,9 @@
 import static kiss.API.*;
 
 class App {
+
+    boolean skipSlowTests = true;
+    
     void testIsPrimeSmallTrueCases() {    
         assert isPrime( 2) == true;
         assert isPrime( 3) == true;
@@ -48,14 +51,75 @@ class App {
         assert isPrime( 100000007) == true;        
         assert isPrime(1000000007) == true;
     }
+
+    void testIsPrimeSame() {
+        if (skipSlowTests) {
+            println("skipSlowTests");
+            return;
+        }
+        for (int i=0; i<100; ++i) {
+            int n = random(Integer.MIN_VALUE,Integer.MAX_VALUE);
+            assert isPrimeSlow(n) == isPrime(n);
+        }
+    }
+
+    void testIsPrimeFast() {
+        if (skipSlowTests) {
+            println("skipSlowTests");
+            return;
+        }
+
+        int tests = 100;
+        double init  = 1;
+        int minVal = 1_000_000_000;
+        int maxVal = 1_999_999_999;
+        double t0;
+
+        seed(init);
+        t0 = time();
+        boolean tmp = false;
+        for (int i = 0; i < tests; ++i) {
+            int n = random(minVal,maxVal);
+            if (isPrimeSlow(n)) { tmp = !tmp; }
+        }
+        double slowTime=time()-t0;
+
+        seed(init);
+        t0 = time();
+        for (int i = 0; i < tests; ++i) {
+            int n = random(minVal,maxVal);
+            if (isPrime(n)) { tmp = !tmp; }
+        }
+        double fastTime=time()-t0;
+        
+        println("speedup: " + round(slowTime/fastTime) + " junk: " + tmp);
+
+        assert fastTime < 0.1*slowTime;
+    }
+
+    boolean isPrimeSlow(int x) {
+        if (x > 1) {
+            for (int i=2; i<x; ++i) if (x % i == 0) return false;
+            return true;
+        } else {
+            return false;
+        }
+    }
     
     boolean isPrime(int x)
     {
-        // true if x > 1 and has no integer divisors between 1 and x
-
-        // TODO
-
-        return true || false;
+        if (x > 1) {
+            if (x == 2) return true;
+            if (x % 2 == 0) return false;
+            int i=3;
+            while (i*i <= x) {
+                if (x % i == 0) return false;
+                i = i + 2;
+            }
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public void run()

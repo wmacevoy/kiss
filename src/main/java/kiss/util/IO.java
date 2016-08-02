@@ -1,5 +1,6 @@
 package kiss.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
@@ -7,18 +8,24 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.nio.ByteBuffer;
+import java.util.Locale;
 
 public class IO {
+    static private Scanner config(Scanner scanner) {
+        return scanner;
+    }
     static ThreadLocal<LinkedList<Scanner>> ins = new ThreadLocal<LinkedList<Scanner>>() {
     	@Override public LinkedList<Scanner> initialValue() {
     		LinkedList<Scanner> ans = new LinkedList<Scanner>();
-    		ans.add(new Scanner(System.in));
+    		ans.add(config(new Scanner(System.in)));
     		return ans;
         }
     };
@@ -61,6 +68,40 @@ public class IO {
         return OUT_CLOSE;
 
     }
+    
+    public static Closeable outExpect(Object... args) {
+        return outExpectVarArgs(args);
+    }
+
+    private static StringBuilder formatVarArgs(StringBuilder sb, Object args[])
+    {
+        char delimiter = '\0';
+
+        for (Object arg : args) {
+            if (arg instanceof String) {
+                if (((String)arg).equals(EOL)) {
+                    sb.append(EOL);
+                    delimiter='\0';
+                    continue;
+                }
+            } 
+            if (delimiter != '\0') sb.append(delimiter);
+            format(sb,arg);
+            delimiter=' ';
+        }
+        if (delimiter != '\0') {
+            sb.append(EOL);
+        }
+        return sb;
+    }
+
+    public static Closeable outExpectVarArgs(Object args[]) {
+        StringBuilder sb = new StringBuilder();
+        formatVarArgs(sb,args);
+        byte[] data = sb.toString().getBytes(Charset.forName("UTF-8"));
+        outs.get().addLast(new PrintStream(new VerifyOutputStream(new ByteArrayInputStream(data))));
+        return OUT_CLOSE;
+    }
 
     public static Closeable outOpen(String filename) {
     	return outOpen(new File(filename));
@@ -82,9 +123,22 @@ public class IO {
     static PrintStream out() { return outs.get().getLast(); }
     static Scanner in() { return ins.get().getLast(); }
 
+    public static Closeable inProvideVar(Object... args) {
+        return inProvideVarArgs(args);
+    }
+
+    public static final String EOL = System.lineSeparator();
+    
+    public static Closeable inProvideVarArgs(Object args[]) {
+        StringBuilder sb = new StringBuilder();
+        formatVarArgs(sb,args);
+        ins.get().addLast(config(new Scanner(sb.toString())));
+        return IN_CLOSE;
+    }
+
     public static Closeable inOpen(File file) {
         try {
-			ins.get().addLast(new Scanner(file));
+			ins.get().addLast(config(new Scanner(file)));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -311,30 +365,57 @@ public class IO {
     public static void println(double value) {
         out().println(value);
     }
+    
+    public static void print(PrintStream ps, Object... args) {
+        printVarArgs(ps,args);
+    }
 
-    static void printva(PrintStream ps, Object args[]) {
+    public static void printVarArgs(PrintStream ps, Object args[]) {
         for (int i=0; i<args.length; ++i) {
-            if (i>0) ps.print(",");
+            if (i>0) ps.print(" ");
             ps.print(format(args[i]));
         }
     }
 
-    public static void printva(Object[] args) {
+    public static void print(Object... args) {
+        printVarArgs(args);
+    }
+    
+    public static void printVarArgs(Object[] args) {
         PrintStream ps = out();
-        printva(ps,args);
+        printVarArgs(ps,args);
     }
 
-    public static void printlnva(Object[] args) {
+    public static void println(Object... args) {
+        printlnVarArgs(args);
+    }
+    public static void printlnVarArgs(Object[] args) {
         PrintStream ps = out();
-        printva(ps,args);
+        printVarArgs(ps,args);
         ps.println();
+    }
+
+    public static String readString() {
+    	Scanner in=in();
+    	if (in.hasNext()) {
+    		String value = in.next();
+    		return value;
+    	} else {
+    		return null;
+    	}
+    }
+
+    public static String readEOL() {
+        String tmp = readLine();
+        if (tmp != null && tmp.equals("")) return EOL;
+        return null;
     }
     
     public static String readLine() {
     	Scanner in=in();
     	if (in.hasNextLine()) {
     		String value = in.nextLine();
-    		if (ins.get().size() > 1 || outs.get().size() > 1) println(value);
+                //    		if (ins.get().size() > 1 || outs.get().size() > 1) println(value);
     		return value;
     	} else {
     		return null;
@@ -345,7 +426,6 @@ public class IO {
     	Scanner in=in();
     	if (in.hasNextBoolean()) {
     		boolean value = in.nextBoolean();
-    		if (ins.get().size() > 1 || outs.get().size() > 1) println(value);
     		return value;
     	} else {
     		return null;
@@ -356,7 +436,6 @@ public class IO {
     	Scanner in=in();
     	if (in.hasNextByte()) {
     		byte value = in.nextByte();
-    		if (ins.get().size() > 1 || outs.get().size() > 1) println(value);
     		return value;
     	} else {
     		return null;
@@ -367,7 +446,6 @@ public class IO {
     	Scanner in=in();
     	if (in.hasNextInt()) {
     		int value = in.nextInt();
-    		if (ins.get().size() > 1 || outs.get().size() > 1) println(value);
     		return value;
     	} else {
     		return null;
@@ -378,7 +456,6 @@ public class IO {
     	Scanner in=in();
     	if (in.hasNextLong()) {
     		long value = in.nextLong();
-    		if (ins.get().size() > 1 || outs.get().size() > 1) println(value);
     		return value;
     	} else {
     		return null;
@@ -389,7 +466,6 @@ public class IO {
     	Scanner in=in();
     	if (in.hasNextFloat()) {
     		float value = in.nextFloat();
-    		if (ins.get().size() > 1 || outs.get().size() > 1) println(value);
     		return value;
     	} else {
     		return null;
@@ -400,7 +476,6 @@ public class IO {
     	Scanner in=in();
     	if (in.hasNextDouble()) {
     		double value = in.nextDouble();
-    		if (ins.get().size() > 1 || outs.get().size() > 1) println(value);
     		return value;
     	} else {
     		return null;

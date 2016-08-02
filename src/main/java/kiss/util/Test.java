@@ -44,4 +44,42 @@ public class Test {
             assert abs(exact-numeric) < 1/sqrt(n);
         }
     }
+
+    void testOutExpect() {
+        outExpect(1,2,3,EOL,
+                  "testing",EOL,
+                  "ok",EOL,
+                  1.0,2.0,3.0,EOL,
+                  "alpha","beta","tango");
+        println(1,2,3);
+        println("testing");
+        println("ok");        
+        println(1.0,2.0,3.0);
+        println("alpha","beta","tango");
+        outClose();
+
+    }
+
+    void testInProvide() {
+        inProvide(1,2,3,EOL,
+                  "testing",EOL,
+                  "ok",EOL,
+                  1.5,2.0,3.0,EOL,
+                  "alpha","beta","tango");
+
+        assert readInt() == 1;
+        assert readInt() == 2;
+        assert readInt() == 3;
+        assert readEOL().equals(EOL);
+        assert readLine().equals("testing");
+        assert readLine().equals("ok");
+
+        assert readDouble() == 1.5;
+        assert readDouble() == 2.0;
+        assert readDouble() == 3.0;
+        assert readEOL().equals(EOL);
+
+        inClose();
+    }
+
 }
