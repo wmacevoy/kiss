@@ -17,8 +17,10 @@ import java.util.Scanner;
 import java.util.Set;
 import java.nio.ByteBuffer;
 import java.util.Locale;
+import kiss.API.Close;
 
 public class IO {
+
     static private Scanner config(Scanner scanner) {
         return scanner;
     }
@@ -38,27 +40,27 @@ public class IO {
         }
     };
     
-    static class OutClose implements Closeable {
+    static class OutClose implements Close {
 
 		@Override
-		public void close() throws IOException {
+		public void close() {
 			outClose();
 		} 
     	
     };
     static OutClose OUT_CLOSE = new OutClose();
     
-    static class InClose implements Closeable {
+    static class InClose implements Close {
 
 		@Override
-		public void close() throws IOException {
+		public void close() {
 			inClose();
 		} 
     	
     }
     static InClose IN_CLOSE = new InClose();
 
-    public static Closeable outVerify(String filename) {
+    public static Close outVerify(String filename) {
         try {
             outs.get().addLast(new PrintStream(new VerifyOutputStream(new FileInputStream(filename))));
         } catch (IOException ex) {
@@ -69,7 +71,7 @@ public class IO {
 
     }
     
-    public static Closeable outExpect(Object... args) {
+    public static Close outExpect(Object... args) {
         return outExpectVarArgs(args);
     }
 
@@ -95,7 +97,7 @@ public class IO {
         return sb;
     }
 
-    public static Closeable outExpectVarArgs(Object args[]) {
+    public static Close outExpectVarArgs(Object args[]) {
         StringBuilder sb = new StringBuilder();
         formatVarArgs(sb,args);
         byte[] data = sb.toString().getBytes(Charset.forName("UTF-8"));
@@ -103,11 +105,11 @@ public class IO {
         return OUT_CLOSE;
     }
 
-    public static Closeable outOpen(String filename) {
+    public static Close outOpen(String filename) {
     	return outOpen(new File(filename));
     }
 
-    public static Closeable outOpen(File file) {
+    public static Close outOpen(File file) {
         try {
             outs.get().addLast(new PrintStream(new FileOutputStream(file)));
         } catch (IOException ex) {
@@ -123,20 +125,20 @@ public class IO {
     static PrintStream out() { return outs.get().getLast(); }
     static Scanner in() { return ins.get().getLast(); }
 
-    public static Closeable inProvideVar(Object... args) {
+    public static Close inProvideVar(Object... args) {
         return inProvideVarArgs(args);
     }
 
     public static final String EOL = System.lineSeparator();
     
-    public static Closeable inProvideVarArgs(Object args[]) {
+    public static Close inProvideVarArgs(Object args[]) {
         StringBuilder sb = new StringBuilder();
         formatVarArgs(sb,args);
         ins.get().addLast(config(new Scanner(sb.toString())));
         return IN_CLOSE;
     }
 
-    public static Closeable inOpen(File file) {
+    public static Close inOpen(File file) {
         try {
 			ins.get().addLast(config(new Scanner(file)));
 		} catch (FileNotFoundException e) {
@@ -147,7 +149,7 @@ public class IO {
         return IN_CLOSE;
     }
     
-    public static Closeable inOpen(String filename) {
+    public static Close inOpen(String filename) {
     	return inOpen(new File(filename));
     }
 

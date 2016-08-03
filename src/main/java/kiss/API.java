@@ -8,23 +8,27 @@ import kiss.util.RNG;
 import kiss.util.Run;
 
 public class API {
+        public interface Close extends AutoCloseable, Closeable {
+           void close(); // no exceptions
+        }
+
         public static final String EOL = IO.EOL;
-        public static Closeable outExpect(Object... args) {
+        public static Close outExpect(Object... args) {
             return IO.outExpectVarArgs(args);
         }
         
-        public static Closeable inProvide(Object... args) {
+        public static Close inProvide(Object... args) {
             return IO.inProvideVarArgs(args);
         }
-        public static Closeable outVerify(String filename) {
+        public static Close outVerify(String filename) {
 		return IO.outVerify(filename);
 	}
 
-	public static Closeable outOpen(String filename) {
+	public static Close outOpen(String filename) {
 		return IO.outOpen(filename);
 	}
 
-	public static Closeable outOpen(File file) {
+	public static Close outOpen(File file) {
 		return IO.outOpen(file);
 	}
 
@@ -32,11 +36,11 @@ public class API {
 		IO.outClose();
 	}
 
-	public static Closeable inOpen(File file) {
+	public static Close inOpen(File file) {
 		return IO.inOpen(file);
 	}
 
-	public static Closeable inOpen(String filename) {
+	public static Close inOpen(String filename) {
 		return IO.inOpen(filename);
 	}
 
