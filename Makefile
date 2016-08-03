@@ -4,13 +4,16 @@ VER_PATCH=0
 VER=$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)
 
 JAR=kiss-$(VER_MAJOR).$(1.0-SNAPSHOT.jar
+
 .PHONY: lib
 lib :   # mvn compile
 	if [ ! -d tmp ] ; then mkdir tmp; fi
 	if [ ! -d target/classes ] ; then mkdir target/classes ; fi
 	javac -Xlint:unchecked -cp target/classes -d target/classes -s src/main/java $$(find src/main/java -regex '[^._].*\.java$$')
 	jar cfe kiss-$(VER).jar kiss.util.Run -C target/classes .
+	cp kiss-$(VER).jar kiss.jar
 	openssl dgst -out kiss-$(VER).jar.sha256 -sha256 kiss-$(VER).jar
+	cp kiss-$(VER).jar.sha256 kiss.jar.sha256
 
 .PHONY: examples
 examples:
@@ -26,7 +29,7 @@ deploy:
 	mvn compile
 	jar cfe kiss-$(VER).jar kiss.util.Run -C target/classes .
 	openssl dgst -out kiss-$(VER).jar.sha256 -sha256 kiss-$(VER).jar
-	git add -f kiss-$(VER).jar kiss-$(VER).jar.sha256
+	git add -f kiss-$(VER).jar kiss-$(VER).jar.sha256 kiss.jar kiss.jar.sha256
 	git commit -m "deploy `date`"
 	git push
 	mvn deploy
