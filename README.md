@@ -189,8 +189,9 @@ A fast (almost as fast as the standard random number generator) but cryptographi
   
 
 [logo]: kiss/java-kiss.png "Java Duke with Kiss"
-[1] Orignal Java Duke image on wikipedia: [https://en.wikipedia.org/wiki/Java_(programming_language)#/media/File:Wave.svg]
-[2] Original Kiss image on pixabay (Public Domain): [https://pixabay.com/en/lips-mouth-speak-kiss-lipstick-145758/]
 
+[1] [Orignal Java Duke image on wikipedia](https://en.wikipedia.org/wiki/Java_(programming_language)#/media/File:Wave.svg)
+
+[2] [Original public domain kiss image on pixabay](https://pixabay.com/en/lips-mouth-speak-kiss-lipstick-145758/)
 
 
