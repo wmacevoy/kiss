@@ -2,10 +2,11 @@
 
 # java kiss API
 
-
 ## Download
 
-[kiss-0.1.1.jar](https://github.com/wmacevoy/kiss/blob/master/kiss-0.1.1.jar?raw=true)
+[blob/master/kiss.jar](https://github.com/wmacevoy/kiss/blob/master/kiss.jar?raw=true) --- latest master build
+
+[kiss-0.2.0.jar](https://github.com/wmacevoy/kiss/blob/master/kiss-0.1.1.jar?raw=true)
 
 [kiss java videos](https://www.youtube.com/channel/UC5Fchcau0ofytGrUbQd_J0w)
 
@@ -135,6 +136,8 @@ run with the `--norun` option.
 
 All the steps after the construction are optional.
 
+### `kiss.util.Run` components of the `kiss.API`
+
 * `test(Target target)` --- test components other than the main application.  This can be used at the point of creation, as in:
 ```java
 MyComponent myComponent=test(new MyComponent())
@@ -185,4 +188,9 @@ A fast (almost as fast as the standard random number generator) but cryptographi
 
   
 
-[logo]: kiss/java-kiss.png "Java Dave with Kiss"
+[logo]: kiss/java-kiss.png "Java Duke with Kiss"
+[1] Orignal Java Duke image on wikipedia: [https://en.wikipedia.org/wiki/Java_(programming_language)#/media/File:Wave.svg]
+[2] Original Kiss image on pixabay (Public Domain): [https://pixabay.com/en/lips-mouth-speak-kiss-lipstick-145758/]
+
+
+
