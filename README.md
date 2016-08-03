@@ -4,11 +4,16 @@
 
 ## Download
 
-[blob/master/kiss.jar](https://github.com/wmacevoy/kiss/blob/master/kiss.jar?raw=true) --- latest master build
+[instructor video: why kiss?](https://youtu.be/YiftHVmbxgU)
+
+[student videos: getting started](https://www.youtube.com/channel/UC5Fchcau0ofytGrUbQd_J0w)
+
+[latest kiss.jar](https://github.com/wmacevoy/kiss/blob/master/kiss.jar?raw=true) --- latest master build
+
+
 
 [kiss-0.2.0.jar](https://github.com/wmacevoy/kiss/blob/master/kiss-0.1.1.jar?raw=true)
 
-[kiss java videos](https://www.youtube.com/channel/UC5Fchcau0ofytGrUbQd_J0w)
 
 ## kiss Java
 
