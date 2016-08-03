@@ -7,6 +7,8 @@
 
 [kiss-0.1.1.jar](https://github.com/wmacevoy/kiss/blob/master/kiss-0.1.1.jar?raw=true)
 
+[kiss java videos](https://www.youtube.com/channel/UC5Fchcau0ofytGrUbQd_J0w)
+
 ## kiss Java
 
 The goal is to make the launching and testing of java programs for beginners
