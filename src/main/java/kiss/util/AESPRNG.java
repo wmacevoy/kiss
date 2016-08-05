@@ -10,7 +10,7 @@ import java.security.SecureRandom;
 import java.util.Random;
 
 /** When using bulk random numbers, this is about 20% slower than Random
- *  but AESPRNG produces crypographically strong psuedo-random
+ *  but AESPRNG produces cryptographically strong psuedo-random
  *  number sequences. */
 
 public class AESPRNG extends Random
@@ -31,7 +31,7 @@ public class AESPRNG extends Random
             data = new byte[PAGE];
             dataBuffer = ByteBuffer.wrap(data);
             dataLongs = dataBuffer.asLongBuffer();
-            dataBuffer.asIntBuffer();            
+            dataInts = dataBuffer.asIntBuffer();            
         }
         for (int i=0; i<PAGE/8; i += 2) {
             dataLongs.put(i+0,ctr);

@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.HashSet;
 
 public class Run {
-    private static HashSet<Class<?>> testedAlready = new HashSet<Class<?>>();
+    static HashSet<Class<?>> testedAlready = new HashSet<Class<?>>();
 
     public static void main(String[] _args) throws Exception {
 

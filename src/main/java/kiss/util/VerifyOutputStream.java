@@ -5,7 +5,20 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class VerifyOutputStream extends OutputStream {
-	InputStream verify;
+    private String code(int ch) {
+        if (ch == -1) return "END";
+        ch = ch & 0xFFFF;
+        if (ch == '\t') return "TAB (code 9)";
+        if (ch == '\n') return "LF (code 10)";
+        if (ch == '\r') return "CR (code 13)";
+        if (ch < 32) return
+                         "'\\u" +
+                         String.format("%040x",ch) +
+                         "' (code " + ((int) ch) + ")";
+        return "'" + ((char) ch) + "' (code " + ((int) ch) + ")";
+    }
+
+    InputStream verify;
 	long at = 0L;
 	long mismatch = Long.MAX_VALUE;
 	
@@ -44,7 +57,11 @@ public class VerifyOutputStream extends OutputStream {
 			}
 			mismatch = at + i;
                         verify.close();
-			throw new VerifyRuntimeException("mismatch at byte offset " + mismatch + " expected '" + ((char)data[i]) + "' (char code " + ((int) data[i]) + ") but got '" + ((char)rdata[i]) + "' (char code " + ((int) rdata[i]) + ")");
+			throw
+                            new VerifyRuntimeException
+                            ("Mismatch at byte offset " + mismatch + "." +
+                             " Expected " + code(rdata[i]) +
+                             " but got " + code(data[i]));
 		}
 	}
 
@@ -59,12 +76,16 @@ public class VerifyOutputStream extends OutputStream {
                     int ch = verify.read();
                     if (ch != -1) {
                         mismatch = at;
-                        throw new VerifyRuntimeException("mismatch at byte offset " + mismatch + ", expected EOF but got '" + ((char) ch) + "' (code " + ch + ")");
+                        throw
+                            new VerifyRuntimeException
+                            ("Mismatch at byte offset " + mismatch + "." +
+                             " Expected " + code(ch) +
+                             " but got " + code(-1));
                     }
 		}
 		verify.close();
 		if (!matches()) {
-			throw new VerifyRuntimeException("mismatch at byte offset " + mismatch);
+                    throw new VerifyRuntimeException("Mismatch at byte offset " + mismatch);
 		}
 	}
 }
