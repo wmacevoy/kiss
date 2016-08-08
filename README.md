@@ -61,7 +61,50 @@ class App {
     }
 }
 ```
+
+
 Any `testXXX` method is automatically called before the `run` method.  Want to write a test?  Just write the test!
+
+In fact, you can test Hello World with the safer try-with resources pattern:
+```java
+import static kiss.API.*;
+
+class App {
+    void testRun() {
+        // create a file with the output we expect
+        try (Close out=outOpen("run.verify")) {
+          println("Hello, World!");
+        }
+
+        // call run() to check that it matches
+        try (Close out=outVerify("run.verify")) {
+          run();
+        }
+    }
+
+    void run()
+    {
+        println("Hello, World!");
+    }
+}
+```
+And, instead of creating a temporary file, this can all be done with internal streams, giving the most succinct:
+```java
+import static kiss.API.*;
+
+class App {
+    void testRun() {
+        try (Close out=outExpect("Hello, World!")) {
+          run();
+        }
+    }
+
+    void run()
+    {
+        println("Hello, World!");
+    }
+}
+```
 
 ## Randomness a kindergartener understands
 
