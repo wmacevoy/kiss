@@ -21,6 +21,14 @@ public class AESPRNG extends Random
     private ByteBuffer dataBuffer;
     private LongBuffer dataLongs;
     private IntBuffer dataInts;
+    private boolean constructed = false;
+
+    AESPRNG() {
+        // so Random's setSeed, called in
+        // Random's constructro, does not
+        // break our implementation
+        constructed = true;
+    }
 
     private volatile int at = PAGE;
 
@@ -356,7 +364,8 @@ public class AESPRNG extends Random
     }
 
     public final void setSeed(long value) {
-        if (aesecb != null) seed(value);
+        super.setSeed(value);
+        if (constructed) seed(value);
     }
 
     public final void seed(long _value) {
