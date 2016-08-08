@@ -71,12 +71,10 @@ import static kiss.API.*;
 
 class App {
     void testRun() {
-        // create a file with the output we expect
         try (Close out=outOpen("run.verify")) {
           println("Hello, World!");
         }
 
-        // call run() to check that it matches
         try (Close out=outVerify("run.verify")) {
           run();
         }
