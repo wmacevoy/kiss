@@ -218,7 +218,7 @@ Only the first instance of an object is tested (or use `testAlways` instead).  I
 
 ### Math
 
-All the math functions and constants are imported, with the exception of `Math.random()` and `Math.random(int n)` which is improved.
+All the math functions and constants are imported, with the exception of `Math.random()` and `Math.random(int n)` which is replaced by an improved version below.
 
 ### RNG
 
