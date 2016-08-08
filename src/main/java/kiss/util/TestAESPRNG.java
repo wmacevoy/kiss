@@ -252,6 +252,24 @@ class TestAESPRNG
         assert maxVal > 1-delta;
     }
 
+    private static double approxInvErf(double eps) {
+        // https://en.wikipedia.org/wiki/Error_function
+        // x=1-eps, for eps>0
+        // x=-1-eps, for eps<0
+
+        double b=(3*PI*(4-PI))/(8*(PI-3)); // b=1/a on Wiki
+        double sigma=copySign(1,eps);
+        eps=abs(eps);
+        double t=log(eps*(2-eps));
+        double Q=(2*b)/PI+t/2;
+        double y=sqrt(Q*Q-t*b)-Q;
+        return copySign(sqrt(y),sigma);
+    }
+
+    public static double round(double x, double digits) {
+        return Math.round(x*pow(10,digits))*pow(10,-digits);
+    }
+
     void testBooleanDistribution() {
         AESPRNG rng = new AESPRNG();
         rng.seed(); // strong
@@ -261,24 +279,67 @@ class TestAESPRNG
         for (int i=0; i<n; ++i) {
             if (rng.nextBoolean()) { ++bins[1]; }  else { ++bins[0]; }
         }
-        assert(abs(bins[0]-n/2)<4*sqrt(n));
-        assert(abs(bins[1]-n/2)<4*sqrt(n));        
+
+        double probabilityOfError = 1e-20;
+        double mu=n/2.0;
+        double sigma=sqrt(n/4.0);
+        double delta = sqrt(2)*sigma*approxInvErf(probabilityOfError);
+
+        assert abs(bins[0]-mu)<delta;
+        assert abs(bins[1]-mu)<delta;
     }
 
     void testByteDistribution() {
         AESPRNG rng = new AESPRNG();
         rng.seed(); // strong
         
-        int n = 1024*1024;
+        int n = 1024*1024*128;
         int [] bins = new int[256];
-        byte[] x = new byte[n];
-        rng.nextBytes(x,0,x.length);
-        for (int i=0; i<n; ++i) {
-            ++bins[x[i]-Byte.MIN_VALUE];
+        byte[] x = new byte[1024*1024];
+
+        for (int i=0; i<n; i += x.length) {
+            rng.nextBytes(x,0,x.length);
+            for (int j=0; j<x.length; ++j) {
+                ++bins[x[j]-Byte.MIN_VALUE];
+            }
         }
+
+        double probabilityOfError = 1e-20;
+        double mu=n/256.0;
+        double sigma=sqrt(n*(1/256.0)*(255.0/256.0));
+        double delta = sqrt(2)*sigma*approxInvErf(probabilityOfError);
+
         for (int i=0; i<256; ++i) {
-            assert(abs(bins[i]-n/256)<sqrt(n));
+            assert abs(bins[i]-mu)<delta;
         }
     }
-}
 
+    void testBenchmark() {
+        int n=128*1024*1024;
+        int sum = 0;
+
+        java.util.Random rng1 = new java.util.Random();
+        rng1.setSeed(1);
+        AESPRNG rng2 = new AESPRNG();
+        rng2.seed(1);
+
+        byte[] x = new byte[1024*1024];
+
+
+        double t0=time();
+        for (int i=0; i<n; i += x.length) {
+            rng1.nextBytes(x);
+        }
+        double t=time()-t0;
+
+        double s0=time();
+        for (int i=0; i<n; i += x.length) {
+            rng2.nextBytes(x);
+        }
+        double s=time()-t0;
+
+        println("slowdown =",round(s/t,2));
+
+        assert s/t < 2;
+    }
+}
