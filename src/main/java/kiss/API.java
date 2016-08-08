@@ -12,6 +12,166 @@ public class API {
         void close(); // no exceptions
     }
 
+    public interface Listener < Event > {
+        public void receive(Generator < Event > source, Event event);
+    }
+
+    public interface Generator < Event > {
+        public void addListener ( Listener < Event > listener );
+        public void removeListener ( Listener < Event > listener );
+    }
+
+    public static class DefaultGenerator < Event > 
+        implements Generator < Event > , java.io.Serializable, Cloneable {
+        
+        private static final Listener < ? > [] NONE =
+            new Listener < ? > [ 0 ];
+        
+        private transient Listener < Event > [] listeners = ( Listener < Event > [] ) NONE; 
+        
+        /** Returns a duplicate of the current listeners. */
+        public Listener < Event > [] getListeners() {
+            Listener < Event > [] tmp = listeners;
+            Listener < Event > [] dup = ( Listener < Event > [] ) 
+                new Listener < ? > [ tmp.length ];
+            
+            for (int i=tmp.length-1; i>=0; --i) dup[i]=tmp[i];
+            
+            return dup;
+        }
+        
+        
+        private transient Object lock = new Object();
+        
+        
+        private boolean contains(Listener < Event > listener) {
+            Listener < Event > [] tmp = listeners;
+            for (int i=tmp.length-1; i>=0; --i) 
+                if (tmp[i] == listener) return true;
+            return false;
+        }
+        
+        /**
+         *  <p>Synchronously register a listener with this Generator.
+         *  <p>This has no effect if the listener is already registered or is null.
+         *  <p>This only effects future (not current) send operations.
+         */
+        public void addListener ( Listener < Event > listener ) 
+        {
+            synchronized(lock) {
+                if (contains(listener) || listener == null) return;
+                
+                Listener < Event > [] tmp = ( Listener < Event > [] ) 
+                    new Listener < ? > [ listeners.length+1 ];
+                
+                for (int i=tmp.length-1; i>0; --i) tmp[i]=listeners[i-1];
+                tmp[0]=listener;
+                
+                listeners=tmp;
+            }
+        }
+        
+        /**
+         *  <p>Synchronously unregister a listener from this Generator.
+         *  <p>This has no effect if the listener is not registered.
+         *  <p>This only effects future (not current) send operations.
+         */
+        public void removeListener ( Listener < Event > listener ) 
+        {
+            synchronized(lock) {        
+                if (!contains(listener)) return;
+                
+                Listener < Event > [] tmp = (Listener < Event > []) 
+                    ( ( listeners.length > 1 ) ? 
+                      new Listener < ? > [listeners.length-1] : NONE );
+                
+                for (int i=listeners.length-1,j=i; i >= 0; --i) 
+                    if (listeners[i] != listener) tmp[--j]=listeners[i];
+                
+                listeners=tmp;
+            }
+        }
+        
+        /** Determine if any listeners are currently registered.
+            This is useful to check before a send operation, since in many
+            cases there are no registered listeners, an so no reason to create
+            an event to send.
+        */
+        protected final boolean listening() { return listeners != NONE; }
+        
+        /** Send an event to the registered listeners.  
+         *
+         *   <p>The listeners receive the event in the order they were
+         *      registered (with <code>addListener</code>)
+         *
+         *   <p>Before creating and sending an event, you should check
+         *      with <code>listening()</code> to see if there are any 
+         *      registered listeners.
+         *
+         *   <p>If the listeners add or remove themselves or other listeners
+         *      from this generator as a consequence of receiving an event,
+         *      these changes will only impact future (not current) send 
+         *      operations.
+         *
+         *   <p>Send is not synchronized (and should not be).  Mutliple threads
+         *      can safely send from the same DefaultGenerator, provided the
+         *      listeners are prepared for aynsynchronous receives.
+         */
+        protected final void send(Event event) {
+            Listener < Event > [] tmp = listeners;
+            for (int i=tmp.length-1; i>=0; --i) tmp[i].receive(this,event);
+        }
+        
+        private void writeObject(java.io.ObjectOutputStream out)
+            throws java.io.IOException
+        {
+            out.defaultWriteObject();
+            Listener <Event> [] tmp = listeners;
+            int len=0;
+            for (int i=0; i<tmp.length; ++i) {
+                if (tmp[i] instanceof java.io.Serializable) {
+                    ++len;
+                }
+            }
+            
+            out.writeInt(len);
+            
+            for (int i=0; i<tmp.length; ++i) {
+                if (tmp[i] instanceof java.io.Serializable) {
+                    out.writeObject(tmp[i]);
+                }
+            }
+        }
+        
+        private void readObject(java.io.ObjectInputStream in)
+            throws java.io.IOException, ClassNotFoundException
+        {
+            in.defaultReadObject();
+            int len=in.readInt();
+            
+            Listener < Event > [] tmp = (Listener < Event > []) 
+                ( ( len > 1 ) ? 
+                  new Listener < ? > [len] : NONE );
+            
+            for (int i=0; i<tmp.length; ++i) {
+                tmp[i]=( Listener < Event > ) in.readObject();
+            }
+            
+            lock=new Object();
+            listeners=tmp;
+        }
+        
+        public DefaultGenerator() {}
+        
+        /** To support Cloneable -- this is effectively a shallow copy */
+        protected DefaultGenerator(DefaultGenerator < Event > copy) {
+            listeners=copy.listeners;
+        }
+        
+        /** Effectively, this produces a shallow copy */
+        public Object clone() { return new DefaultGenerator < Event > (this); }
+    }
+    
     public static final String EOL = IO.EOL;
     public static Close outExpect(Object... args) {
         return IO.outExpectVarArgs(args);
