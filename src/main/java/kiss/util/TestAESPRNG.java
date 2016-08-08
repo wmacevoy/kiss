@@ -137,8 +137,10 @@ class TestAESPRNG
             if (x[i] < minVal) minVal=x[i];
             if (x[i] > maxVal) maxVal=x[i];
         }
-        assert(minVal < Long.MIN_VALUE + (1/sqrt(n))*pow(2,64));
-        assert(maxVal > Long.MAX_VALUE - (1/sqrt(n))*pow(2,64));
+        double probabilityOfError = 1e-20;
+        long delta = (long) ((-log(probabilityOfError))*pow(2,64)/n);
+        assert minVal < Long.MIN_VALUE + delta;
+        assert maxVal > Long.MAX_VALUE - delta;
     }
 
     void testNonNegativeLongRange() {
@@ -153,9 +155,13 @@ class TestAESPRNG
             if (x[i] < minVal) minVal=x[i];
             if (x[i] > maxVal) maxVal=x[i];
         }
-        assert(minVal >= 0);
-        assert(minVal < 0 + (1/sqrt(n))*pow(2,64));
-        assert(maxVal > Long.MAX_VALUE - (1/sqrt(n))*pow(2,64));
+
+        double probabilityOfError = 1e-20;
+        long delta = (long) ((-log(probabilityOfError))*pow(2,63)/n);
+        
+        assert minVal >= 0;
+        assert minVal < 0 + delta;
+        assert maxVal > Long.MAX_VALUE - delta;
     }
 
 
@@ -171,8 +177,12 @@ class TestAESPRNG
             if (x[i] < minVal) minVal=x[i];
             if (x[i] > maxVal) maxVal=x[i];
         }
-        assert(minVal < Integer.MIN_VALUE + (1/sqrt(n))*pow(2,32));
-        assert(maxVal > Integer.MAX_VALUE - (1/sqrt(n))*pow(2,32));
+
+        double probabilityOfError = 1e-20;
+        int delta = (int) ((-log(probabilityOfError))*pow(2,32)/n);
+        
+        assert minVal < Integer.MIN_VALUE + delta;
+        assert maxVal > Integer.MAX_VALUE - delta;
     }
 
     void testNonNegativeIntRange() {
@@ -187,9 +197,13 @@ class TestAESPRNG
             if (x[i] < minVal) minVal=x[i];
             if (x[i] > maxVal) maxVal=x[i];
         }
-        assert(minVal >= 0);
-        assert(minVal < 0 + (1/sqrt(n))*pow(2,32));
-        assert(maxVal > Integer.MAX_VALUE - (1/sqrt(n))*pow(2,32));
+
+        double probabilityOfError = 1e-20;
+        int delta = (int) ((-log(probabilityOfError))*pow(2,31)/n);
+
+        assert minVal >= 0;
+        assert minVal < delta;
+        assert maxVal > Integer.MAX_VALUE - delta;
     }
 
     void testDoubleRange() {
@@ -204,10 +218,15 @@ class TestAESPRNG
             if (x[i] < minVal) minVal=x[i];
             if (x[i] > maxVal) maxVal=x[i];
         }
-        assert(minVal >= 0);
-        assert(maxVal < 1);
-        assert(minVal < 0 + (1/sqrt(n)));
-        assert(maxVal > 1 - (1/sqrt(n)));
+
+        double probabilityOfError = 1e-20;
+        double delta = -log(probabilityOfError)/n;
+
+        assert minVal >= 0;
+        assert maxVal < 1;
+
+        assert minVal < delta;
+        assert maxVal > 1-delta;
     }
 
     void testFloatRange() {
@@ -222,12 +241,16 @@ class TestAESPRNG
             if (x[i] < minVal) minVal=x[i];
             if (x[i] > maxVal) maxVal=x[i];
         }
-        assert(minVal >= 0.0f);
-        assert(maxVal < 1.0f);
-        assert(minVal < 0 + (1/sqrt(n)));
-        assert(maxVal > 1 - (1/sqrt(n)));
-    }
 
+        double probabilityOfError = 1e-20;
+        double delta = -log(probabilityOfError)/n;
+
+        assert minVal >= 0;
+        assert maxVal < 1;
+
+        assert minVal < delta;
+        assert maxVal > 1-delta;
+    }
 
     void testBooleanDistribution() {
         AESPRNG rng = new AESPRNG();
@@ -238,24 +261,8 @@ class TestAESPRNG
         for (int i=0; i<n; ++i) {
             if (rng.nextBoolean()) { ++bins[1]; }  else { ++bins[0]; }
         }
-        assert(abs(bins[0]-n/2)<sqrt(n));
-        assert(abs(bins[1]-n/2)<sqrt(n));        
-    }
-
-    void testByteDistribution() {
-        AESPRNG rng = new AESPRNG();
-        rng.seed(); // strong
-        
-        int n = 1024*1024;
-        int [] bins = new int[256];
-        byte[] x = new byte[n];
-        rng.nextBytes(x,0,x.length);
-        for (int i=0; i<n; ++i) {
-            ++bins[x[i]-Byte.MIN_VALUE];
-        }
-        for (int i=0; i<256; ++i) {
-            assert(abs(bins[i]-n/256)<sqrt(n));
-        }
+        assert(abs(bins[0]-n/2)<4*sqrt(n));
+        assert(abs(bins[1]-n/2)<4*sqrt(n));        
     }
 
     void testByteDistribution() {
@@ -274,3 +281,4 @@ class TestAESPRNG
         }
     }
 }
+
