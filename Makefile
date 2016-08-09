@@ -26,8 +26,8 @@ examples:
 
 .PHONY: clean
 clean: # mvn clean
-	/bin/rm -rf tmp/* target/kiss*.jar* target/classes/* examples/target/classes/*
-	/bin/rm -rf $$(find . -name '*~' -o -name '._*')
+	/bin/rm -rf tmp/* target/* examples/*/target/* examples/*/tmp/*
+	/bin/rm -rf $$(find . -name '*~' -o -name '._*' -o -name '#*')
 
 deploy: all
 	mvn clean
