@@ -7,7 +7,7 @@ class Light {
 
     Light(String _location) { location=_location; }
 
-    void onReceiveState(Remote remote, State state) {
+    void onReceiveState(State state) {
         println("light in " + location + " is " + state);
     }
 }
@@ -22,19 +22,19 @@ class App {
         Light bedroomLight = new Light("bedroom");
         Light kitchenLight = new Light("kitchen");
 
-        Remote lightsRemote = new Remote();
+        Remote remote = new Remote();
 
-        lightsRemote.addListener(bedroomLight);
-        lightsRemote.addListener(kitchenLight);
+        remote.addListener(bedroomLight);
+        remote.addListener(kitchenLight);
 
         try (Close out = outExpect("light in bedroom is on",EOL,
                                    "light in kitchen is on",EOL)) {
-            lightsRemote.on();
+            remote.on();
         }
 
         try (Close out = outExpect("light in bedroom is off",EOL,
                                    "light in kitchen is off",EOL)) {
-            lightsRemote.off();
+            remote.off();
         }
     }
 }

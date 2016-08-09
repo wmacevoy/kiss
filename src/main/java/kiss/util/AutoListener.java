@@ -9,7 +9,7 @@ public class AutoListener<Message> implements Listener<Message> {
     private Object object;
     private Method method;
 
-    public AutoListener(Class<?> tx, Class<Message> type,  Object _object) {
+    public AutoListener(Class<Message> type,  Object _object) {
         try {
             object=_object;
             String name = type.getName();
@@ -18,7 +18,7 @@ public class AutoListener<Message> implements Listener<Message> {
                 +name.substring(pos+2);
             
             String methodName = "onReceive" + Name;
-            method = object.getClass().getDeclaredMethod(methodName, tx, type);
+            method = object.getClass().getDeclaredMethod(methodName, type);
             method.setAccessible(true);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -27,9 +27,9 @@ public class AutoListener<Message> implements Listener<Message> {
     }
     
     @Override
-    public void receive(Generator<Message> generator, Message message) {
+    public void receive(Message message) {
         try {
-            method.invoke(object,generator,message);
+            method.invoke(object,message);
         } catch (Exception ex) {
             ex.printStackTrace();
             System.out.println("ignored!");

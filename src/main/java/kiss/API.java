@@ -15,7 +15,7 @@ public class API {
     }
 
     public interface Listener < Event > {
-        public void receive(Generator < Event > source, Event event);
+        public void receive(Event event);
     }
 
     public interface GeneratorInterface < Event > {
@@ -85,7 +85,8 @@ public class API {
     
         @SuppressWarnings("unchecked")
         public void addListener(Object object) {
-        kiss.util.AutoListener<Event> listener = new kiss.util.AutoListener(getClass(),type,object);
+        kiss.util.AutoListener<Event> listener =
+            new kiss.util.AutoListener(type,object);
         addListener(listener);
     }
         
@@ -138,7 +139,7 @@ public class API {
          */
         protected final void send(Event event) {
             Listener < Event > [] tmp = listeners;
-            for (int i=tmp.length-1; i>=0; --i) tmp[i].receive(this,event);
+            for (int i=tmp.length-1; i>=0; --i) tmp[i].receive(event);
         }
         
         private void writeObject(java.io.ObjectOutputStream out)
