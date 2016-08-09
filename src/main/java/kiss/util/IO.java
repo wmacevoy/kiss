@@ -227,6 +227,7 @@ public class IO {
                 }
             }
         } else if (object instanceof Map<?,?>) {
+            @SuppressWarnings("unchecked")
             Set<Map.Entry> set = ((Map) object).entrySet();
             ans.append("[");
             boolean first = true;
