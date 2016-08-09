@@ -3,8 +3,6 @@ VER_MINOR=2
 VER_PATCH=0
 VER=$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)
 
-JAR=kiss-$(VER_MAJOR).$(1.0-SNAPSHOT.jar
-
 .PHONY: lib
 lib :   # mvn compile
 	if [ ! -d tmp ] ; then mkdir tmp; fi
@@ -21,10 +19,12 @@ examples:
 
 .PHONY: clean
 clean: # mvn clean
-	/bin/rm -rf tmp/* target/$(JAR) target/classes/* examples/target/classes/*
+	/bin/rm -rf tmp/* target/kiss-$(VER).jar* target/kiss.jar* target/classes/* examples/target/classes/*
 	/bin/rm -rf $$(find . -name '*~' -o -name '._*')
 
 deploy:
+	/bin/rm -rf tmp/* target/kiss-$(VER).jar* target/kiss.jar* target/classes/* examples/target/classes/*
+	/bin/rm -rf $$(find . -name '*~' -o -name '._*')
 	mvn clean
 	mvn compile
 	jar cfe kiss-$(VER).jar kiss.util.Run -C target/classes .
