@@ -3,6 +3,9 @@ VER_MINOR=2
 VER_PATCH=0
 VER=$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)
 
+.PHONY: all
+all : clean lib examples test
+
 .PHONY: lib
 lib :   # mvn compile
 	if [ ! -d tmp ] ; then mkdir tmp; fi
