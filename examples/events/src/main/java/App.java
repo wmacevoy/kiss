@@ -1,22 +1,17 @@
 import static kiss.API.*;
 
-
-import static kiss.API.*; // github.com/wmacevoy/kiss
-
 // kind of information to pass around
 enum EnvironmentState { Cold, Comfortable, Hot };
 
 // something which gets this kind of information
-class Fan implements Listener<EnvironmentState> {
+class Fan {
     String name;
     boolean isOn = false;
 
     Fan(String _name) { name=_name; }
 
-    // what to do when this information is sent
-    @Override
-    public void receive(Generator<EnvironmentState> from,
-                        EnvironmentState state) {
+    void onReceiveEnvironmentState(Thermostat thermostat,
+                                   EnvironmentState state) {
         if (isOn) {
             if (state == EnvironmentState.Cold) {
                 println(name + " fan turned off");
@@ -31,28 +26,25 @@ class Fan implements Listener<EnvironmentState> {
     }
 }
 
-// something else that receives environment state info
-class Heater implements Listener<EnvironmentState> {
+class Heater {
     String name;
     boolean isOn = false;
     Heater(String _name) { name = _name; }
-
-    // how it uses it
-    @Override
-    public void receive(Generator<EnvironmentState> from,
-                        EnvironmentState state) {
+    
+    void onReceiveEnvironmentState(Thermostat thermostat,
+                                   EnvironmentState state) {
         if (isOn) {
             if (state == EnvironmentState.Hot) {
-                    println(name + " heater turned off");
-                    isOn = false;
-                }
-            } else {
-                if (state == EnvironmentState.Cold) {
-                    println(name + " heater turned on");
-                    isOn = true;
-                }
+                println(name + " heater turned off");
+                isOn = false;
+            }
+        } else {
+            if (state == EnvironmentState.Cold) {
+                println(name + " heater turned on");
+                isOn = true;
             }
         }
+    }
 }
 
 
@@ -60,7 +52,7 @@ class Heater implements Listener<EnvironmentState> {
 // default generator helps Thermostat keep track of interested
 // listeners
 
-class Thermostat extends DefaultGenerator<EnvironmentState> {
+class Thermostat extends Generator<EnvironmentState> {
     private double temperature; // degrees centigrade
     private double tooHot;
     private double tooCold;

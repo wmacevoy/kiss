@@ -3,6 +3,8 @@ package kiss;
 import java.io.Closeable;
 import java.io.File;
 
+import java.util.Set;
+
 import kiss.util.IO;
 import kiss.util.RNG;
 import kiss.util.Run;
@@ -16,20 +18,28 @@ public class API {
         public void receive(Generator < Event > source, Event event);
     }
 
-    public interface Generator < Event > {
+    public interface GeneratorInterface < Event > {
         public void addListener ( Listener < Event > listener );
         public void removeListener ( Listener < Event > listener );
     }
 
-    public static class DefaultGenerator < Event > 
-        implements Generator < Event > , java.io.Serializable, Cloneable {
+    public static class Generator < Event > 
+        implements GeneratorInterface < Event > ,
+                   java.io.Serializable, Cloneable {
+        public Class<Event> type;
+        {
+            type=(Class<Event>)
+                kiss.util.Reflect.getTypeArguments(Generator.class,
+                                                   getClass()).get(0);
+            assert type != null;
+        }
         
         private static final Listener < ? > [] NONE =
             new Listener < ? > [ 0 ];
         
         private transient Listener < Event > [] listeners = ( Listener < Event > [] ) NONE; 
-        
         /** Returns a duplicate of the current listeners. */
+        @SuppressWarnings("unchecked")        
         public Listener < Event > [] getListeners() {
             Listener < Event > [] tmp = listeners;
             Listener < Event > [] dup = ( Listener < Event > [] ) 
@@ -56,6 +66,7 @@ public class API {
          *  <p>This has no effect if the listener is already registered or is null.
          *  <p>This only effects future (not current) send operations.
          */
+        @SuppressWarnings("unchecked")        
         public void addListener ( Listener < Event > listener ) 
         {
             synchronized(lock) {
@@ -70,12 +81,20 @@ public class API {
                 listeners=tmp;
             }
         }
+
+    
+        @SuppressWarnings("unchecked")
+        public void addListener(Object object) {
+        kiss.util.AutoListener<Event> listener = new kiss.util.AutoListener(getClass(),type,object);
+        addListener(listener);
+    }
         
         /**
          *  <p>Synchronously unregister a listener from this Generator.
          *  <p>This has no effect if the listener is not registered.
          *  <p>This only effects future (not current) send operations.
          */
+        @SuppressWarnings("unchecked")
         public void removeListener ( Listener < Event > listener ) 
         {
             synchronized(lock) {        
@@ -114,7 +133,7 @@ public class API {
          *      operations.
          *
          *   <p>Send is not synchronized (and should not be).  Mutliple threads
-         *      can safely send from the same DefaultGenerator, provided the
+         *      can safely send from the same Generator, provided the
          *      listeners are prepared for aynsynchronous receives.
          */
         protected final void send(Event event) {
@@ -143,6 +162,7 @@ public class API {
             }
         }
         
+        @SuppressWarnings("unchecked")
         private void readObject(java.io.ObjectInputStream in)
             throws java.io.IOException, ClassNotFoundException
         {
@@ -161,17 +181,18 @@ public class API {
             listeners=tmp;
         }
         
-        public DefaultGenerator() {}
+        public Generator() {}
         
         /** To support Cloneable -- this is effectively a shallow copy */
-        protected DefaultGenerator(DefaultGenerator < Event > copy) {
+        protected Generator(Generator < Event > copy) {
             listeners=copy.listeners;
         }
         
         /** Effectively, this produces a shallow copy */
-        public Object clone() { return new DefaultGenerator < Event > (this); }
+        public Object clone() { return new Generator < Event > (this); }
     }
     
+
     public static final String EOL = IO.EOL;
     public static Close outExpect(Object... args) {
         return IO.outExpectVarArgs(args);
