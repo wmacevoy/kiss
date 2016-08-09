@@ -11,10 +11,14 @@ lib :   # mvn compile
 	if [ ! -d tmp ] ; then mkdir tmp; fi
 	if [ ! -d target/classes ] ; then mkdir target/classes ; fi
 	javac -Xlint:unchecked -cp target/classes -d target/classes -s src/main/java $$(find src/main/java -regex '[^._].*\.java$$')
-	jar cfe kiss-$(VER).jar kiss.util.Run -C target/classes .
+	cd target/classes; jar cvfe ../../kiss-$(VER).jar kiss.util.Run $$(find . -name '*.class' -and -not -iname 'test*')
+	cd target/classes; jar cfe ../../kiss-with-tests-$(VER).jar kiss.util.Run .
 	cp kiss-$(VER).jar kiss.jar
+	cp kiss-with-tests-$(VER).jar kiss-with-tests.jar
 	openssl dgst -out kiss-$(VER).jar.sha256 -sha256 kiss-$(VER).jar
+	openssl dgst -out kiss-with-tests-$(VER).jar.sha256 -sha256 kiss-with-tests-$(VER).jar
 	cp kiss-$(VER).jar.sha256 kiss.jar.sha256
+	cp kiss-with-tests-$(VER).jar.sha256 kiss-with-tests.jar.sha256
 
 .PHONY: examples
 examples:
@@ -22,12 +26,10 @@ examples:
 
 .PHONY: clean
 clean: # mvn clean
-	/bin/rm -rf tmp/* target/kiss-$(VER).jar* target/kiss.jar* target/classes/* examples/target/classes/*
+	/bin/rm -rf tmp/* target/kiss*.jar* target/classes/* examples/target/classes/*
 	/bin/rm -rf $$(find . -name '*~' -o -name '._*')
 
-deploy:
-	/bin/rm -rf tmp/* target/kiss-$(VER).jar* target/kiss.jar* target/classes/* examples/target/classes/*
-	/bin/rm -rf $$(find . -name '*~' -o -name '._*')
+deploy: all
 	mvn clean
 	mvn compile
 	jar cfe kiss-$(VER).jar kiss.util.Run -C target/classes .
