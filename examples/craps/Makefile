@@ -4,6 +4,7 @@ lib:
 
 .PHONY: this
 this:
+	if [ ! -d target/classes ] ; then mkdir -p target/classes ; fi
 	javac -cp "../../target/classes:target/classes" -d "target/classes" -s "src/main/java" $$(find "src/main/java" -regex '[^._].*\.java$$')
 
 .PHONY: run
