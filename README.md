@@ -229,7 +229,9 @@ A fast (almost as fast as the standard random number generator) but cryptographi
 
 ### Unapologetic events
 
-The generator/event/listener pattern is all over the JDK, but most tutorials on it are a secret apology: a discussion on how to "listen" to events/messages but "generating" events/messages is either done badly or not at all.  With kiss, it is easy to do it right without advanced Java katas:
+The generator/event/listener pattern is all over the JDK, because it helps solve the hard problem of hooking different objects together to solve a larger problem, even if the generators and listeners didn't know much about each other to start with.
+
+But most tutorials on it are a secret apology: they discuss how to "listen" to events/messages but "generating" events/messages is either done badly or not at all.  With kiss, it is easy to do it right without advanced Java katas:
 
 ```java
 import static kiss.API.*;
