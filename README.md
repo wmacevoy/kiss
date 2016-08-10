@@ -232,7 +232,37 @@ A fast (almost as fast as the standard random number generator) but cryptographi
 
 * `seed(double value)` --- seeds the PRNG for a reproducible sequence.
 
-  
+### Unapologetic events
+
+The generator/event/listener pattern is all over the JDK, but most tutorials on it are a secret apology: a discussion on how to "listen" to events/messages but "generating" events/messages is either done badly or not at all.  With kiss, it is easy to do it right without advanced Java katas:
+
+```java
+import static kiss.API.*;
+
+class Parrot {
+    void onReceiveString(String message) {
+	println("squawk: " + message);
+    }
+};
+
+// Generator<Event> does the glue work...
+class Trainer extends Generator<String> {
+    void speak(String words) { send(words); }
+}
+
+class App {
+    void run() {
+	Parrot polly = new Parrot();
+	Trainer susan = new Trainer();
+
+	susan.addListener(words -> println("say: " + words));
+	susan.addListener(polly);
+	
+	susan.speak("hello");
+    }
+}
+```
+This reports "say: hello", followed by "squawk: hello".
 
 [logo]: kiss/java-kiss.png "Java Duke with Kiss"
 
