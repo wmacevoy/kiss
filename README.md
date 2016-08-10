@@ -235,12 +235,11 @@ The generator/event/listener pattern is all over the JDK, but most tutorials on 
 import static kiss.API.*;
 
 class Parrot {
-    void onReceiveString(String message) {
-        println("squawk: " + message + "!");
+    void mimic(String words) {
+        println("squawk: " + words + "!");
     }
 };
 
-// Generator<Event> does the glue work...
 class Trainer extends Generator<String> {
     void speak(String words) { send(words); }
 }
@@ -250,18 +249,13 @@ class App {
         Parrot polly = new Parrot();
         Trainer susan = new Trainer();
 
-        susan.addListener(words -> println("say: " + words + "."));
-        susan.addListener(polly);
-        
+        susan.addListener(words -> polly.mimic(words));
+
         susan.speak("hello");
     }
 }
 ```
-This produces the console output:
-```sh
-say: hello.
-squawk: hello!
-```
+This produces `squawk: hello!`
 
 [logo]: kiss/java-kiss.png "Java Duke with Kiss"
 
