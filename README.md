@@ -236,7 +236,7 @@ import static kiss.API.*;
 
 class Parrot {
     void onReceiveString(String message) {
-        println("squawk: " + message);
+        println("squawk: " + message + "!");
     }
 };
 
@@ -250,14 +250,18 @@ class App {
         Parrot polly = new Parrot();
         Trainer susan = new Trainer();
 
-        susan.addListener(words -> println("say: " + words));
+        susan.addListener(words -> println("say: " + words + "."));
         susan.addListener(polly);
         
         susan.speak("hello");
     }
 }
 ```
-This reports "say: hello", followed by "squawk: hello".
+This produces the console output:
+```sh
+say: hello.
+squawk: hello!
+```
 
 [logo]: kiss/java-kiss.png "Java Duke with Kiss"
 
