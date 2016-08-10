@@ -1,37 +1,21 @@
-VER_MAJOR=0
-VER_MINOR=2
-VER_PATCH=0
-VER=$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)
-
 .PHONY: all
 all : clean lib examples test
 
 .PHONY: lib
 lib :   # mvn compile
-	if [ ! -d tmp ] ; then mkdir tmp; fi
 	if [ ! -d target/classes ] ; then mkdir -p target/classes ; fi
 	javac -Xlint:unchecked -cp target/classes -d target/classes -s src/main/java $$(find src/main/java -regex '[^._].*\.java$$')
-	cd target/classes; jar cvfe ../../kiss-$(VER).jar kiss.util.Run $$(find . -name '*.class' -and -not -iname 'test*')
-	cd target/classes; jar cfe ../../kiss-with-tests-$(VER).jar kiss.util.Run .
-	cp kiss-$(VER).jar kiss.jar
-	cp kiss-with-tests-$(VER).jar kiss-with-tests.jar
-	openssl dgst -out kiss-$(VER).jar.sha256 -sha256 kiss-$(VER).jar
-	openssl dgst -out kiss-with-tests-$(VER).jar.sha256 -sha256 kiss-with-tests-$(VER).jar
-	cp kiss-$(VER).jar.sha256 kiss.jar.sha256
-	cp kiss-with-tests-$(VER).jar.sha256 kiss-with-tests.jar.sha256
+	cd target/classes; jar cvfe ../../kiss.jar kiss.util.Run $$(find . -name '*.class' -and -not -iname 'test*')
+	cd target/classes; jar cfe ../../kiss-with-tests.jar kiss.util.Run .
+	openssl dgst -out kiss.jar.sha256 -sha256 kiss.jar
+	openssl dgst -out kiss-with-tests.jar.sha256 -sha256 kiss-with-tests.jar
 
 .PHONY: examples
 examples:
 	for dir in examples/*; do \
-	  if [ -d "$$dir" ] ; then \
-	    echo "$$dir..."; \
-	    if [ ! -d "$$dir/target/classes" ] ; then \
-	      mkdir -p "$$dir/target/classes" ; \
-	    fi ; \
-	    javac -cp "target/classes:$$dir/target/classes" \
-	      -d "$$dir/target/classes" \
-	      -s "$$dir/src/main/java" \
-	      $$(find "$$dir/src/main/java" -regex '[^._].*\.java$$'); \
+	  if [ -f "$$dir/Makefile" ] ; then \
+	    echo "$$dir: make this"; \
+	    $(MAKE) -C "$$dir" this ; \
 	  fi ; \
 	done
 
@@ -51,12 +35,27 @@ deploy: all
 	mvn deploy
 
 .PHONY: test
-test : # mvn exec:exec
-	java -cp target/classes kiss.util.Run --app kiss.util.Test
-	if [ ! -d tmp ] ; then mkdir tmp ; fi
-	cd tmp; for dir in ../examples/*; do if [ -d "$$dir" ] ; then echo "$$dir..."; java -cp "../target/classes:$$dir/target/classes" kiss.util.Run --norun; fi ; done
+test: self-test example-tests
 
-.PHONY: run
-run : # mvn exec:exec
-	if [ ! -d tmp ] ; then mkdir tmp ; fi
-	cd tmp; for dir in ../examples/*; do if [ -d "$$dir" ] ; then echo "$$dir..."; java -cp "../target/classes:$$dir/target/classes" kiss.util.Run --notest; fi ; done
+.PHONY: self-test
+self-test:
+	java -cp target/classes kiss.util.Run --app kiss.util.Test
+
+.PHONY: example-tests
+example-tests:
+	for dir in examples/*; do \
+	  if [ -f "$$dir/Makefile" ] ; then \
+	    echo "$$dir: make test"; \
+	    $(MAKE) -C "$$dir" test ; \
+	  fi ; \
+	done
+
+.PHONY: example-runs
+example-runs:
+	for dir in examples/*; do \
+	  if [ -f "$$dir/Makefile" ] ; then \
+	    echo "$$dir: make run"; \
+	    $(MAKE) -C "$$dir" run ; \
+	  fi ; \
+	done
+
