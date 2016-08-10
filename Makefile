@@ -9,7 +9,7 @@ all : clean lib examples test
 .PHONY: lib
 lib :   # mvn compile
 	if [ ! -d tmp ] ; then mkdir tmp; fi
-	if [ ! -d target/classes ] ; then mkdir target/classes ; fi
+	if [ ! -d target/classes ] ; then mkdir -p target/classes ; fi
 	javac -Xlint:unchecked -cp target/classes -d target/classes -s src/main/java $$(find src/main/java -regex '[^._].*\.java$$')
 	cd target/classes; jar cvfe ../../kiss-$(VER).jar kiss.util.Run $$(find . -name '*.class' -and -not -iname 'test*')
 	cd target/classes; jar cfe ../../kiss-with-tests-$(VER).jar kiss.util.Run .
@@ -22,7 +22,18 @@ lib :   # mvn compile
 
 .PHONY: examples
 examples:
-	for dir in examples/*; do if [ -d "$$dir" ] ; then echo "$$dir..."; javac -cp "target/classes:$$dir/target/classes" -d "$$dir/target/classes" -s "$$dir/src/main/java" $$(find "$$dir/src/main/java" -regex '[^._].*\.java$$'); fi ; done
+	for dir in examples/*; do \
+	  if [ -d "$$dir" ] ; then \
+	    echo "$$dir..."; \
+	    if [ ! -d "$$dir/target/classes" ] ; then \
+	      mkdir -p "$$dir/target/classes" ; \
+	    fi ; \
+	    javac -cp "target/classes:$$dir/target/classes" \
+	      -d "$$dir/target/classes" \
+	      -s "$$dir/src/main/java" \
+	      $$(find "$$dir/src/main/java" -regex '[^._].*\.java$$'); \
+	  fi ; \
+	done
 
 .PHONY: clean
 clean: # mvn clean
