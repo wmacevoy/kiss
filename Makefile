@@ -10,6 +10,15 @@ lib :   # mvn compile
 	openssl dgst -out kiss.jar.sha256 -sha256 kiss.jar
 	openssl dgst -out kiss-with-tests.jar.sha256 -sha256 kiss-with-tests.jar
 
+.PHONY: verify
+verify:
+	for file in kiss.jar kiss-with-tests.jar ; do \
+	  if openssl dgst -sha256 "$$file" | diff -q - "$$file.sha256" ; \
+	    then \
+	      echo "$$file checksum matches $$file.sha256" ; \
+	  fi; \
+	done
+
 .PHONY: examples
 examples:
 	for dir in examples/*; do \
@@ -24,14 +33,13 @@ clean: # mvn clean
 	/bin/rm -rf tmp/* target/* examples/*/target/* examples/*/tmp/*
 	/bin/rm -rf $$(find . -name '*~' -o -name '._*' -o -name '#*')
 
-deploy: all
+deploy: clean all
+	git add -f kiss.jar kiss.jar.sha256 \
+	           kiss-with-tests.jar kiss-with-tests.jar.sha256
+	git commit -m "deploy `date -u`"
+	git push
 	mvn clean
 	mvn compile
-	jar cfe kiss-$(VER).jar kiss.util.Run -C target/classes .
-	openssl dgst -out kiss-$(VER).jar.sha256 -sha256 kiss-$(VER).jar
-	git add -f kiss-$(VER).jar kiss-$(VER).jar.sha256 kiss.jar kiss.jar.sha256
-	git commit -m "deploy `date`"
-	git push
 	mvn deploy
 
 .PHONY: test
