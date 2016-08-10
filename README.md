@@ -10,11 +10,6 @@
 
 [latest kiss.jar](https://github.com/wmacevoy/kiss/blob/master/kiss.jar?raw=true) --- latest master build
 
-
-
-[kiss-0.2.0.jar](https://github.com/wmacevoy/kiss/blob/master/kiss-0.1.1.jar?raw=true)
-
-
 ## kiss Java
 
 The goal is to make the launching and testing of java programs for beginners
@@ -241,7 +236,7 @@ import static kiss.API.*;
 
 class Parrot {
     void onReceiveString(String message) {
-	println("squawk: " + message);
+        println("squawk: " + message);
     }
 };
 
@@ -252,13 +247,13 @@ class Trainer extends Generator<String> {
 
 class App {
     void run() {
-	Parrot polly = new Parrot();
-	Trainer susan = new Trainer();
+        Parrot polly = new Parrot();
+        Trainer susan = new Trainer();
 
-	susan.addListener(words -> println("say: " + words));
-	susan.addListener(polly);
-	
-	susan.speak("hello");
+        susan.addListener(words -> println("say: " + words));
+        susan.addListener(polly);
+        
+        susan.speak("hello");
     }
 }
 ```
