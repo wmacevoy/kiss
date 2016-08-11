@@ -336,9 +336,9 @@ class TestAESPRNG
         for (int i=0; i<n; i += x.length) {
             rng2.nextBytes(x);
         }
-        double s=time()-t0;
+        double s=time()-s0;
 
-        println("slowdown =",round(s/t,2));
+        println("kiss rng is",round(s/t,2),"the speed of system rng.");
 
         assert s/t < 2;
     }

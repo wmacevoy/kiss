@@ -51,7 +51,7 @@ class App {
     }
 
     void run()
-    {
+`    {
         println("Hello, World!");
     }
 }
@@ -101,7 +101,7 @@ class App {
 
 ## Randomness a kindergartener understands
 
-`int die=random(1,6)` is a die roll and `seed(1)` resets the pseudo-random sequence for testability.  The random-number sequence is reset with `seed(1)` before each `textXXX()` and reset to a cryptographically strong PRNG with `seed()` before invoking `run()`.
+`int die=random(1,6)` is a die roll and `seed(1)` resets the pseudo-random sequence for testability.  The random-number sequence is reset with `seed(1)` before each `textXXX()` and reset to a cryptographically strong PRNG with `seed()` before invoking `run()`.  It is also about twice as fast as the normal random number generator.
 
 ## ~~Math.~~math
 
