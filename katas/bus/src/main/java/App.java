@@ -109,11 +109,18 @@ class App {
     }
 
     boolean canRide() {
+        // canRide should be true if either
+        //     you have enough money (PRICE)
+        //     or have at least one pass
+
         // TODO
         return false;
     }
 
     void ride() {
+        // ride should use a pass if possible
+        // otherwise it should use money.
+        
         // TODO
     }
 }
