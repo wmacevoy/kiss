@@ -12,6 +12,7 @@ class App {
     }
 
     void hi() {
+        // get a name, and tell them hello.
         // TODO
     }
 }
