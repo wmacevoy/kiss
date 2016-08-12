@@ -32,56 +32,8 @@ To see the classic message, you need the kiss jar file in your project and use "
 
 ## Test Hello World
 
-So it is not hard to say hello.  Now let's test it.
+So it is not hard to say hello.  Now let's test it:
 
-```java
-import static kiss.API.*;
-
-class App {
-    void testRun() {
-        // create a file with the output we expect
-        outOpen("run.verify");
-        println("Hello, World!");
-        outClose();
-
-        // call run() to check that it matches
-        outVerify("run.verify");
-        run();
-        outClose();
-    }
-
-    void run()
-`    {
-        println("Hello, World!");
-    }
-}
-```
-
-
-Any `testXXX` method is automatically called before the `run` method.  Want to write a test?  Just write the test!
-
-In fact, you can test Hello World with the safer try-with resources pattern:
-```java
-import static kiss.API.*;
-
-class App {
-    void testRun() {
-        try (Close out=outOpen("run.verify")) {
-          println("Hello, World!");
-        }
-
-        try (Close out=outVerify("run.verify")) {
-          run();
-        }
-    }
-
-    void run()
-    {
-        println("Hello, World!");
-    }
-}
-```
-And, instead of creating a temporary file, this can all be done with internal streams, giving the most succinct:
 ```java
 import static kiss.API.*;
 
@@ -98,6 +50,10 @@ class App {
     }
 }
 ```
+Any `testXXX` method is automatically called before the `run` method.  Want to write a test?  Just write the test!
+
+In fact, you can test Hello World with the safer try-with resources pattern:
+And, instead of creating a temporary file, this can all be done with internal streams, giving the most succinct:
 
 ## Randomness a kindergartener understands
 
