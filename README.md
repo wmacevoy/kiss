@@ -259,7 +259,7 @@ class App {
 ```
 This produces `squawk: hello!`
 
-### As
+### As conversions
 
 The casting notation is hard to read and converting strings to primitives types
 is a pile of API and inconsistent with the syntax of the language. So,
