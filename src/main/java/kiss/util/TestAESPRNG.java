@@ -338,7 +338,9 @@ class TestAESPRNG
         }
         double s=time()-s0;
 
-        println("kiss rng is",round(s/t,2),"the speed of system rng.");
+        println("time(sys rng)="+round(t,2)+"s");        
+        println("time(kiss rng)="+round(s,2)+"s");
+        println("kiss/sys ratio=",round(s/t,2));
 
         assert s/t < 2;
     }

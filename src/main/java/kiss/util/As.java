@@ -2,74 +2,74 @@ package kiss.util;
 
 import static kiss.API.*;
 
-public class To {
-    public static final boolean toBoolean(boolean x) { return x; }
-    public static final boolean toBoolean(char x) { return x != 0; }
-    public static final boolean toBoolean(CharSequence x) {
+public class As {
+    public static final boolean asBoolean(boolean x) { return x; }
+    public static final boolean asBoolean(char x) { return x != 0; }
+    public static final boolean asBoolean(CharSequence x) {
         if (x == null || x.length() == 0 || x.equals("false")) {
             return false;
         }
         return true;
     }
-    public static final boolean toBoolean(byte x) { return x != 0; }    
-    public static final boolean toBoolean(short x) { return x != 0; }
-    public static final boolean toBoolean(int x) { return x != 0; }
-    public static final boolean toBoolean(long x) { return x != 0; }
-    public static final boolean toBoolean(float x) { return x != 0; }
-    public static final boolean toBoolean(double x) { return x != 0; }
+    public static final boolean asBoolean(byte x) { return x != 0; }    
+    public static final boolean asBoolean(short x) { return x != 0; }
+    public static final boolean asBoolean(int x) { return x != 0; }
+    public static final boolean asBoolean(long x) { return x != 0; }
+    public static final boolean asBoolean(float x) { return x != 0; }
+    public static final boolean asBoolean(double x) { return x != 0; }
 
-    public static final char toChar(boolean x) {
+    public static final char asChar(boolean x) {
         return x ? '\u0001' : '\u0000';
     }
-    public static final char toChar(char x) { return x; }
-    public static final char toChar(CharSequence x) {
+    public static final char asChar(char x) { return x; }
+    public static final char asChar(CharSequence x) {
         return (x == null || x.length() == 0) ? 0 : x.charAt(0);
     }
 
-    public static final char toChar(byte x) { return (char) x; }    
-    public static final char toChar(short x) { return (char) x; }
-    public static final char toChar(int x) { return (char) x; }
-    public static final char toChar(long x) { return (char) x; }
-    public static final char toChar(float x) { return (char) x; }
-    public static final char toChar(double x) { return (char) x; }
+    public static final char asChar(byte x) { return (char) x; }    
+    public static final char asChar(short x) { return (char) x; }
+    public static final char asChar(int x) { return (char) x; }
+    public static final char asChar(long x) { return (char) x; }
+    public static final char asChar(float x) { return (char) x; }
+    public static final char asChar(double x) { return (char) x; }
         
-    public static final byte toByte(boolean x) { return (byte) (x ? 1 : 0); }
-    public static final byte toByte(char x) { return (byte) x; }
-    public static final byte toByte(CharSequence x) {
-        return (byte) toLong(x);
+    public static final byte asByte(boolean x) { return (byte) (x ? 1 : 0); }
+    public static final byte asByte(char x) { return (byte) x; }
+    public static final byte asByte(CharSequence x) {
+        return (byte) asLong(x);
     }
-    public static final byte toByte(byte x) { return x; }
-    public static final byte toByte(short x) { return (byte) x; }    
-    public static final byte toByte(int x) { return (byte) x; }
-    public static final byte toByte(long x) { return (byte) x; }
-    public static final byte toByte(float x) { return (byte) x; }
-    public static final byte toByte(double x) { return (byte) x; }
+    public static final byte asByte(byte x) { return x; }
+    public static final byte asByte(short x) { return (byte) x; }    
+    public static final byte asByte(int x) { return (byte) x; }
+    public static final byte asByte(long x) { return (byte) x; }
+    public static final byte asByte(float x) { return (byte) x; }
+    public static final byte asByte(double x) { return (byte) x; }
 
-    public static final short toShort(boolean x) { return (short) (x ? 1 : 0); }
-    public static final short toShort(char x) { return (short) x; }
-    public static final short toShort(CharSequence x) {
-        return (short) toLong(x);
+    public static final short asShort(boolean x) { return (short) (x ? 1 : 0); }
+    public static final short asShort(char x) { return (short) x; }
+    public static final short asShort(CharSequence x) {
+        return (short) asLong(x);
     }
-    public static final short toShort(byte x) { return (short) x; }    
-    public static final short toShort(short x) { return x; }
-    public static final short toShort(int x) { return (short) x; }
-    public static final short toShort(long x) { return (short) x; }
-    public static final short toShort(float x) { return (short) x; }
-    public static final short toShort(double x) { return (short) x; }
+    public static final short asShort(byte x) { return (short) x; }    
+    public static final short asShort(short x) { return x; }
+    public static final short asShort(int x) { return (short) x; }
+    public static final short asShort(long x) { return (short) x; }
+    public static final short asShort(float x) { return (short) x; }
+    public static final short asShort(double x) { return (short) x; }
 
-    public static final int toInt(boolean x) { return x ? 1 : 0; }
-    public static final int toInt(char x) { return (int) x; }
-    public static final int toInt(CharSequence x) { return (int) toLong(x); }
+    public static final int asInt(boolean x) { return x ? 1 : 0; }
+    public static final int asInt(char x) { return (int) x; }
+    public static final int asInt(CharSequence x) { return (int) asLong(x); }
 
-    public static final int toInt(byte x) { return (byte) x; }    
-    public static final int toInt(short x) { return (int) x; }
-    public static final int toInt(int x) { return x; }
-    public static final int toInt(long x) { return (int) x; }
-    public static final int toInt(float x) { return (int) x; }
-    public static final int toInt(double x) { return (int) x; }
+    public static final int asInt(byte x) { return (byte) x; }    
+    public static final int asInt(short x) { return (int) x; }
+    public static final int asInt(int x) { return x; }
+    public static final int asInt(long x) { return (int) x; }
+    public static final int asInt(float x) { return (int) x; }
+    public static final int asInt(double x) { return (int) x; }
 
-    public static final long toLong(boolean x) { return x ? 1 : 0; }
-    public static final long toLong(char x) { return (long) x; }
+    public static final long asLong(boolean x) { return x ? 1 : 0; }
+    public static final long asLong(char x) { return (long) x; }
 
     private static CharSequence remove(CharSequence x, char c) {
         if (x != null) {
@@ -90,7 +90,7 @@ public class To {
         }
         return x;
     }
-    public static final long toLong(CharSequence x) {
+    public static final long asLong(CharSequence x) {
         x = remove(x,'_');
         if (x != null && x.length()>=2
             && x.charAt(0)=='0' && x.charAt(1)=='x') {
@@ -103,47 +103,47 @@ public class To {
         return Long.parseLong(x.toString());
     }
 
-    public static final long toLong(byte x) { return (byte) x; }    
-    public static final long toLong(short x) { return (long) x; }
-    public static final long toLong(int x) { return (long) x; }
-    public static final long toLong(long x) { return x; }
-    public static final long toLong(float x) { return (long) x; }
-    public static final long toLong(double x) { return (long) x; }
+    public static final long asLong(byte x) { return (byte) x; }    
+    public static final long asLong(short x) { return (long) x; }
+    public static final long asLong(int x) { return (long) x; }
+    public static final long asLong(long x) { return x; }
+    public static final long asLong(float x) { return (long) x; }
+    public static final long asLong(double x) { return (long) x; }
 
-    public static final float toFloat(boolean x) { return x ? 1 : 0; }
-    public static final float toFloat(char x) { return (float) x; }
-    public static final float toFloat(CharSequence x) {
+    public static final float asFloat(boolean x) { return x ? 1 : 0; }
+    public static final float asFloat(char x) { return (float) x; }
+    public static final float asFloat(CharSequence x) {
         return Float.parseFloat(remove(x,'_').toString());
     }
 
-    public static final float toFloat(byte x) { return (byte) x; }    
-    public static final float toFloat(short x) { return (float) x; }
-    public static final float toFloat(int x) { return (float) x; }
-    public static final float toFloat(long x) { return (float) x; }
-    public static final float toFloat(float x) { return x; }
-    public static final float toFloat(double x) { return (float) x; }
+    public static final float asFloat(byte x) { return (byte) x; }    
+    public static final float asFloat(short x) { return (float) x; }
+    public static final float asFloat(int x) { return (float) x; }
+    public static final float asFloat(long x) { return (float) x; }
+    public static final float asFloat(float x) { return x; }
+    public static final float asFloat(double x) { return (float) x; }
 
 
-    public static final double toDouble(boolean x) { return x ? 1 : 0; }
-    public static final double toDouble(char x) { return (double) x; }
-    public static final double toDouble(CharSequence x) {
+    public static final double asDouble(boolean x) { return x ? 1 : 0; }
+    public static final double asDouble(char x) { return (double) x; }
+    public static final double asDouble(CharSequence x) {
         return Double.parseDouble(remove(x,'_').toString());
     }
 
-    public static final double toDouble(byte x) { return (byte) x; }    
-    public static final double toDouble(short x) { return (double) x; }
-    public static final double toDouble(int x) { return (double) x; }
-    public static final double toDouble(long x) { return (double) x; }
-    public static final double toDouble(float x) { return (double) x; }
-    public static final double toDouble(double x) { return x; }
+    public static final double asDouble(byte x) { return (byte) x; }    
+    public static final double asDouble(short x) { return (double) x; }
+    public static final double asDouble(int x) { return (double) x; }
+    public static final double asDouble(long x) { return (double) x; }
+    public static final double asDouble(float x) { return (double) x; }
+    public static final double asDouble(double x) { return x; }
     
-    public static final String toString(boolean x) { return String.valueOf(x); }
-    public static final String toString(char x) { return String.valueOf(x); }
-    public static final String toString(byte x) { return String.valueOf(x); } 
-    public static final String toString(short x) { return String.valueOf(x); }
-    public static final String toString(int x) { return String.valueOf(x); }
-    public static final String toString(String x) { return x; }
-    public static final String toString(float x) { return String.valueOf(x); }
-    public static final String toString(double x) { return String.valueOf(x); }
-    public static final String toString(Object x) { return IO.format(x); }
+    public static final String asString(boolean x) { return String.valueOf(x); }
+    public static final String asString(char x) { return String.valueOf(x); }
+    public static final String asString(byte x) { return String.valueOf(x); } 
+    public static final String asString(short x) { return String.valueOf(x); }
+    public static final String asString(int x) { return String.valueOf(x); }
+    public static final String asString(String x) { return x; }
+    public static final String asString(float x) { return String.valueOf(x); }
+    public static final String asString(double x) { return String.valueOf(x); }
+    public static final String asString(Object x) { return IO.format(x); }
 }
