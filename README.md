@@ -52,9 +52,6 @@ class App {
 ```
 Any `testXXX` method is automatically called before the `run` method.  Want to write a test?  Just write the test!
 
-In fact, you can test Hello World with the safer try-with resources pattern:
-And, instead of creating a temporary file, this can all be done with internal streams, giving the most succinct:
-
 ## Randomness a kindergartener understands
 
 `int die=random(1,6)` is a die roll and `seed(1)` resets the pseudo-random sequence for testability.  The random-number sequence is reset with `seed(1)` before each `textXXX()` and reset to a cryptographically strong PRNG with `seed()` before invoking `run()`.  It is also about twice as fast as the normal random number generator.
