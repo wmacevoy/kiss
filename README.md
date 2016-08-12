@@ -259,6 +259,19 @@ class App {
 ```
 This produces `squawk: hello!`
 
+### Yes toDegrees but no toString? or toDouble?
+
+The casting notation is hard to read and converting strings to primitives types
+is a pile of API and inconsistent with the syntax of the language. So,
+```java
+assert toDouble(3)/toDouble(2) == 1.5;
+assert toInt("0xff_ff") == 0xff_ff;
+assert toString('a').equals("a");
+assert toChar("a") == 'a';
+assert toBoolean(0) == false;
+assert toBoolean(1) == true;
+```
+
 [logo]: kiss/java-kiss.png "Java Duke with Kiss"
 
 [1] [Orignal Java Duke image on wikipedia](https://en.wikipedia.org/wiki/Java_(programming_language)#/media/File:Wave.svg)

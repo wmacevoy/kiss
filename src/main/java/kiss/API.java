@@ -8,6 +8,7 @@ import java.util.Set;
 import kiss.util.IO;
 import kiss.util.RNG;
 import kiss.util.Run;
+import kiss.util.To;
 
 public class API {
     public interface Close extends AutoCloseable, Closeable {
@@ -678,5 +679,257 @@ public class API {
 
     public static float ulp(float f) {
         return Math.ulp(f);
+    }
+
+    public static final boolean toBoolean(boolean x) {
+        return To.toBoolean(x);
+    }
+    public static final boolean toBoolean(char x) {
+        return To.toBoolean(x);
+    }
+    public static final boolean toBoolean(CharSequence x) {
+        return To.toBoolean(x);
+    }
+    public static final boolean toBoolean(byte x) {
+        return To.toBoolean(x);
+    }
+    public static final boolean toBoolean(short x) {
+        return To.toBoolean(x);
+    }
+    public static final boolean toBoolean(int x) {
+        return To.toBoolean(x);
+    }
+    public static final boolean toBoolean(long x) {
+        return To.toBoolean(x);
+    }
+    public static final boolean toBoolean(float x) {
+        return To.toBoolean(x);
+    }
+    public static final boolean toBoolean(double x) {
+        return To.toBoolean(x);
+    }
+
+    public static final char toChar(boolean x) {
+        return To.toChar(x);
+    }
+    public static final char toChar(char x) {
+        return To.toChar(x);
+    }
+    public static final char toChar(CharSequence x) {
+        return To.toChar(x);
+    }
+    public static final char toChar(byte x) {
+        return To.toChar(x);
+    }
+    public static final char toChar(short x) {
+        return To.toChar(x);
+    }
+    public static final char toChar(int x) {
+        return To.toChar(x);
+    }
+    public static final char toChar(long x) {
+        return To.toChar(x);
+    }
+    public static final char toChar(float x) {
+        return To.toChar(x);
+    }
+    public static final char toChar(double x) {
+        return To.toChar(x);
+    }
+        
+    public static final byte toByte(boolean x) {
+        return To.toByte(x);
+    }
+    public static final byte toByte(char x) {
+        return To.toByte(x);
+    }
+    public static final byte toByte(CharSequence x) {
+        return To.toByte(x);
+    }
+    public static final byte toByte(byte x) {
+        return To.toByte(x);
+    }
+    public static final byte toByte(short x) {
+        return To.toByte(x);
+    }
+    public static final byte toByte(int x) {
+        return To.toByte(x);
+    }
+    public static final byte toByte(long x) {
+        return To.toByte(x);
+    }
+    public static final byte toByte(float x) {
+        return To.toByte(x);
+    }
+    public static final byte toByte(double x) {
+        return To.toByte(x);
+    }
+
+    public static final short toShort(boolean x) {
+        return To.toShort(x);
+    }
+    public static final short toShort(char x) {
+        return To.toShort(x);
+    }
+    public static final short toShort(CharSequence x) {
+        return To.toShort(x);
+    }
+    public static final short toShort(byte x) {
+        return To.toShort(x);
+    }
+    public static final short toShort(short x) {
+        return To.toShort(x);
+    }
+    public static final short toShort(int x) {
+        return To.toShort(x);
+    }
+    public static final short toShort(long x) {
+        return To.toShort(x);
+    }
+    public static final short toShort(float x) {
+        return To.toShort(x);
+    }
+    public static final short toShort(double x) {
+        return To.toShort(x);
+    }
+
+    public static final int toInt(boolean x) {
+        return To.toInt(x);
+    }
+    public static final int toInt(char x) {
+        return To.toInt(x);
+    }
+    public static final int toInt(CharSequence x) {
+        return To.toInt(x);
+    }
+    public static final int toInt(byte x) {
+        return To.toInt(x);
+    }
+    public static final int toInt(short x) {
+        return To.toInt(x);
+    }
+    public static final int toInt(int x) {
+        return To.toInt(x);
+    }
+    public static final int toInt(long x) {
+        return To.toInt(x);
+    }
+    public static final int toInt(float x) {
+        return To.toInt(x);
+    }
+    public static final int toInt(double x) {
+        return To.toInt(x);
+    }
+
+    public static final long toLong(boolean x) {
+        return To.toLong(x);
+    }
+    public static final long toLong(char x) {
+        return To.toLong(x);
+    }
+    public static final long toLong(CharSequence x) {
+        return To.toLong(x);
+    }
+    public static final long toLong(byte x) {
+        return To.toLong(x);
+    }
+    public static final long toLong(short x) {
+        return To.toLong(x);
+    }
+    public static final long toLong(int x) {
+        return To.toLong(x);
+    }
+    public static final long toLong(long x) {
+        return To.toLong(x);
+    }
+    public static final long toLong(float x) {
+        return To.toLong(x);
+    }
+    public static final long toLong(double x) {
+        return To.toLong(x);
+    }
+
+    public static final float toFloat(boolean x) {
+        return To.toFloat(x);
+    }
+    public static final float toFloat(char x) {
+        return To.toFloat(x);
+    }
+    public static final float toFloat(CharSequence x) {
+        return To.toFloat(x);
+    }
+    public static final float toFloat(byte x) {
+        return To.toFloat(x);
+    }
+    public static final float toFloat(short x) {
+        return To.toFloat(x);
+    }
+    public static final float toFloat(int x) {
+        return To.toFloat(x);
+    }
+    public static final float toFloat(long x) {
+        return To.toFloat(x);
+    }
+    public static final float toFloat(float x) {
+        return To.toFloat(x);
+    }
+    public static final float toFloat(double x) {
+        return To.toFloat(x);
+    }
+
+    public static final double toDouble(boolean x) {
+        return To.toDouble(x);
+    }
+    public static final double toDouble(char x) {
+        return To.toDouble(x);
+    }
+    public static final double toDouble(CharSequence x) {
+        return To.toDouble(x);
+    }
+    public static final double toDouble(byte x) {
+        return To.toDouble(x);
+    }
+    public static final double toDouble(short x) {
+        return To.toDouble(x);
+    }
+    public static final double toDouble(int x) {
+        return To.toDouble(x);
+    }
+    public static final double toDouble(long x) {
+        return To.toDouble(x);
+    }
+    public static final double toDouble(float x) {
+        return To.toDouble(x);
+    }
+    public static final double toDouble(double x) {
+        return To.toDouble(x);
+    }
+    
+    public static final String toString(boolean x) {
+        return To.toString(x);
+    }
+    public static final String toString(char x) {
+        return To.toString(x);
+    }
+    public static final String toString(byte x) {
+        return To.toString(x);
+    }
+    public static final String toString(short x) {
+        return To.toString(x);
+    }
+    public static final String toString(int x) {
+        return To.toString(x);
+    }
+    public static final String toString(String x) {
+        return To.toString(x);
+    }
+    public static final String toString(float x) {
+        return To.toString(x);
+    }
+    public static final String toString(double x) {
+        return To.toString(x);
+    }
+    public static final String toString(Object x) {
+        return To.toString(x);
     }
 }
