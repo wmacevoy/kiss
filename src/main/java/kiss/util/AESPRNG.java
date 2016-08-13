@@ -257,7 +257,7 @@ public class AESPRNG extends Random
     /** [min,max) */    
     public final void nextFloats(float [] buf, int offset, int length,
                                     float min, float max) {
-        if (max >= min) {
+        if (min >= max) {
             java.util.Arrays.fill(buf,offset,offset+length,min);
             return;
         }
