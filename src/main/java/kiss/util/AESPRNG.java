@@ -23,7 +23,7 @@ public class AESPRNG extends Random
     private IntBuffer dataInts;
     private boolean constructed = false;
 
-    AESPRNG() {
+    public AESPRNG() {
         // so Random's setSeed, called in
         // Random's constructro, does not
         // break our implementation
