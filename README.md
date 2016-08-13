@@ -193,7 +193,7 @@ A fast (almost as fast as the standard random number generator) but cryptographi
 
 * `seed(double value)` --- seeds the PRNG for a reproducible sequence.
 
-### Unapologetic events
+### Events
 
 The generator/event/listener pattern is all over the JDK, because it helps solve the hard problem of hooking different objects together to solve a larger problem, even if the generators and listeners didn't know much about each other to start with.
 
@@ -225,7 +225,7 @@ class App {
 ```
 This produces `squawk: hello!`
 
-### As conversions
+### As
 
 The casting notation is hard to read and converting strings to primitives types
 is a pile of API and inconsistent with the syntax of the language. So,
