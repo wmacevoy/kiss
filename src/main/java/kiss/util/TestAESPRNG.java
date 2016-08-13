@@ -26,6 +26,35 @@ class TestAESPRNG
         }
     }
 
+    void testReseedIntRange() {
+        AESPRNG rng = new AESPRNG();
+        rng.seed(1);
+        int[] buf = new int[64*1024];
+        int min = -3;
+        int max =  7;
+        rng.nextInts(buf,0,buf.length,min,max);
+        rng.seed(1);
+        for (int i=0; i<buf.length; ++i) {
+            assert buf[i] == rng.nextInt(min,max);
+            assert min <= buf[i];
+            assert buf[i] <= max;
+        }
+    }
+
+    void testReseedIntNullRange() {
+        AESPRNG rng = new AESPRNG();
+        rng.seed(1);
+        int[] buf = new int[64*1024];
+        int min = -3;
+        int max = -7;
+        rng.nextInts(buf,0,buf.length,min,max);
+        rng.seed(1);
+        for (int i=0; i<buf.length; ++i) {
+            assert buf[i] == rng.nextInt(min,max);
+            assert buf[i] == min;
+        }
+    }
+    
     void testReseedLongs() {
         AESPRNG rng = new AESPRNG();
         rng.seed(1);
@@ -48,6 +77,35 @@ class TestAESPRNG
         }
     }
 
+    void testReseedFloatRange() {
+        AESPRNG rng = new AESPRNG();
+        rng.seed(1);
+        float[] buf = new float[64*1024];
+        float min =  (float) -PI;
+        float max =  (float) sqrt(2);
+        rng.nextFloats(buf,0,buf.length,min,max);
+        rng.seed(1);
+        for (int i=0; i<buf.length; ++i) {
+            assert buf[i] == rng.nextFloat(min,max);
+            assert min <= buf[i];
+            assert buf[i] < max;
+        }
+    }
+
+    void testReseedFloatNullRange() {
+        AESPRNG rng = new AESPRNG();
+        rng.seed(1);
+        float[] buf = new float[64*1024];
+        float min =  (float) PI;
+        float max =  (float) sqrt(2);
+        rng.nextFloats(buf,0,buf.length,min,max);
+        rng.seed(1);
+        for (int i=0; i<buf.length; ++i) {
+            assert buf[i] == rng.nextFloat(min,max);
+            assert buf[i] == min;
+        }
+    }
+    
     void testReseedDoubles() {
         AESPRNG rng = new AESPRNG();
         rng.seed(1);
@@ -59,6 +117,35 @@ class TestAESPRNG
         }
     }
 
+    void testReseedDoubleRange() {
+        AESPRNG rng = new AESPRNG();
+        rng.seed(1);
+        double[] buf = new double[64*1024];
+        double min = -PI;
+        double max =  sqrt(2);
+        rng.nextDoubles(buf,0,buf.length,min,max);
+        rng.seed(1);
+        for (int i=0; i<buf.length; ++i) {
+            assert buf[i] == rng.nextDouble(min,max);
+            assert min <= buf[i];
+            assert buf[i] < max;
+        }
+    }
+
+    void testReseedDoubleNullRange() {
+        AESPRNG rng = new AESPRNG();
+        rng.seed(1);
+        double[] buf = new double[64*1024];
+        double min =  PI;
+        double max =  sqrt(2);
+        rng.nextDoubles(buf,0,buf.length,min,max);
+        rng.seed(1);
+        for (int i=0; i<buf.length; ++i) {
+            assert buf[i] == rng.nextDouble(min,max);
+            assert buf[i] == min;
+        }
+    }
+    
     void testReseedGaussians() {
         AESPRNG rng = new AESPRNG();
         rng.seed(1);
@@ -346,4 +433,6 @@ class TestAESPRNG
 
         assert s/t < 2;
     }
+
+
 }
