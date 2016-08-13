@@ -152,9 +152,22 @@ Only the first instance of an object is tested (or use `testAlways` instead).  I
 
 * `outOpen(String filename)` --- redirects print/ln() output to the specified
   file.  These can be nested and each thread is independent.  There must be a
-  matching `outClose()` to close the file.
+  matching `outClose()` to close the file.  The best-practice pattern is a try-with-resources:
+```java
+try (Close out=outOpen("hi.txt")) {
+  println("hi!");
+}
+```
+This assures the file is closed, even in the case of an error.
 
-* `inOpen(String filename)` --- redirects readXXX() to use this input file.  Thse can be nested and each thread is independent.  There must be a matching `inClose()` to close the file.
+* `inOpen(String filename)` --- redirects readXXX() to use this input file.  Thse can be nested and each thread is independent.  There must be a matching `inClose()` to close the file.  The best-practice pattern is a try-with-resources:
+```java
+try (Close in=inOpen("words.txt")) {
+  String word = readLine();
+  // do something with word.
+}
+```
+This assures the file is closed, even in the case of an error.
 
 * `outVerify(String filename)` --- compares print/ln() output to the contents of this file.  `readXXX()` are also matched so you should be able to copy your console dialog into a verify file to create an expected contract.  Like outOpen, this can be nested and each thread is independent, and must be matched by outClose() to stop the verification.  Verification failures throw an error at the point a mismatch is detected.
 
