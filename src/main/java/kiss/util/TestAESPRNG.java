@@ -326,12 +326,14 @@ class TestAESPRNG
         byte[] x = new byte[1024*1024];
 
 
+        rng1.nextBytes(x);        
         double t0=time();
         for (int i=0; i<n; i += x.length) {
             rng1.nextBytes(x);
         }
         double t=time()-t0;
 
+        rng2.nextBytes(x);
         double s0=time();
         for (int i=0; i<n; i += x.length) {
             rng2.nextBytes(x);
