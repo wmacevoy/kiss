@@ -120,4 +120,62 @@ public class TestRun {
             Run.testedAlready.remove(TestApp.class);            
         }
     }
+
+    class Sample1 {
+        java.util.ArrayList<String> order
+            = new java.util.ArrayList<String>();
+
+        void testA() {
+            order.add("a");
+        }
+        void testX() {
+            order.add("b");
+        }
+        void testQ() {
+            order.add("c");
+        }
+    }
+
+    class Sample2 {
+        java.util.ArrayList<String> order
+            = new java.util.ArrayList<String>();
+
+        void testC() {
+            order.add("a");
+        }
+        void testB() {
+            order.add("b");
+        }
+        void testAAA() {
+            order.add("c");
+        }
+    }
+
+    class Sample3 {
+        java.util.ArrayList<String> order
+            = new java.util.ArrayList<String>();
+
+        protected void testCxkdmY() {
+            order.add("a");
+        }
+
+        void some() { }
+        void test12444() {
+            order.add("b");
+        }
+
+        void other() {} 
+        private void testUUAAA() {
+            order.add("c");
+        }
+
+        void stuff() {}
+    }
+    
+    
+    void testOrder() {
+        assert format(test(new Sample1()).order).equals("[a,b,c]");
+        assert format(test(new Sample2()).order).equals("[a,b,c]");
+        assert format(test(new Sample3()).order).equals("[a,b,c]");
+    }
 }

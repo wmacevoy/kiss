@@ -180,7 +180,11 @@ public class Run {
             }
 
             String sdata = new String(data,java.nio.charset.Charset.forName("UTF-8"));
-
+            int lnt = sdata.indexOf("LineNumberTable");
+            if (lnt != -1) sdata = sdata.substring(lnt+"LineNumberTable".length()+3);
+            int cde = sdata.lastIndexOf("SourceFile");
+            if (cde != -1) sdata = sdata.substring(0,cde);
+            
             MethodOffset mo[] = new MethodOffset[methods.length];
             for (int i=0; i<methods.length; ++i) {
                 mo[i] = new MethodOffset(methods[i],
