@@ -171,11 +171,34 @@ public class TestRun {
 
         void stuff() {}
     }
+
+    class Sample4 {
+        java.util.ArrayList<String> order
+            = new java.util.ArrayList<String>();
+
+        protected void testA() {
+            order.add("a");
+        }
+
+        void some() { }
+        private void testAtestAtestA() {
+            order.add("b");
+        }
+
+        void other() {} 
+        void testAtestA() {
+            order.add("c");
+        }
+
+        void stuff() {}
+    }
+    
     
     
     void testOrder() {
         assert format(test(new Sample1()).order).equals("[a,b,c]");
         assert format(test(new Sample2()).order).equals("[a,b,c]");
         assert format(test(new Sample3()).order).equals("[a,b,c]");
+        assert format(test(new Sample4()).order).equals("[a,b,c]");        
     }
 }

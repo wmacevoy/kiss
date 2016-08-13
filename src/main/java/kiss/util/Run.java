@@ -154,6 +154,8 @@ public class Run {
 
             methods = clazz.getDeclaredMethods();
 
+            java.util.Arrays.sort(methods,(a,b)->b.getName().length()-a.getName().length());
+
             InputStream is = clazz.getClassLoader()
                 .getResourceAsStream(resource);
             ArrayList<byte[]> blocks = new ArrayList<byte[]>();
@@ -186,9 +188,29 @@ public class Run {
             if (cde != -1) sdata = sdata.substring(0,cde);
             
             MethodOffset mo[] = new MethodOffset[methods.length];
+
+            
             for (int i=0; i<methods.length; ++i) {
-                mo[i] = new MethodOffset(methods[i],
-                                         sdata.indexOf(methods[i].getName()));
+                int pos = -1;
+                for (;;) {
+                    pos=sdata.indexOf(methods[i].getName(),pos);
+                    if (pos == -1) break;
+                    boolean subset = false;
+                    for (int j=0; j<i; ++j) {
+                        if (mo[j].offset >= 0 &&
+                            mo[j].offset <= pos &&
+                            pos < mo[j].offset + mo[j].method.getName().length()) {
+                            subset = true;
+                            break;
+                        }
+                    }
+                    if (subset) {
+                        pos += methods[i].getName().length();
+                    } else {
+                        break;
+                    }
+                }
+                mo[i] = new MethodOffset(methods[i],pos);
             }
             java.util.Arrays.sort(mo);
             for (int i=0; i<mo.length; ++i) {
