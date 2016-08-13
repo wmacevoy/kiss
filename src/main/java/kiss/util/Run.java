@@ -132,122 +132,31 @@ public class Run {
         return object;
     }
 
-    static class MethodOffset implements Comparable<MethodOffset> {
-        MethodOffset(Method _method, int _offset) {
-            method=_method;
-            offset=_offset;
-        }
-
-        @Override
-        public int compareTo(MethodOffset target) {
-            return offset-target.offset;
-        }
-
-        Method method;
-        int offset;
-    }
-
-    private static Method[] getDeclaredMethodsInOrder(Class clazz) {
-        Method[] methods = null;
-        try {
-            String resource = clazz.getName().replace('.', '/')+".class";
-
-            methods = clazz.getDeclaredMethods();
-
-            java.util.Arrays.sort(methods,(a,b)->b.getName().length()-a.getName().length());
-
-            InputStream is = clazz.getClassLoader()
-                .getResourceAsStream(resource);
-            ArrayList<byte[]> blocks = new ArrayList<byte[]>();
-            int length = 0;
-            for (;;) {
-                byte[] block = new byte[16*1024];
-                int n = is.read(block);
-                if (n > 0) {
-                    if (n < block.length) {
-                        block = java.util.Arrays.copyOf(block,n);
-                    }
-                    length += block.length;
-                    blocks.add(block);
-                } else {
-                    break;
-                }
-            }
-
-            byte[] data = new byte[length];
-            int offset = 0;
-            for (byte[] block : blocks) {
-                System.arraycopy(block,0,data,offset,block.length);
-                offset += block.length;
-            }
-
-            String sdata = new String(data,java.nio.charset.Charset.forName("UTF-8"));
-            int lnt = sdata.indexOf("LineNumberTable");
-            if (lnt != -1) sdata = sdata.substring(lnt+"LineNumberTable".length()+3);
-            int cde = sdata.lastIndexOf("SourceFile");
-            if (cde != -1) sdata = sdata.substring(0,cde);
-            
-            MethodOffset mo[] = new MethodOffset[methods.length];
-
-            
-            for (int i=0; i<methods.length; ++i) {
-                int pos = -1;
-                for (;;) {
-                    pos=sdata.indexOf(methods[i].getName(),pos);
-                    if (pos == -1) break;
-                    boolean subset = false;
-                    for (int j=0; j<i; ++j) {
-                        if (mo[j].offset >= 0 &&
-                            mo[j].offset <= pos &&
-                            pos < mo[j].offset + mo[j].method.getName().length()) {
-                            subset = true;
-                            break;
-                        }
-                    }
-                    if (subset) {
-                        pos += methods[i].getName().length();
-                    } else {
-                        break;
-                    }
-                }
-                mo[i] = new MethodOffset(methods[i],pos);
-            }
-            java.util.Arrays.sort(mo);
-            for (int i=0; i<mo.length; ++i) {
-                methods[i]=mo[i].method;
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-        return methods;
-    }
-
     public static <T> T testAlways(T object) {
         try {        
-        testedAlready.add(object.getClass());
-        DecimalFormat df = new DecimalFormat("0.00");
-        Method[] methods = getDeclaredMethodsInOrder(object.getClass());
+            testedAlready.add(object.getClass());
+            DecimalFormat df = new DecimalFormat("0.00");
+            Method[] methods = Reflect.getDeclaredMethodsInOrder(object.getClass());
         
-        for (Method method : methods) {
-            if (method.getName().startsWith("test")
-                       && method.getParameterTypes().length == 0) {
+            for (Method method : methods) {
+                if (method.getName().startsWith("test")
+                    && method.getParameterTypes().length == 0) {
                 
-                kiss.API.seed(1);
-                method.setAccessible(true);
+                    kiss.API.seed(1);
+                    method.setAccessible(true);
                 
-                Date started = new Date();
-                System.out.println(started+" "+method.getName()+": started");
-                method.invoke(object);
+                    Date started = new Date();
+                    System.out.println(started+" "+method.getName()+": started");
+                    method.invoke(object);
                 
-                Date ended = new Date();
+                    Date ended = new Date();
                 
-                double elapsed = (ended.getTime()-started.getTime())/1000.0;
+                    double elapsed = (ended.getTime()-started.getTime())/1000.0;
                 
-                System.out.println(ended+" "+method.getName()+": ended in " + df.format(elapsed) + " second(s)");
+                    System.out.println(ended+" "+method.getName()+": ended in " + df.format(elapsed) + " second(s)");
+                }
             }
-        }
-        return object;
+            return object;
         } catch (Exception e) {
             throw new AssertionError("test(s) failed",e);
         }

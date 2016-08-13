@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.io.InputStream;
 
 public class Reflect {
 /**
@@ -17,7 +18,7 @@ public class Reflect {
      * @param type the type
      * @return the underlying class
      */
-    public static Class<?> getClass(Type type) {
+    private static Class<?> getClass(Type type) {
         if (type instanceof Class) {
             return (Class) type;
         }
@@ -39,6 +40,15 @@ public class Reflect {
         }
     }
 
+    /**
+     *
+     * Rarified code used to discover event listeners for generic Generator
+     *
+     * Almost verbatim from:
+     *
+     * http://www.artima.com/weblogs/viewpost.jsp?thread=208860
+     *
+     */
     public static <T> List<Class<?>> getTypeArguments(
                                                       Class<T> baseClass, Class<? extends T> childClass) {
         Map<Type, Type> resolvedTypes = new HashMap<Type, Type>();
@@ -84,4 +94,97 @@ public class Reflect {
         }
         return typeArgumentsAsClasses;
     }
+
+    private static class MethodOffset implements Comparable<MethodOffset> {
+        MethodOffset(Method _method, int _offset) {
+            method=_method;
+            offset=_offset;
+        }
+
+        @Override
+        public int compareTo(MethodOffset target) {
+            return offset-target.offset;
+        }
+
+        Method method;
+        int offset;
+    }
+
+    /** Grok the bytecode to get the declared order */
+    public static Method[] getDeclaredMethodsInOrder(Class clazz) {
+        Method[] methods = null;
+        try {
+            String resource = clazz.getName().replace('.', '/')+".class";
+
+            methods = clazz.getDeclaredMethods();
+
+            java.util.Arrays.sort(methods,(a,b)->b.getName().length()-a.getName().length());
+
+            InputStream is = clazz.getClassLoader()
+                .getResourceAsStream(resource);
+            ArrayList<byte[]> blocks = new ArrayList<byte[]>();
+            int length = 0;
+            for (;;) {
+                byte[] block = new byte[16*1024];
+                int n = is.read(block);
+                if (n > 0) {
+                    if (n < block.length) {
+                        block = java.util.Arrays.copyOf(block,n);
+                    }
+                    length += block.length;
+                    blocks.add(block);
+                } else {
+                    break;
+                }
+            }
+
+            byte[] data = new byte[length];
+            int offset = 0;
+            for (byte[] block : blocks) {
+                System.arraycopy(block,0,data,offset,block.length);
+                offset += block.length;
+            }
+
+            String sdata = new String(data,java.nio.charset.Charset.forName("UTF-8"));
+            int lnt = sdata.indexOf("LineNumberTable");
+            if (lnt != -1) sdata = sdata.substring(lnt+"LineNumberTable".length()+3);
+            int cde = sdata.lastIndexOf("SourceFile");
+            if (cde != -1) sdata = sdata.substring(0,cde);
+            
+            MethodOffset mo[] = new MethodOffset[methods.length];
+
+            
+            for (int i=0; i<methods.length; ++i) {
+                int pos = -1;
+                for (;;) {
+                    pos=sdata.indexOf(methods[i].getName(),pos);
+                    if (pos == -1) break;
+                    boolean subset = false;
+                    for (int j=0; j<i; ++j) {
+                        if (mo[j].offset >= 0 &&
+                            mo[j].offset <= pos &&
+                            pos < mo[j].offset + mo[j].method.getName().length()) {
+                            subset = true;
+                            break;
+                        }
+                    }
+                    if (subset) {
+                        pos += methods[i].getName().length();
+                    } else {
+                        break;
+                    }
+                }
+                mo[i] = new MethodOffset(methods[i],pos);
+            }
+            java.util.Arrays.sort(mo);
+            for (int i=0; i<mo.length; ++i) {
+                methods[i]=mo[i].method;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return methods;
+    }
+    
 }
