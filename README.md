@@ -183,7 +183,7 @@ All the math functions and constants are imported, with the exception of `Math.r
 
 ### RNG
 
-A fast (almost as fast as the standard random number generator) but cryptographically strong pseudo-random number generator is provided by default.  Calling `seed()` strongly sets the seed, while `seed(double value)` sets it to a reproducible sequence.
+A fast (faster than the standard random number generator) but cryptographically strong pseudo-random number generator is provided by default.  Calling `seed()` strongly sets the seed, while `seed(double value)` sets it to a reproducible sequence.
 
 * `int random(int a, int b)` --- generates a uniformly random integer in the interval, including the endpoints.  If b<=a, this always returns a.
 
