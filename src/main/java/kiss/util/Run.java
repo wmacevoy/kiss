@@ -1,5 +1,8 @@
 package kiss.util;
 
+import static kiss.API.*;
+
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Field;
@@ -7,6 +10,8 @@ import java.lang.reflect.Constructor;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.ArrayList;
+import java.io.InputStream;
 
 public class Run {
     static HashSet<Class<?>> testedAlready = new HashSet<Class<?>>();
@@ -127,12 +132,78 @@ public class Run {
         return object;
     }
 
+    static class MethodOffset implements Comparable<MethodOffset> {
+        MethodOffset(Method _method, int _offset) {
+            method=_method;
+            offset=_offset;
+        }
+
+        @Override
+        public int compareTo(MethodOffset target) {
+            return offset-target.offset;
+        }
+
+        Method method;
+        int offset;
+    }
+
+    private static Method[] getDeclaredMethodsInOrder(Class clazz) {
+        Method[] methods = null;
+        try {
+            String resource = clazz.getName().replace('.', '/')+".class";
+
+            methods = clazz.getDeclaredMethods();
+
+            InputStream is = clazz.getClassLoader()
+                .getResourceAsStream(resource);
+            ArrayList<byte[]> blocks = new ArrayList<byte[]>();
+            int length = 0;
+            for (;;) {
+                byte[] block = new byte[16*1024];
+                int n = is.read(block);
+                if (n > 0) {
+                    if (n < block.length) {
+                        block = java.util.Arrays.copyOf(block,n);
+                    }
+                    length += block.length;
+                    blocks.add(block);
+                } else {
+                    break;
+                }
+            }
+
+            byte[] data = new byte[length];
+            int offset = 0;
+            for (byte[] block : blocks) {
+                System.arraycopy(block,0,data,offset,block.length);
+                offset += block.length;
+            }
+
+            String sdata = new String(data,java.nio.charset.Charset.forName("UTF-8"));
+
+            MethodOffset mo[] = new MethodOffset[methods.length];
+            for (int i=0; i<methods.length; ++i) {
+                mo[i] = new MethodOffset(methods[i],
+                                         sdata.indexOf(methods[i].getName()));
+            }
+            java.util.Arrays.sort(mo);
+            for (int i=0; i<mo.length; ++i) {
+                methods[i]=mo[i].method;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return methods;
+    }
+
     public static <T> T testAlways(T object) {
         try {        
         testedAlready.add(object.getClass());
         DecimalFormat df = new DecimalFormat("0.00");
-
-        for (Method method : object.getClass().getDeclaredMethods()) {
+        Method[] methods = getDeclaredMethodsInOrder(object.getClass());
+        
+        for (Method method : methods) {
             if (method.getName().startsWith("test")
                        && method.getParameterTypes().length == 0) {
                 
