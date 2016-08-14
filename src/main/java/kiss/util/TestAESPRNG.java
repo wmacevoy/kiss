@@ -431,7 +431,8 @@ class TestAESPRNG
         println("time(kiss rng)="+round(s,2)+"s");
         println("kiss/sys ratio=",round(s/t,2));
 
-        assert s/t < 2;
+        // Pi2 & Pi3 are pretty slow at AES...
+        assert s/t < 5;
     }
 
 
