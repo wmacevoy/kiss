@@ -24,9 +24,9 @@ public class API {
         public void removeListener ( Listener < Event > listener );
     }
 
-    public static abstract class Generator < Event > 
+    public static class Generator < Event > 
         implements GeneratorInterface < Event > ,
-                   java.io.Serializable {
+                   java.io.Serializable, Cloneable {
         public Class<Event> type;
         {
             type=(Class<Event>)
