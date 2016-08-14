@@ -138,7 +138,7 @@ MyComponent myComponent=test(new MyComponent())
 ```
 Only the first instance of an object is tested (or use `testAlways` instead).  If you want to skip testing of an object, replace `test` with `untest`.
 
-* `sleep(double duration)` --- Pauses the application for the given number of seconds (without wasting CPU time).
+* `pause(double duration)` --- Pauses the application for the given number of seconds (without wasting CPU time).
 
 * `double time()` --- Returns the seconds since midnight, January 1, 1970 UTC.  Calling this twice and taking the difference is useful for interval timing.
 
