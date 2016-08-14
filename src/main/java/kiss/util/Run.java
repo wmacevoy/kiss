@@ -14,9 +14,10 @@ import java.util.ArrayList;
 import java.io.InputStream;
 
 public class Run {
+    // modified by TestRun so not private
     static HashSet<Class<?>> testedAlready = new HashSet<Class<?>>();
 
-    public static void main(String[] _args) throws Exception {
+    public static final void main(String[] _args) throws Exception {
 
         ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
 
@@ -109,7 +110,7 @@ public class Run {
         }
     }
 
-    private static boolean testEnabled(Object object) {
+    private static final boolean testEnabled(Object object) {
         if (object == null) return false;
         if (testedAlready.contains(object.getClass())) return false;
         try {
@@ -121,18 +122,18 @@ public class Run {
     }
     
     /** test if object of this type has not been already tested */
-    public static <T> T test(T object) {
+    public static final <T> T test(T object) {
         if (testEnabled(object)) {
             testAlways(object);
         }
         return object;
     }
 
-    public static <T> T untest(T object) {
+    public static final <T> T untest(T object) {
         return object;
     }
 
-    public static <T> T testAlways(T object) {
+    public static final <T> T testAlways(T object) {
         try {        
             testedAlready.add(object.getClass());
             DecimalFormat df = new DecimalFormat("0.00");
@@ -163,11 +164,11 @@ public class Run {
         
     }
 
-    public static <T> T untestAlways(T object) throws Exception {
+    public static final <T> T untestAlways(T object) throws Exception {
         return object;
     }
 
-    public static void sleep(double duration) {
+    public static final void sleep(double duration) {
         if (duration > 0) {
             try {
                 Thread.sleep((int)java.lang.Math.round(duration*1000));
@@ -179,7 +180,7 @@ public class Run {
         }
     }
 
-    public static double time() {
+    public static final double time() {
         return java.lang.System.currentTimeMillis()/1000.0;
     }
 }

@@ -60,7 +60,7 @@ public class IO {
     }
     static InClose IN_CLOSE = new InClose();
 
-    public static Close outVerify(String filename) {
+    public static final Close outVerify(String filename) {
         try {
             outs.get().addLast(new PrintStream(new VerifyOutputStream(new FileInputStream(filename))));
         } catch (IOException ex) {
@@ -71,7 +71,7 @@ public class IO {
 
     }
     
-    public static Close outExpect(Object... args) {
+    public static final Close outExpect(Object... args) {
         return outExpectVarArgs(args);
     }
 
@@ -97,7 +97,7 @@ public class IO {
         return sb;
     }
 
-    public static Close outExpectVarArgs(Object args[]) {
+    public static final Close outExpectVarArgs(Object args[]) {
         StringBuilder sb = new StringBuilder();
         formatVarArgs(sb,args);
         byte[] data = sb.toString().getBytes(Charset.forName("UTF-8"));
@@ -105,11 +105,11 @@ public class IO {
         return OUT_CLOSE;
     }
 
-    public static Close outOpen(String filename) {
+    public static final Close outOpen(String filename) {
     	return outOpen(new File(filename));
     }
 
-    public static Close outOpen(File file) {
+    public static final Close outOpen(File file) {
         try {
             outs.get().addLast(new PrintStream(new FileOutputStream(file)));
         } catch (IOException ex) {
@@ -118,79 +118,79 @@ public class IO {
         }
         return OUT_CLOSE;
     }
-    public static void outClose() {
+    public static final void outClose() {
         outs.get().removeLast().close();
     }
 
     static PrintStream out() { return outs.get().getLast(); }
     static Scanner in() { return ins.get().getLast(); }
 
-    public static Close inProvideVar(Object... args) {
+    public static final Close inProvideVar(Object... args) {
         return inProvideVarArgs(args);
     }
 
     public static final String EOL = System.lineSeparator();
     
-    public static Close inProvideVarArgs(Object args[]) {
+    public static final Close inProvideVarArgs(Object args[]) {
         StringBuilder sb = new StringBuilder();
         formatVarArgs(sb,args);
         ins.get().addLast(config(new Scanner(sb.toString())));
         return IN_CLOSE;
     }
 
-    public static Close inOpen(File file) {
+    public static final Close inOpen(File file) {
         try {
-			ins.get().addLast(config(new Scanner(file)));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
+            ins.get().addLast(config(new Scanner(file)));
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return null;
+        }
         return IN_CLOSE;
     }
     
-    public static Close inOpen(String filename) {
+    public static final Close inOpen(String filename) {
     	return inOpen(new File(filename));
     }
 
-    public static void inClose() {
+    public static final void inClose() {
         ins.get().removeLast().close();
     }
 
-    public static void format(StringBuilder ans, boolean value) {
+    public static final void format(StringBuilder ans, boolean value) {
         ans.append(Boolean.toString(value));
     }
 
-    public static void format(StringBuilder ans, byte value) {
+    public static final void format(StringBuilder ans, byte value) {
         ans.append(Byte.toString(value));
     }
 
-    public static void format(StringBuilder ans, char value) {
+    public static final void format(StringBuilder ans, char value) {
         ans.append(Character.toString(value));
     }
 
-    public static void format(StringBuilder ans, short value) {
+    public static final void format(StringBuilder ans, short value) {
         ans.append(Short.toString(value));
     }
 
-    public static void format(StringBuilder ans, int value) {
+    public static final void format(StringBuilder ans, int value) {
         ans.append(Integer.toString(value));
     }
 
-    public static void format(StringBuilder ans, long value) {
+    public static final void format(StringBuilder ans, long value) {
         ans.append(Long.toString(value));
     }
 
-    public static void format(StringBuilder ans, float value) {
+    public static final void format(StringBuilder ans, float value) {
         ans.append(Float.toString(value));
     }
 
-    public static void format(StringBuilder ans, double value) {
+    public static final void format(StringBuilder ans, double value) {
         ans.append(Double.toString(value));
     }
 
     // format a (possibly nested) object
-    public static void format(StringBuilder ans, Object object) {
+    public static final void format(StringBuilder ans, Object object) {
         if (object.getClass().isArray()) {
             if (object instanceof Object[]) {
                 Object[] array = (Object[]) object;
@@ -258,147 +258,147 @@ public class IO {
         }
     }
 
-    public static String format(boolean value) {
+    public static final String format(boolean value) {
         return (Boolean.toString(value));
     }
 
-    public static String format(byte value) {
+    public static final String format(byte value) {
         return (Byte.toString(value));
     }
 
-    public static String format(char value) {
+    public static final String format(char value) {
         return (Character.toString(value));
     }
 
-    public static String format(short value) {
+    public static final String format(short value) {
         return (Short.toString(value));
     }
 
-    public static String format(int value) {
+    public static final String format(int value) {
         return (Integer.toString(value));
     }
 
-    public static String format(long value) {
+    public static final String format(long value) {
         return (Long.toString(value));
     }
 
-    public static String format(float value) {
+    public static final String format(float value) {
         return (Float.toString(value));
     }
 
-    public static String format(double value) {
+    public static final String format(double value) {
         return (Double.toString(value));
     }
 
-    public static String format(Object object) {
+    public static final String format(Object object) {
         StringBuilder ans = new StringBuilder();
         format(ans, object);
         return ans.toString();
     }
 
-    public static void print(Object value) {
+    public static final void print(Object value) {
         out().print(format(value));
     }
 
-    public static void print(boolean value) {
+    public static final void print(boolean value) {
         out().print(value);
 
     }
 
-    public static void print(byte value) {
+    public static final void print(byte value) {
         out().print(value);
     }
 
-    public static void print(char value) {
+    public static final void print(char value) {
         out().print(value);
     }
 
-    public static void print(short value) {
+    public static final void print(short value) {
         out().print(value);
     }
 
-    public static void print(int value) {
+    public static final void print(int value) {
         out().print(value);
     }
 
-    public static void print(long value) {
+    public static final void print(long value) {
         out().print(value);
     }
 
-    public static void print(float value) {
+    public static final void print(float value) {
         out().print(value);
     }
 
-    public static void print(double value) {
+    public static final void print(double value) {
         out().print(value);
     }
 
-    public static void println(Object value) {
+    public static final void println(Object value) {
         out().println(format(value));
     }
 
-    public static void println(boolean value) {
+    public static final void println(boolean value) {
         out().println(value);
     }
 
-    public static void println(byte value) {
+    public static final void println(byte value) {
         out().println(value);
     }
 
-    public static void println(char value) {
+    public static final void println(char value) {
         out().println(value);
     }
 
-    public static void println(short value) {
+    public static final void println(short value) {
         out().println(value);
     }
 
-    public static void println(int value) {
+    public static final void println(int value) {
         out().println(value);
     }
 
-    public static void println(long value) {
+    public static final void println(long value) {
         out().println(value);
     }
 
-    public static void println(float value) {
+    public static final void println(float value) {
         out().println(value);
     }
 
-    public static void println(double value) {
+    public static final void println(double value) {
         out().println(value);
     }
     
-    public static void print(PrintStream ps, Object... args) {
+    public static final void print(PrintStream ps, Object... args) {
         printVarArgs(ps,args);
     }
 
-    public static void printVarArgs(PrintStream ps, Object args[]) {
+    public static final void printVarArgs(PrintStream ps, Object args[]) {
         for (int i=0; i<args.length; ++i) {
             if (i>0) ps.print(" ");
             ps.print(format(args[i]));
         }
     }
 
-    public static void print(Object... args) {
+    public static final void print(Object... args) {
         printVarArgs(args);
     }
     
-    public static void printVarArgs(Object[] args) {
+    public static final void printVarArgs(Object[] args) {
         PrintStream ps = out();
         printVarArgs(ps,args);
     }
 
-    public static void println(Object... args) {
+    public static final void println(Object... args) {
         printlnVarArgs(args);
     }
-    public static void printlnVarArgs(Object[] args) {
+    public static final void printlnVarArgs(Object[] args) {
         PrintStream ps = out();
         printVarArgs(ps,args);
         ps.println();
     }
 
-    public static String readString() {
+    public static final String readString() {
     	Scanner in=in();
     	if (in.hasNext()) {
     		String value = in.next();
@@ -408,13 +408,13 @@ public class IO {
     	}
     }
 
-    public static String readEOL() {
+    public static final String readEOL() {
         String tmp = readLine();
         if (tmp != null && tmp.equals("")) return EOL;
         return null;
     }
     
-    public static String readLine() {
+    public static final String readLine() {
     	Scanner in=in();
     	if (in.hasNextLine()) {
     		String value = in.nextLine();
@@ -425,7 +425,7 @@ public class IO {
     	}
     }
 
-    public static Boolean readBoolean() {
+    public static final Boolean readBoolean() {
     	Scanner in=in();
     	if (in.hasNextBoolean()) {
     		boolean value = in.nextBoolean();
@@ -435,7 +435,7 @@ public class IO {
     	}
     }
 
-    public static Byte readByte() {
+    public static final Byte readByte() {
     	Scanner in=in();
     	if (in.hasNextByte()) {
     		byte value = in.nextByte();
@@ -445,7 +445,7 @@ public class IO {
     	}
     }
 
-    public static Integer readInteger() {
+    public static final Integer readInteger() {
     	Scanner in=in();
     	if (in.hasNextInt()) {
     		int value = in.nextInt();
@@ -455,7 +455,7 @@ public class IO {
     	}
     }
 
-    public static Long readLong() {
+    public static final Long readLong() {
     	Scanner in=in();
     	if (in.hasNextLong()) {
     		long value = in.nextLong();
@@ -465,7 +465,7 @@ public class IO {
     	}
     }
 
-    public static Float readFloat() {
+    public static final Float readFloat() {
     	Scanner in=in();
     	if (in.hasNextFloat()) {
     		float value = in.nextFloat();
@@ -475,7 +475,7 @@ public class IO {
     	}
     }
 
-    public static Double readDouble() {
+    public static final Double readDouble() {
     	Scanner in=in();
     	if (in.hasNextDouble()) {
     		double value = in.nextDouble();
