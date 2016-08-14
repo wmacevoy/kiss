@@ -15,7 +15,7 @@ or just reboot after you complete the tests.
 Notes
 
 * These tests take some time to run.
-* Because the p-values are uniformly distributed and there are so many tests, you should expect WEAK (1%) and possible FAIL (0.01%) tests.
+* Because the p-values are uniformly distributed and there are so many tests, you should expect WEAK (1%) and possible FAIL (0.01%) tests, just not consistently on the same test.
 * `jaesprng-*.log` are example log files.
 
 
