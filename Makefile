@@ -10,6 +10,10 @@ lib :   # mvn compile
 	openssl dgst -out kiss.jar.sha256 -sha256 kiss.jar
 	openssl dgst -out kiss-with-tests.jar.sha256 -sha256 kiss-with-tests.jar
 
+.PHONY: doc
+doc :
+	mvn javadoc:javadoc
+
 .PHONY: verify
 verify:
 	for file in kiss.jar kiss-with-tests.jar ; do \
