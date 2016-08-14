@@ -9,9 +9,9 @@ public class TestRun {
         assert abs(s-t)<0.01;
     }
 
-    void testSleep() {
+    void testPause() {
         double t0=time();
-        sleep(0.1);
+        pause(0.1);
         double t=time()-t0;
         assert abs(t-0.1) < 0.01;
     }

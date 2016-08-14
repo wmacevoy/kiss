@@ -168,7 +168,7 @@ public class Run {
         return object;
     }
 
-    public static final void sleep(double duration) {
+    public static final void pause(double duration) {
         if (duration > 0) {
             try {
                 Thread.sleep((int)java.lang.Math.round(duration*1000));

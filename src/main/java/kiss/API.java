@@ -457,8 +457,8 @@ public class API {
         return object;
     }
 
-    public static final void sleep(double duration) {
-        Run.sleep(duration);
+    public static final void pause(double duration) {
+        Run.pause(duration);
     }
 
     public static final double time() {
