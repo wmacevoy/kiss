@@ -24,9 +24,9 @@ public class API {
         public void removeListener ( Listener < Event > listener );
     }
 
-    public static final class Generator < Event > 
+    public static abstract class Generator < Event > 
         implements GeneratorInterface < Event > ,
-                   java.io.Serializable, Cloneable {
+                   java.io.Serializable {
         public Class<Event> type;
         {
             type=(Class<Event>)
@@ -184,14 +184,6 @@ public class API {
         }
         
         public Generator() {}
-        
-        /** To support Cloneable -- this is effectively a shallow copy */
-        protected Generator(Generator < Event > copy) {
-            listeners=copy.listeners;
-        }
-        
-        /** Effectively, this produces a shallow copy */
-        public Object clone() { return new Generator < Event > (this); }
     }
     
 
