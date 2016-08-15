@@ -7,28 +7,17 @@ class App {
 
     void ifSunny() {
         // TODO: println the message "sunny!" if isSunny is true
-        if (isSunny) {
-            println("sunny!");
-        }
     }
 
 
     void ifSunnyElseCold() {
         // TODO: println the message "sunny!" if isSunny is true,
         //       println the message "cold." if isSunny is false
-        if (isSunny) {
-            println("sunny!");
-        } else {
-            println("cold.");
-        }
     }
 
     void ifSunnyAndWeekend() {
         // TODO: print the message "going out!" if both sunny and weekend are
         //       true.  Otherwise print nothing.
-        if (isSunny && isWeekend) {
-            println("going out!");
-        }
     }
 
     void ifPlans() {
@@ -37,16 +26,8 @@ class App {
         //       print out the message "hanging out with friends".  If
         //       none of these are true, then, print out "waiting for the
         //       weekend"
+        //       You should be able to do this with 3 println statements
         //
-        if (isWeekend) {
-            if (isSunny) {
-                println("going out!");
-            } else {
-                println("hanging out with friends");
-            }
-        } else {
-            println("waiting for the weekend");
-        }
     }
 
     void testIfSunny() {
