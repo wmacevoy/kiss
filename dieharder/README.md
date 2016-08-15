@@ -1,5 +1,11 @@
 # RNG Test
 
+## You Don't Care
+
+This is just an internal detail about the library and has nothing to do with learning java.
+
+## You are a developer and interested in the AESPRNG internal generator.
+
 This is a tiny project to test the AESPRNG against the dieharder randomness
 tests.  It runs in ubuntu, assuming you have the kiss library in the parent
 directory and the dieharder test suite (sudo apt-get install dieharder)
