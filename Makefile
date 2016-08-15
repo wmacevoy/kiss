@@ -1,14 +1,19 @@
 .PHONY: all
 all : clean lib examples test
 
-.PHONY: lib
-lib :   # mvn compile
+SRC:=$(shell find src/main/java -regex '[^._].*\.java$$')
+
+kiss.jar kiss-with-tests.jar : $(SRC)
 	if [ ! -d target/classes ] ; then mkdir -p target/classes ; fi
 	javac -Xlint:unchecked -cp target/classes -d target/classes -s src/main/java $$(find src/main/java -regex '[^._].*\.java$$')
 	cd target/classes; jar cvfe ../../kiss.jar kiss.util.Run $$(find . -name '*.class' -and -not -iname 'test*')
 	cd target/classes; jar cfe ../../kiss-with-tests.jar kiss.util.Run .
-	openssl dgst -out kiss.jar.sha256 -sha256 kiss.jar
-	openssl dgst -out kiss-with-tests.jar.sha256 -sha256 kiss-with-tests.jar
+
+%.sha256 : %
+	openssl dgst -out $@ -sha256 $<
+
+.PHONY: lib
+lib :   kiss.jar kiss.jar.sha256 kiss-with-tests.jar kiss-with-tests.jar.sha256
 
 .PHONY: doc
 doc :

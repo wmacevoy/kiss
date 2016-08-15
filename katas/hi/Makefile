@@ -1,3 +1,6 @@
+.PHONY: all
+all : lib this run
+
 .PHONY: lib
 lib:
 	$(MAKE) -C ../.. lib
@@ -5,19 +8,17 @@ lib:
 .PHONY: this
 this:
 	if [ ! -d target/classes ] ; then mkdir -p target/classes ; fi
-	javac -cp "../../target/classes:target/classes" -d "target/classes" -s "src/main/java" $$(find "src/main/java" -regex '[^._].*\.java$$')
+	javac -cp "../../kiss.jar" -d "target/classes" -s "src/main/java" $$(find "src/main/java" -regex '[^._].*\.java$$')
 
 .PHONY: run
 run:
-	if [ ! -d tmp ] ; then mkdir tmp ; fi
-	cd tmp; java -cp "../../../target/classes:../target/classes" kiss.util.Run
+	java -cp "../../kiss.jar:target/classes" kiss.util.Run
 
 .PHONY: test
 test: 
-	if [ ! -d tmp ] ; then mkdir tmp ; fi
-	cd tmp; java -cp "../../../target/classes:../target/classes" kiss.util.Run --norun
+	java -cp "../../target/classes:target/classes" kiss.util.Run --norun
 
 .PHONY: clean
 clean:
-	/bin/rm -rf tmp/* target/*
+	/bin/rm -rf target/*
 	/bin/rm -rf $$(find . -name '*~' -o -name '._*' -o -name '#*')
