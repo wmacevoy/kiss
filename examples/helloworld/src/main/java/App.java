@@ -2,13 +2,9 @@ import static kiss.API.*;
 
 class App {
     void testRun() {
-        outOpen("testRun.verify");
-        println("Hello, World!");
-        outClose();
-
-        outVerify("testRun.verify");
-        run();
-        outClose();
+        try (Close out = outExpect("Hello, World!")) {
+            run();
+        }
     }
     
     void run() {
