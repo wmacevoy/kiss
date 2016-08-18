@@ -31,7 +31,7 @@ public class AESPRNG extends Random
     }
 
     private volatile int at = PAGE;
-
+    private long ctr0 = 0;
     private long ctr = 0;
 
     private final void readPage() {
@@ -43,7 +43,7 @@ public class AESPRNG extends Random
         }
         for (int i=0; i<PAGE/8; i += 2) {
             dataLongs.put(i+0,ctr);
-            dataLongs.put(i+1,0);
+            dataLongs.put(i+1,ctr0);
             ++ctr;
         }
         try {
@@ -301,9 +301,9 @@ public class AESPRNG extends Random
     }
 
     public final void seed() {
-        byte [] value = new byte[16];
+        byte [] value = new byte[24];
         try {
-            if (new FileInputStream("/dev/urandom").read(value) == 16) {
+            if (new FileInputStream("/dev/urandom").read(value) == 24) {
                 seed(value);
                 return;
             }
@@ -319,8 +319,8 @@ public class AESPRNG extends Random
 
     public final synchronized void seed(byte[] value) {
         
-        if (value.length != 16) {
-            throw new UnsupportedOperationException("seed must be 16 bytes long.");
+        if (value.length != 24) {
+            throw new UnsupportedOperationException("seed must be 24 bytes long.");
         }
 
         if (aesecb == null) {
@@ -333,7 +333,17 @@ public class AESPRNG extends Random
         }
         
         try {
-            aesecb.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(value, "AES"));
+            byte[] aeskey = java.util.Arrays.copyOf(value,16);
+            aesecb.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(aeskey, "AES"));
+            java.util.Arrays.fill(aeskey,(byte) 0);
+            ctr0 = (((long) value[16+0]) >> (0*8))
+                |(((long) value[16+1]) >> (1*8))
+                |(((long) value[16+2]) >> (2*8))
+                |(((long) value[16+3]) >> (3*8))
+                |(((long) value[16+4]) >> (4*8))
+                |(((long) value[16+5]) >> (5*8))
+                |(((long) value[16+6]) >> (6*8))
+                |(((long) value[16+7]) >> (7*8));
         } catch (Exception ex) {
             ex.printStackTrace();
             throw new Error("Failing to set aes key is inconceivable.");
@@ -406,8 +416,9 @@ public class AESPRNG extends Random
             { (byte) 0xe5, (byte) 0xcb, (byte) 0xf1, (byte) 0xd2,
               (byte) 0x0a, (byte) 0x29, (byte) 0x48, (byte) 0x3c,
               (byte) 0x50, (byte) 0x64, (byte) 0xb1, (byte) 0x25,
-              (byte) 0x3b, (byte) 0xa1, (byte) 0xf3, (byte) 0xa3 };
-        
+              (byte) 0x3b, (byte) 0xa1, (byte) 0xf3, (byte) 0xa3,
+              (byte) 0xdc, (byte) 0x9e, (byte) 0xaa, (byte) 0x1d,
+              (byte) 0x76, (byte) 0xc5, (byte) 0x4c, (byte) 0xa8 };
         value[0] ^=(byte) (_value >> (0*8));
         value[1] ^=(byte) (_value >> (1*8));
         value[2] ^=(byte) (_value >> (2*8));
