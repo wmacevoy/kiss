@@ -1,9 +1,10 @@
 .PHONY: all
-all : clean lib examples test
+all : lib examples test
 
 SRC:=$(shell find src/main/java -regex '[^._].*\.java$$')
 
 kiss.jar kiss-with-tests.jar : $(SRC)
+	/bin/rm -rf target/classes/*
 	if [ ! -d target/classes ] ; then mkdir -p target/classes ; fi
 	javac -Xlint:unchecked -cp target/classes -d target/classes -s src/main/java $$(find src/main/java -regex '[^._].*\.java$$')
 	cd target/classes; jar cvfe ../../kiss.jar kiss.util.Run $$(find . -name '*.class' -and -not -iname 'test*')
@@ -56,7 +57,7 @@ test: self-test example-tests
 
 .PHONY: self-test
 self-test:
-	java -cp target/classes kiss.util.Run --app kiss.util.Test
+	java -cp kiss-with-tests.jar kiss.util.Run --app kiss.util.Test
 
 .PHONY: example-tests
 example-tests:

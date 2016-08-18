@@ -16,7 +16,7 @@ run:
 
 .PHONY: test
 test: 
-	java -cp "../../target/classes:target/classes" kiss.util.Run --norun
+	java -cp "../../kiss.jar:target/classes" kiss.util.Run --norun
 
 .PHONY: clean
 clean:
