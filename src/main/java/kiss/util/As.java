@@ -61,7 +61,7 @@ public class As {
     public static final int asInt(char x) { return (int) x; }
     public static final int asInt(CharSequence x) { return (int) asLong(x); }
 
-    public static final int asInt(byte x) { return (byte) x; }    
+    public static final int asInt(byte x) { return (int) x; }    
     public static final int asInt(short x) { return (int) x; }
     public static final int asInt(int x) { return x; }
     public static final int asInt(long x) { return (int) x; }
@@ -103,7 +103,7 @@ public class As {
         return Long.parseLong(x.toString());
     }
 
-    public static final long asLong(byte x) { return (byte) x; }    
+    public static final long asLong(byte x) { return (long) x; }    
     public static final long asLong(short x) { return (long) x; }
     public static final long asLong(int x) { return (long) x; }
     public static final long asLong(long x) { return x; }
@@ -116,7 +116,7 @@ public class As {
         return Float.parseFloat(remove(x,'_').toString());
     }
 
-    public static final float asFloat(byte x) { return (byte) x; }    
+    public static final float asFloat(byte x) { return (float) x; }    
     public static final float asFloat(short x) { return (float) x; }
     public static final float asFloat(int x) { return (float) x; }
     public static final float asFloat(long x) { return (float) x; }
@@ -130,7 +130,7 @@ public class As {
         return Double.parseDouble(remove(x,'_').toString());
     }
 
-    public static final double asDouble(byte x) { return (byte) x; }    
+    public static final double asDouble(byte x) { return (double) x; }    
     public static final double asDouble(short x) { return (double) x; }
     public static final double asDouble(int x) { return (double) x; }
     public static final double asDouble(long x) { return (double) x; }
