@@ -9,9 +9,9 @@ import java.io.FileInputStream;
 import java.security.SecureRandom;
 import java.util.Random;
 
-/** When using bulk random numbers, this is about 20% slower than Random
- *  but AESPRNG produces cryptographically strong psuedo-random
- *  number sequences. */
+/** When using bulk random numbers, AESPRNG is about twice as fast as
+ *  Random on reasonably modern AES-accelerated hardware.  And AESPRNG
+ *  produces cryptographically strong psuedo-random number sequences. */
 
 public class AESPRNG extends Random
 {
@@ -25,7 +25,7 @@ public class AESPRNG extends Random
 
     public AESPRNG() {
         // so Random's setSeed, called in
-        // Random's constructro, does not
+        // Random's constructor, does not
         // break our implementation
         constructed = true;
     }
