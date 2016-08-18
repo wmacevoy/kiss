@@ -224,8 +224,6 @@ public class AESPRNG extends Random
 	} else {
 	    return min;
 	}
-	    
-	//        return (min < max) ? (int)((nextNonNegativeLong()%((long)max-(long)min+1L))+min) : min;
     }
 
     /** [min,max] */
@@ -235,23 +233,6 @@ public class AESPRNG extends Random
             java.util.Arrays.fill(buf,offset,offset+length,min);
             return;
         }
-        // long D = ((long)max-(long)min+1L);
-
-        // at = (at+7) & ~7;
-        // while (length > 0) {
-        //     if (at >= PAGE) readPage();
-        //     int n = (PAGE-at)/8;
-        //     if (n > length) n=length;
-        //     dataLongs.position(at/8);
-        //     for (int i=0; i<n; ++i) {
-        //         buf[offset+i]=
-        //             (int)(((dataLongs.get() & Long.MAX_VALUE) % D)+min);
-        //     }
-        //     at += 8*n;
-        //     offset += n;
-        //     length -= n;
-        // }
-
         long D = ((long)max-(long)min+1L);
 
         at = (at+7) & ~7;
