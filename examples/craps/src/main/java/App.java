@@ -34,9 +34,9 @@ class App {
     void testCraps()
     {
         // repeated because of the seed(1) before test
-        assert craps() == "Ace Deuce";
-        assert craps() == "Nina";
-        assert craps() == "Nina";
+        assert craps() == "Easy Six";
+        assert craps() == "Yo";
+        assert craps() == "Boxcars";
     }
 
     void run() {
