@@ -280,12 +280,12 @@ class App {
        
         assert sin(toRadians(90.0)) == 1.0;
         assert toDegrees(asin(1.0)) == 90.0;
-              
-        assert exp(1.0) == E;
-        assert log(E) == 1.0;
+
+        assert abs(exp(1.0)-E) < 1e-15;
+        assert abs(log(E)-1) < 1e-15;
        
-        assert pow(10.0,1.0) == 10.0;
-        assert log10(10.0) == 1.0;
+        assert abs(pow(10.0,1.0)-10) < 1e-15;
+        assert abs(log10(10.0)-1) < 1e-15;
     }
    
     void testDoubleRandom() {

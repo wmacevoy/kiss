@@ -429,6 +429,10 @@ public class API {
         IO.printlnVarArgs(value);
     }
 
+    public static final void printf(CharSequence fmt, Object... value) {
+        IO.printfVarArgs(fmt,value);
+    }
+    
     public static final String readEOL() {
         return IO.readEOL();
     }
@@ -863,6 +867,14 @@ public class API {
         return As.asBoolean(x);
     }
 
+    public static final boolean asBoolean(Number x) {
+        return As.asBoolean(x);
+    }
+
+    public static final boolean asBoolean(Object x) {
+        return As.asBoolean(x);
+    }
+    
     /** Codepoint 0, '\u0000' for false, codepoint 1, '\u0001' for true. */
     public static final char asChar(boolean x) {
         return As.asChar(x);
@@ -908,6 +920,14 @@ public class API {
         return As.asChar(x);
     }
 
+    public static final char asChar(Number x) {
+        return As.asChar(x);
+    }
+
+    public static final char asChar(Object x) {
+        return As.asChar(x);
+    }
+    
     /** 0 or 1 */
     public static final byte asByte(boolean x) {
         return As.asByte(x);
@@ -953,6 +973,14 @@ public class API {
         return As.asByte(x);
     }
 
+    public static final byte asByte(Number x) {
+        return As.asByte(x);
+    }
+
+    public static final byte asByte(Object x) {
+        return As.asByte(x);
+    }
+    
     /** 0 or 1 */
     public static final short asShort(boolean x) {
         return As.asShort(x);
@@ -998,6 +1026,15 @@ public class API {
         return As.asShort(x);
     }
 
+
+    public static final short asShort(Number x) {
+        return As.asShort(x);
+    }
+
+    public static final short asShort(Object x) {
+        return As.asShort(x);
+    }
+    
     /** 0 or 1 */
     public static final int asInt(boolean x) {
         return As.asInt(x);
@@ -1043,6 +1080,15 @@ public class API {
         return As.asInt(x);
     }
 
+
+    public static final int asInt(Number x) {
+        return As.asInt(x);
+    }
+
+    public static final int asInt(Object x) {
+        return As.asInt(x);
+    }
+    
     /** 0 or 1 */
     public static final long asLong(boolean x) {
         return As.asLong(x);
@@ -1088,6 +1134,15 @@ public class API {
         return As.asLong(x);
     }
 
+
+    public static final long asLong(Number x) {
+        return As.asLong(x);
+    }
+
+    public static final long asLong(Object x) {
+        return As.asLong(x);
+    }
+    
     public static final float asFloat(boolean x) {
         return As.asFloat(x);
     }
@@ -1113,6 +1168,12 @@ public class API {
         return As.asFloat(x);
     }
     public static final float asFloat(double x) {
+        return As.asFloat(x);
+    }
+    public static final float asFloat(Number x) {
+        return As.asFloat(x);
+    }
+    public static final float asFloat(Object x) {
         return As.asFloat(x);
     }
 
@@ -1143,32 +1204,65 @@ public class API {
     public static final double asDouble(double x) {
         return As.asDouble(x);
     }
+    public static final double asDouble(Number x) {
+        return As.asDouble(x);
+    }
+    public static final double asDouble(Object x) {
+        return As.asDouble(x);
+    }
     
     public static final String asString(boolean x) {
         return As.asString(x);
     }
+    public static final String asString(boolean x, CharSequence fmt) {
+        return As.asString(x,fmt);
+    }
     public static final String asString(char x) {
         return As.asString(x);
+    }
+    public static final String asString(char x, CharSequence fmt) {
+        return As.asString(x,fmt);
     }
     public static final String asString(byte x) {
         return As.asString(x);
     }
+    public static final String asString(byte x, CharSequence fmt) {
+        return As.asString(x,fmt);
+    }
     public static final String asString(short x) {
         return As.asString(x);
+    }
+    public static final String asString(short x, CharSequence fmt) {
+        return As.asString(x,fmt);
     }
     public static final String asString(int x) {
         return As.asString(x);
     }
+    public static final String asString(int x, CharSequence fmt) {
+        return As.asString(x,fmt);
+    }
     public static final String asString(String x) {
         return As.asString(x);
+    }
+    public static final String asString(String x, CharSequence fmt) {
+        return As.asString(x,fmt);
     }
     public static final String asString(float x) {
         return As.asString(x);
     }
+    public static final String asString(float x, CharSequence fmt) {
+        return As.asString(x,fmt);
+    }
     public static final String asString(double x) {
         return As.asString(x);
     }
+    public static final String asString(double x, CharSequence fmt) {
+        return As.asString(x,fmt);
+    }
     public static final String asString(Object x) {
         return As.asString(x);
+    }
+    public static final String asString(Object x, CharSequence fmt) {
+        return As.asString(x,fmt);
     }
 }

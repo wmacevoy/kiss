@@ -77,4 +77,14 @@ class TestIO {
         }
         assert caught == true;
     }
+
+    void testPrintf() {
+	try (Close out = outExpect("Hello, World!",EOL)) {
+	    printf("Hello, %s!\n","World");
+	}
+	try (Close out = outExpect("3.14",EOL)) {
+	    printf("%1.2f\n",PI);
+	}
+
+    }
 }

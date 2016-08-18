@@ -398,6 +398,15 @@ public class IO {
         ps.println();
     }
 
+    public static final void printf(CharSequence fmt, Object... args) {
+        printfVarArgs(fmt,args);
+    }
+
+    public static final void printfVarArgs(CharSequence fmt, Object[] args) {
+        out().printf(fmt.toString(),args);
+    }
+
+
     public static final String readString() {
     	Scanner in=in();
     	if (in.hasNext()) {
