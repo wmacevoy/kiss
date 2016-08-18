@@ -201,8 +201,31 @@ public class AESPRNG extends Random
     }
 
     /** [min,max] */    
-    public final int nextInt(int min, int max) {
-        return (min < max) ? (int)((nextNonNegativeLong()%((long)max-(long)min+1L))+min) : min;
+    public synchronized final int nextInt(int min, int max) {
+	if (min < max) {
+	    at = (at+7) & ~7;	    
+	    long D = ((long) max) - ((long) min) + ((long) 1);
+	    long x;
+	    for (;;) {
+		if (at >= PAGE) readPage();
+		x = dataLongs.get(at/8) & Long.MAX_VALUE;
+		at += 8;
+		
+		if (x < (Long.MAX_VALUE - (1L << 32))) break;
+		// this almost never happens (less than 1:1 billion),
+		// but ensures perfect binning of the random range.
+		//
+		// B is computed efficiently using Java's operations
+		// and relies on known overflow behavior.
+		long B = Long.MIN_VALUE - (Long.MIN_VALUE % D) - 1;
+		if (x <= B) break;
+	    }
+	    return (int)((x % D) + min);
+	} else {
+	    return min;
+	}
+	    
+	//        return (min < max) ? (int)((nextNonNegativeLong()%((long)max-(long)min+1L))+min) : min;
     }
 
     /** [min,max] */
@@ -212,6 +235,23 @@ public class AESPRNG extends Random
             java.util.Arrays.fill(buf,offset,offset+length,min);
             return;
         }
+        // long D = ((long)max-(long)min+1L);
+
+        // at = (at+7) & ~7;
+        // while (length > 0) {
+        //     if (at >= PAGE) readPage();
+        //     int n = (PAGE-at)/8;
+        //     if (n > length) n=length;
+        //     dataLongs.position(at/8);
+        //     for (int i=0; i<n; ++i) {
+        //         buf[offset+i]=
+        //             (int)(((dataLongs.get() & Long.MAX_VALUE) % D)+min);
+        //     }
+        //     at += 8*n;
+        //     offset += n;
+        //     length -= n;
+        // }
+
         long D = ((long)max-(long)min+1L);
 
         at = (at+7) & ~7;
@@ -220,13 +260,24 @@ public class AESPRNG extends Random
             int n = (PAGE-at)/8;
             if (n > length) n=length;
             dataLongs.position(at/8);
+	    int k=0;
             for (int i=0; i<n; ++i) {
-                buf[offset+i]=
-                    (int)(((dataLongs.get() & Long.MAX_VALUE) % D)+min);
+		long x = (dataLongs.get() & Long.MAX_VALUE);
+		if (x > (Long.MAX_VALUE - (1L << 32))) {
+		    // this almost never happens (less than 1:1 billion),
+		    // but ensures perfect binning of the random range.
+		    //
+		    // B is computed efficiently using Java's operations
+		    // and relies on known overflow behavior.
+		    long B = Long.MIN_VALUE - (Long.MIN_VALUE % n) - 1;
+		    if (x > B) continue;
+		}
+                buf[offset+k]=(int) ((x % D)+min);
+		++k;
             }
-            at += 8*n;
-            offset += n;
-            length -= n;
+            at += 8*k;
+            offset += k;
+            length -= k;
         }
     }
 
