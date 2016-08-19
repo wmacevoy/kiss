@@ -50,6 +50,23 @@ class App {
     }
 }
 ```
+If you don't want to introduce the try block yet, you can alternatively use
+```java
+import static kiss.API.*;
+
+class App {
+    void testRun() {
+        outExpect("Hello, World!");
+        run();
+        outClose();
+    }
+
+    void run()
+    {
+        println("Hello, World!");
+    }
+}
+```
 Any `testXXX` method is automatically called before the `run` method.  Want to write a test?  Just write the test!
 
 ## Randomness a kindergartener understands
