@@ -317,6 +317,7 @@ public class AESPRNG extends Random
         }
     }
 
+    /** value is zeroed after initialization for safety */
     public final synchronized void seed(byte[] value) {
         
         if (value.length != 24) {
@@ -331,9 +332,10 @@ public class AESPRNG extends Random
                 throw new Error("No AES/ECB/NoPadding cipher is inconceivable.");
             }
         }
-        
+
+	byte[] aeskey = null;	
         try {
-            byte[] aeskey = java.util.Arrays.copyOf(value,16);
+            aeskey = java.util.Arrays.copyOf(value,16);
             aesecb.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(aeskey, "AES"));
             java.util.Arrays.fill(aeskey,(byte) 0);
             ctr0 = (((long) value[16+0]) >> (0*8))
@@ -347,7 +349,10 @@ public class AESPRNG extends Random
         } catch (Exception ex) {
             ex.printStackTrace();
             throw new Error("Failing to set aes key is inconceivable.");
-        }
+        } finally {
+            if (aeskey != null) java.util.Arrays.fill(aeskey,(byte) 0);
+            java.util.Arrays.fill(value,(byte) 0);	    
+	}
         at = PAGE;
         ctr = 0;
         gaussianAt = 0;
