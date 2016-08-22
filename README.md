@@ -189,11 +189,13 @@ This assures the file is closed, even in the case of an error.
 
 * `outVerify(String filename)` --- compares print/ln() output to the contents of this file.  `readXXX()` are also matched so you should be able to copy your console dialog into a verify file to create an expected contract.  Like outOpen, this can be nested and each thread is independent, and must be matched by outClose() to stop the verification.  Verification failures throw an error at the point a mismatch is detected.
 
-* `format(...)` --- a way to convert objects to printable strings similar to the print() statements below.  They do a better job than the java PrintStream methods on structured objects like arrays and lists.
+* `print/ln(...)` --- like PrintStream's print/ln, but sends the formatted strings to the current output stream (`System.out` by default) and does a nicer job with arrays and collections.  You can change the default output with `outOpen`, `outExpect`, and `outVerify`.
 
-* `print/ln(...)` --- like format, but sends the formatted strings to the current output stream (`System.out` by default).  You can change the default with `outOpen` and `outVerify`.
+* `outExpect(...)` --- makes an internal stream which is used to match against future output (until `inClose()` or the end of the try block).  If there is a mismatch an error thrown.
 
-* `readXXX(...)` --- uses a `java.util.Scanner` on the current input stream (`System.in` by default).  You can change the default with `inOpen`.
+* `readXXX(...)` --- uses a `java.util.Scanner` on the current input stream (`System.in` by default).  You can change the default with `inOpen` and `inProvide`.
+
+* `inProvide(...)` --- makes an internal stream which is used for future input (until `inClose()` or the end of the try block).
 
 ### Math
 
