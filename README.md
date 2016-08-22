@@ -93,7 +93,7 @@ class App {
           int d1=random(1,6);
           int d2=random(1,6);
           int sum=d1+d2;
-          println(i," ",d1," ",d2," ",sum);
+          println(i,d1,d2,sum);
        }
        outClose();
     }
