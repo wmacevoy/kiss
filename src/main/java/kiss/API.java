@@ -1140,6 +1140,11 @@ The random values in from <code>run()</code> will change, but the random values 
         return RNG.random(a, b);
     }
 
+    /** Equivalent to `random(0,n-1)`.  {@see random(int,int)} */
+    public static final int random(int n) {
+        return RNG.random(0, n-1);
+    }
+    
     /** Generate a uniform psuedo-random double bigger than or equal to 0, but less than 1:
 <blockquote><pre><code>
 import static kiss.API.*;
