@@ -11,3 +11,4 @@ To run application after building:
 ```sh
 mvn -q exec:exec
 ```
+

@@ -364,5 +364,4 @@ class App {
         try (Close out = outExpect("你好")) { println("你好"); }
         try (Close out = outExpect("Big Daddy")) { println("Big Daddy"); }
     }
-
 }

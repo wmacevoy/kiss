@@ -46,7 +46,7 @@ clean: # mvn clean
 deploy: clean all
 	git add -f kiss.jar kiss.jar.sha256 \
 	           kiss-with-tests.jar kiss-with-tests.jar.sha256
-	git commit -m "deploy `date -u`"
+	git commit --allow-empty -m "deploy `date -u`"
 	git push
 	mvn clean
 	mvn compile
