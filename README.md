@@ -79,7 +79,8 @@ The java.Math static methods are effectively also imported, so you just use `sqr
 
 ## Obvious Output
 
-Here is a java program that makes a CSV file with 100 die rolls pairs:
+Here is a java program that makes a space-separated CSV file
+with 100 die rolls pairs:
 
 ```java
 import static kiss.API.*;
@@ -87,12 +88,12 @@ import static kiss.API.*;
 class App {
     void run() {
        outOpen("rolls.csv");
-       println("i,d1,d2,sum");
+       println("i d1 d2 sum");
        for (int i=1; i<=100; ++i) {
           int d1=random(1,6);
           int d2=random(1,6);
           int sum=d1+d2;
-          println(i,d1,d2,sum);
+          println(i," ",d1," ",d2," ",sum);
        }
        outClose();
     }

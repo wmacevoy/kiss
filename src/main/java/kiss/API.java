@@ -10,6 +10,257 @@ import kiss.util.RNG;
 import kiss.util.Run;
 import kiss.util.As;
 
+/** 
+ <p>The kiss library promotes good software development practices from the beginning.</p>
+
+<p>The key principles are:
+  <ul>
+  <li>simple
+  <li>testable
+  <li>unsurpising
+  </ul>
+</p>
+
+
+<p><strong>Simple.</strong>  Here is Hello World (specify {@see kiss.util.Run#main} as the main class):
+<pre><code>
+import static kiss.API.*;
+
+class App {
+  void run() {
+    println("Hello World!");
+  }
+}
+</code></pre>
+</p>
+
+<p><strong>Testable.</strong> Here is hello world, tested:
+<pre><code>
+import static kiss.API.*;
+
+class App {
+  void testRun() {
+    outExpect("Hello World!");
+    run();
+    outClose();
+  }
+  void run() {
+    println("Hello World!");
+  }
+}
+</code></pre>
+</p>
+
+<p>A safer habit is to use try-with-resources:
+<pre><code>
+import static kiss.API.*;
+
+class App {
+  void testRun() {
+    try (Close out=outExpect("Hello World!")) {
+      run();
+    }
+  }
+  void run() {
+    println("Hello World!");
+  }
+}
+</code></pre>
+</p>
+
+<strong>Unsurprising.</strong>  Which of the following seems easier to read or understand:
+
+<table>
+<tr>
+<td>
+<pre><code>
+import static kiss.API.*;
+
+class App {
+  void hi() {
+    print("What is your name? ");
+    String name = readLine();
+    println("Hello, " + name + "!");
+  }
+
+  void dice(int n) {
+    int sum=0;
+    for (int i=1; i&lt;=n; ++i) {
+      int die = random(1,6);
+      sum = sum + die;
+      println("roll # " + i + " is " + die);
+    }
+    println("average: " + (asDouble(sum)/asDouble(n)));
+  }
+
+  void run() {
+    hi();
+    outOpen("dice.dat");
+    dice(100);
+    outClose();
+  }
+}
+</code></pre>
+</td>
+<td>
+<pre><code>
+import java.io.FileWriter;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Scanner;
+
+public class App {
+  void hi() {
+     Scanner scanner = new Scanner(System.in);
+     System.out.print("What is your name? ");
+     String name = scanner.nextLine();
+     System.out.println("Hello, " + name + "!");
+  }
+
+  void dice(PrintWriter out, int n) {
+    int sum = 0;
+    for (int i=1; i&lt;=n; ++i) {
+      int die = (int) Math.floor(6*Math.random())+1;
+      sum = sum + die;
+      out.println("roll # " + i + " is " + die);
+    }
+    out.println("average: " + ((double)(sum)/((double)n)));
+  }
+
+  public static void main(String [] args) {
+      new App().run();
+  }
+  
+  void run() {
+    hi();
+
+    try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("dice.dat")))) {
+      dice(out,100);
+    } catch (IOException ex) {
+      ex.printStackTrace();
+    }
+  }
+}
+</code></pre>
+</td>
+</tr>
+</table>
+
+<p>The traditional version on the right is almost impossible to test.</p>
+
+<p>The kiss version on the right is easy to test.  Below are two versions: the left uses nested open/close, while the version on the right uses try-with-resources.</p>
+
+<table>
+<tr>
+<td>
+<code><pre>
+import static kiss.API.*;
+
+class App {
+  void hi() {
+    print("What is your name? ");
+    String name = readLine();
+    println("Hello, " + name + "!");
+  }
+  void testHi()
+  {
+     inProvide("Alice");
+     outExpect("What is your name? Hello, Alice!");
+     hi();
+     outClose();
+     inClose();
+  }
+
+  void dice(int n) {
+    int sum=0;
+    for (int i=1; i&lt;=n; ++i) {
+      int die = random(1,6);
+      sum = sum + die;
+      println("roll # " + i + " is " + die);
+    }
+    println("average: " + (asDouble(sum)/asDouble(n)));
+  }
+
+  void testDice() {
+    seed(1);
+    int die1 = random(1,6);
+    int die2 = random(1,6);
+    double average 
+      = asDouble(die1+die2)/asDouble(2);
+
+    seed(1);
+    outExpect("roll # 1 is " + die1, EOL,
+              "roll # 2 is " + die2, EOL,
+              "average: " + average);
+    dice(2);
+    outClose();
+  }
+
+  void run() {
+    hi();
+    outOpen("dice.dat");
+    dice(100);
+    outClose();
+  }
+}
+</code></pre>
+</td><td>
+<pre><code>
+import static kiss.API.*;
+
+class App {
+  void hi() {
+    print("What is your name? ");
+    String name = readLine();
+    println("Hello, " + name + "!");
+  }
+  void testHi()
+  {
+     try (Close in=inProvide("Alice")) {
+       try (Close out=outExpect("What is your name? Hello, Alice!")) {
+         hi();
+       }
+     }
+  }
+
+  void dice(int n) {
+    int sum=0;
+    for (int i=1; i&lt;=n; ++i) {
+      int die = random(1,6);
+      sum = sum + die;
+      println("roll # " + i + " is " + die);
+    }
+    println("average: " + (asDouble(sum)/asDouble(n)));
+  }
+
+  void testDice() {
+    seed(1);
+    int die1 = random(1,6);
+    int die2 = random(1,6);
+    double average 
+      = asDouble(die1+die2)/asDouble(2);
+
+    seed(1);
+    try (Close out = outExpect(
+              "roll # 1 is " + die1, EOL,
+              "roll # 2 is " + die2, EOL,
+              "average: " + average)) {
+      dice(2);
+    }
+  }
+
+  void run() {
+    hi();
+    try (Close out=outOpen("dice.dat")) {
+      dice(100);
+    }
+  }
+}
+</code></pre>
+</tr></table>
+
+ */
 public class API {
     /** Close is like to make things that can be closed, i.e., have a 
         close() method, but that throw no declared exceptions. This is
@@ -277,182 +528,802 @@ public class API {
         IO.inClose();
     }
 
+    /** <p>Like {@see #print(boolean value)}, but appends the text
+        to the string builder. </p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testFormatStringBuilderBoolean() {
+    StringBuilder sb = new StringBuilder();
+    boolean value = true;
+    format(sb,value);
+    assert sb.toString().equals("true");
+  }
+}
+</code></pre></blockquote>
+    */
     public static final void format(StringBuilder ans, boolean value) {
         IO.format(ans, value);
     }
 
+    /** <p>Like {@see #print(byte value)}, but appends the text
+        to the string builder.</p>
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testFormatStringBuilderByte() {
+    StringBuilder sb = new StringBuilder();
+    byte value = 100;
+    format(sb,value);
+    assert sb.toString().equals("100");
+  }
+}
+</code></pre></blockquote>
+</p>
+    */
     public static final void format(StringBuilder ans, byte value) {
         IO.format(ans, value);
     }
 
+    /** <p>Like {@see #print(char value)}, but appends the text
+        to the string builder.</p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testFormatStringBuilderChar() {
+    StringBuilder sb = new StringBuilder();
+    char value = 'x';
+    format(sb,value);
+    assert sb.toString().equals("x");
+  }
+}
+</code></pre></blockquote>
+</p>
+ */
     public static final void format(StringBuilder ans, char value) {
         IO.format(ans, value);
     }
 
+    /** <p>Like {@see #print(short value)}, but appends the text
+        to the string builder.</p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testFormatStringBuilderShort() {
+    StringBuilder sb = new StringBuilder();
+    short value = 10_000;
+    format(sb,value);
+    assert sb.toString().equals("10000");
+  }
+}
+</code></pre></blockquote>
+</p>
+*/
     public static final void format(StringBuilder ans, short value) {
         IO.format(ans, value);
     }
 
+    /** <p>Like {@see #print(int value)}, but appends the text
+        to the string builder.</p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testFormatStringBuilderInt() {
+    StringBuilder sb = new StringBuilder();
+    int value = 100_000_000;
+    format(sb,value);
+    assert sb.toString().equals("100000000");
+  }
+}
+</code></pre></blockquote>
+</p>
+*/
     public static final void format(StringBuilder ans, int value) {
         IO.format(ans, value);
     }
 
+    /** <p>Like {@see #print(long value)}, but appends the text
+        to the string builder. </p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testFormatStringBuilderLong() {
+    StringBuilder sb = new StringBuilder();
+    long value = 100_000_000_000_000;
+    format(sb,value);
+    assert sb.toString().equals("100000000000000");
+  }
+}
+</code></pre><blockqoute>
+</p>
+*/
     public static final void format(StringBuilder ans, long value) {
         IO.format(ans, value);
     }
 
+    /** <p>Like {@see #print(float value)}, but appends the text
+        to the string builder. </p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testFormatStringBuilderFloat() {
+    StringBuilder sb = new StringBuilder();
+    float value = 3.1415;
+    format(sb,value);
+    assert sb.toString().equals("3.1415");
+  }
+}
+</code></pre></blockquote>
+</p>
+*/    
     public static final void format(StringBuilder ans, float value) {
         IO.format(ans, value);
     }
 
+    /** <p>Like {@see #print(double value)}, but appends the text
+        to the string builder. </p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testFormatStringBuilderDouble() {
+    StringBuilder sb = new StringBuilder();
+    double value = PI;
+    format(sb,value);
+    assert sb.toString().equals("3.141592653589793");
+  }
+}
+</code></pre></blockquote>
+</p>
+*/    
     public static final void format(StringBuilder ans, double value) {
         IO.format(ans, value);
     }
 
+    /** <p>Like {@see #print(Object value)}, but appends the text
+        to the string builder. </p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testFormatStringBuilderObject() {
+    StringBuilder sb = new StringBuilder();
+    Object value = new int[] {2,5,6};
+    format(sb,value);
+    assert sb.toString().equals("[2,5,6]");
+  }
+}
+</code></pre></blockquote>
+</p>
+*/    
     public static final void format(StringBuilder ans, Object value) {
         IO.format(ans, value);
     }
 
+    /** <p>Like {@see #print(boolean value)}, but just returns a string.</p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testFormatBoolean() {
+    boolean value = true;
+    String string = format(value);
+    assert string.equals("true");
+  }
+}
+</code></pre></blockquote>
+    */
     public static final String format(boolean value) {
         return IO.format(value);
     }
 
+    /** <p>Like {@see #print(byte value)}, but just returns a string.</p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testFormatByte() {
+    byte value = 100;
+    String string = format(value);
+    assert string.equals("100");
+  }
+}
+</code></pre></blockquote>
+    */
     public static final String format(byte value) {
         return IO.format(value);
     }
 
+    /** <p>Like {@see #print(char value)}, but just returns a string.</p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testFormatChar() {
+    char value = 'x';
+    String string = format(value);
+    assert string.equals("x");
+  }
+}
+</code></pre></blockquote>
+    */
     public static final String format(char value) {
         return IO.format(value);
     }
 
+    /** <p>Like {@see #print(short value)}, but just returns a string.</p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testFormatShort() {
+    short value = 10_000;
+    String string = format(value);
+    assert string.equals("10000");
+  }
+}
+</code></pre></blockquote>
+    */
     public static final String format(short value) {
         return IO.format(value);
     }
 
+    /** <p>Like {@see #print(int value)}, but just returns a string.</p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testFormatInt() {
+    int value = 100_000_000;
+    String string = format(value);
+    assert string.equals("100000000");
+  }
+}
+</code></pre></blockquote>
+    */
     public static final String format(int value) {
         return IO.format(value);
     }
 
+    /** <p>Like {@see #print(long value)}, but just returns a string.</p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testFormatLong() {
+    long value = 100_000_000_000;
+    String string = format(value);
+    assert string.equals("100000000000");
+  }
+}
+</code></pre></blockquote>
+    */
     public static final String format(long value) {
         return IO.format(value);
     }
 
+    /** <p>Like {@see #print(float value)}, but just returns a string.</p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testFormatLong() {
+    float value = 3.1415;
+    String string = format(value);
+    assert string.equals("3.1415");
+  }
+}
+</code></pre></blockquote>
+    */
     public static final String format(float value) {
         return IO.format(value);
     }
 
+    /** <p>Like {@see #print(float value)}, but just returns a string.</p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testFormatDouble() {
+    float value = PI;
+    String string = format(value);
+    assert string.equals("3.141592653589793");
+  }
+}
+</code></pre></blockquote>
+</p>
+    */
     public static final String format(double value) {
         return IO.format(value);
     }
 
+    /** <p>Like {@see #print(Object value)}, but just returns a string.</p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testFormatObject() {
+    Object value = new int[] {2,5,6};
+    String string = format(value);
+    assert string.equals("[2,5,6]");
+  }
+}
+</code></pre></blockquote>
+</p>
+*/    
     public static final String format(Object value) {
         return IO.format(value);
     }
 
-    public static final void print(Object value) {
-        IO.print(value);
-    }
+    /** 
+        <p>Format a boolean (true or false) value for output.  This prints the characters "true" or "false".  If this is the last thing on a line, use {@see #println(boolean)} instead.</p>
 
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void run() {
+    boolean value = true;
+    print("value=");
+    print(value);
+    println(".");
+  }
+}
+</code></pre></blockquote>
+This prints <code>value=true.</code> on a single line.
+</p>
+    */
     public static final void print(boolean value) {
         IO.print(value);
     }
 
+    /** 
+        <p>Format a byte (-128 to 127) value for output.  This prints the decimal version of the value.  If this is the last thing on a line, use {@see #println(byte)} instead.</p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void run() {
+    byte value = asByte(100);
+    print("value=");
+    print(value);
+    println(".");
+  }
+}
+</code></pre></blockquote>
+This prints <code>value=100.</code> on a single line.
+</p>
+    */
     public static final void print(byte value) {
         IO.print(value);
     }
 
+    /** 
+        <p>Format a unicode code point (single letters and symbols from almost every languages) in the range 0 to 65535.  This prints the character version of the value.  This may look like a box if the character does not have a representation in the current font, or a few special formatting actions; like '\n' (code 12) often starts a new line.  If this is the last thing on a line, use {@see #println(char)} instead.</p>
+
+<p><i>A detail beginners do not have to worry about.</i>
+Modern unicode includes code points that fall outside the range 0..65535.  These will not fit onto a Java char.  This means they cannot be represented as a single java char value.  You should look at the API in {@see java.lang.String} to deal with multi-char unicode.  If you are just getting started don't worry about it; the first 65_536 codes (0..65535) that can be represented as a single java char cover the vast variety of modern languages.
+</p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void run() {
+    char value = 'x';
+    print("value=");
+    print(value);
+    println(".");
+  }
+}
+</code></pre></blockquote>
+This prints <code>value=x.</code> on a single line.
+</p>
+    */
     public static final void print(char value) {
         IO.print(value);
     }
 
+    /** 
+        <p>Format a short (-32_768 to 32767) value for output.  This prints the decimal version of the value.  If this is the last thing on a line, use {@see #println(short)} instead.</p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void run() {
+    short value = asShort(10_0000);
+    print("value=");
+    print(value);
+    println(".");
+  }
+}
+</code></pre></blockquote>
+This prints <code>value=10000.</code> on a single line.
+</p>
+    */
     public static final void print(short value) {
         IO.print(value);
     }
 
+    /** 
+        <p>Print an int (-2_147_483_648 to 2_147_483_647) value.  This prints the decimal version of the value.  If this is the last thing on a line, use {@see #println(int)} instead.</p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void run() {
+    int value = 10_000_000;
+    print("value=");
+    print(value);
+    println(".");
+  }
+}
+</code></pre></blockquote>
+This prints <code>value=10000000.</code> on a single line.
+</p>
+    */
     public static final void print(int value) {
         IO.print(value);
     }
 
+    /** 
+        <p>Print a long (-9_223_372_036_854_775_808 to 9_223_372_036_854_775_807) value.  This prints the decimal version of the value.  If this is the last thing on a line, use {@see #println(long)} instead.</p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void run() {
+    long value = 10_000_000_000L; // use L for "long literal"
+    print("value=");
+    print(value);
+    println(".");
+  }
+}
+</code></pre></blockquote>
+This prints <code>value=10000000000.</code> on a single line.
+</p>
+    */
     public static final void print(long value) {
         IO.print(value);
     }
 
+    /** 
+        <p>Print a float (about seven decimal digits of precision) value.  If this is the last thing on a line, use {@see #println(float)} instead.</p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void run() {
+    float value = 3.1415F; // use F for "float literal"
+    print("value=");
+    print(value);
+    println(".");
+  }
+}
+</code></pre></blockquote>
+This prints <code>value=3.1415.</code> on a single line.
+</p>
+    */
     public static final void print(float value) {
         IO.print(value);
     }
 
+    /** 
+        <p>Print a double (about fifteen decimal digits of precision) value for output. If this is the last thing on a line, use {@see #println(double)} instead.</p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void run() {
+    double value = PI;
+    print("value=");
+    print(value);
+    println(".");
+  }
+}
+</code></pre></blockquote>
+This prints <code>value=3.141592653589793.</code> on a single line.
+</p>
+    */
     public static final void print(double value) {
         IO.print(value);
     }
 
-    public static final void println(Object value) {
-        IO.println(value);
+    /** <p>Prints an object.  This is a lot like printing the {@see Object#toString()}, but tries to format arrays and lists into nicer strucures.  If this is the last thing on a line, use {@see println(Object)} instead. </p>
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void run() {
+    Object value = new int[] {2,5,6};
+    print("value=");
+    print(value);
+    println(".");
+  }
+}
+</code></pre></blockquote>
+This prints <code>value=[2,5,6].</code> on a single line.
+</p>
+    */
+    public static final void print(Object value) {
+        IO.print(value);
     }
 
+    /** {@see print(boolean)} with a newline. */
     public static final void println(boolean value) {
         IO.println(value);
     }
 
+    /** {@see print(byte)} with a newline. */    
     public static final void println(byte value) {
         IO.println(value);
     }
 
+    /** {@see print(char)} with a newline. */        
     public static final void println(char value) {
         IO.println(value);
     }
 
+    /** {@see print(short)} with a newline. */            
     public static final void println(short value) {
         IO.println(value);
     }
 
+    /** {@see print(int)} with a newline. */                
     public static final void println(int value) {
         IO.println(value);
     }
 
+    /** {@see print(long)} with a newline. */                    
     public static final void println(long value) {
         IO.println(value);
     }
 
+    /** {@see print(float)} with a newline. */                        
     public static final void println(float value) {
         IO.println(value);
     }
 
+    /** {@see print(double)} with a newline. */                            
     public static final void println(double value) {
         IO.println(value);
     }
 
+    /** {@see print(Object)} with a newline. */                                public static final void println(Object value) {
+        IO.println(value);
+    }
+
+    /** Prints all the listed items, 
+        separated with a blank ' ' character */
     public static final void print(Object... value) {
         IO.printVarArgs(value);
     }
 
+    /** Prints all the listed items, 
+        separated with a blank ' ' character, follwed by a newline */
     public static final void println(Object... value) {
         IO.printlnVarArgs(value);
     }
 
+    /** <p>Format arguments like {@see PrintStream.printf()}.  This is especially helpful for formatting numbers.</p>
+
+    <p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void run() {
+    outExpect("|0100| 3.142|");
+    printf("|%04x|%6.3f|",256,PI);
+    outClose();
+  }
+}
+</code></pre></blockquote>
+</p>
+*/
     public static final void printf(CharSequence fmt, Object... value) {
         IO.printfVarArgs(fmt,value);
     }
-    
+
+    /**
+       <p>Read in an end-of-line.  This is helpful in reading
+       information into your program when it is broken into
+       multiple lines.</p>
+
+    <p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void run() {
+    int i;
+    double d;
+    String s;
+    inProvide(13,1.3,"thirteen", EOL,
+              "next line");
+    assert readInt() == 13;
+    assert readDouble() == 1.3;
+    assert readString().equals("thirteen");
+    assert readEOL().equals(EOL);
+    assert readLine().equals("next line");
+    inClose();
+  }
+}
+</code></pre></blockquote>
+</p>
+*/
     public static final String readEOL() {
         return IO.readEOL();
     }
-    
+
+    /** <p>Read from the input everything to the next end-of-line
+        and return it as a string (with the end-of-line marker
+        removed.</p>
+    <p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void run() {
+    print("What is your sport? ");
+    String sport = readLine();
+    println("Go " + sport + "!");
+  }
+}
+</code></pre></blockquote>
+</p>
+    */
     public static final String readLine() {
         return IO.readLine();
     }
 
+    /** <p>Read in a simple string (no white space) and return it
+        as a String.</p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void run() {
+
+//  without the inProvide/inClose, this
+//  would just ask the user.
+
+    inProvide("tango salsa cha-cha");
+    String dance1 = readString();
+    String dance2 = readString();
+    String dance3 = readString();
+    inClose();
+
+    println("dance # 1:",dance1);
+    println("dance # 2:",dance2);
+    println("dance # 3:",dance3);
+  }
+}
+</code></pre></blockquote>
+</p>
+    */
     public static final String readString() {
         return IO.readString();
     }
 
+    /** 
+<p>Read a boolean (true/false) value.</p>
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testReadBoolean() {
+    try (Close in = inProvide("true")) {
+      assert readBoolean() == true;
+    }
+    try (Close in = inProvide("false")) {
+      assert readBoolean() == false;
+    }
+  }
+}
+</code></pre></blockquote>
+</p>
+    */
     public static final Boolean readBoolean() {
         return IO.readBoolean();
     }
 
+    /** 
+<p>Read a boolean (true/false) value.</p>
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testReadByte() {
+    try (Close in = inProvide("100")) {
+       assert readByte() == 100;
+    }
+  }
+}
+</code></pre></blockquote>
+</p>
+    */
     public static final Byte readByte() {
         return IO.readByte();
     }
 
+    /** 
+<p>Read a int (-2_147_483_648 to 2_147_483_647) value.</p>
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testReadByte() {
+    try (Close in = inProvide("10000000")) {
+       assert readInt() == 100_000_000;
+    }
+  }
+}
+</code></pre></blockquote>
+</p>
+    */
     public static final Integer readInteger() {
         return IO.readInteger();
     }
@@ -462,47 +1333,255 @@ public class API {
         return IO.readInteger();
     }
     
+    /** 
+<p>Read a long (-9_223_372_036_854_775_808 to 9_223_372_036_854_775_807) value.</p>
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testReadByte() {
+    try (Close in = inProvide("10000000000")) {
+       assert readLong() == 100_000_000_000L;
+    }
+  }
+}
+</code></pre></blockquote>
+</p>
+    */
     public static final Long readLong() {
         return IO.readLong();
     }
 
+    /** 
+<p>Read a float (about seven decimal digits of precision) value.</p>
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testReadByte() {
+    try (Close in = inProvide("3.14")) {
+       assert readFloat() == 3.14F;
+    }
+  }
+}
+</code></pre></blockquote>
+</p>
+    */
     public static final Float readFloat() {
         return IO.readFloat();
     }
 
+    /** 
+<p>Read a double (about fifteen decimal digits of precision) value.</p>
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testReadByte() {
+    try (Close in = inProvide("3.141592653589793")) {
+       assert readDouble() == PI;
+    }
+  }
+}
+</code></pre></blockquote>
+</p>
+    */
     public static final Double readDouble() {
         return IO.readDouble();
     }
 
-    /** seed the kiss random-number generator with a strong random source.
-        This is done automatically before invoking run(). */
+    /** Seed the kiss random-number generator with a strong random source.
+
+        The random number generator is automatically seeded this way before run(), so you normally don't need to explicitly use this.  But if you want real randomness in a test, they normally are seeded with seed(1). 
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testRepeats() {
+  // seed(1) is used before every test for repeatability
+    int x1 = random(1,100_000_000);
+    double y1 = random();
+    seed(1);
+    int x2 = random(1,100_000_000);
+    double y2 = random();
+
+    assert x1 == x2;
+    assert y1 == y2;
+  }
+
+  void testReallyRandom() {
+    seed();
+    int x1 = random(1,100_000_000);
+    double y1 = random();
+
+    seed();
+    int x2 = random(1,100_000_000);
+    double y2 = random();
+
+    // there is a tiny chance these
+    // randomly are the same...
+    assert x1 != x2;
+    assert y1 != y2;
+  }
+
+  void run() {
+    // seed() is done for complete randomness in run.
+  }
+}
+</code></pre></blockquote>
+</p>
+*/
     public static final void seed() {
         RNG.seed();
     }
 
-    /** seed the random-number generator for a specific sequence.  Changing the seed will change the sequence, but the same seed produces the same sequence.  The kiss random number generator is reset with seed(1.0) before invoking each testXXX to help make reproducable results. */
+    /** <p>Seed the kiss random-number generator for a fixed pattern.  Small changes in the seed will have big changes in the sequence, but for real (cryptographically strong) randomness use {@see seed()} instead.</p>
+
+<p>Seeding each test with <code>seed(1)</code> makes tests more repeatable, which helps figure out what went wrong, so this is done automatically before each test.  Before <code>run()</code> the random number generator is seeded with <code>seed()</code> so it is strongly random.</p>
+
+<p>For example:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testRepeats() {
+  // seed(1) is used before every test for repeatability
+
+    int x1 = random(1,100_000_000);
+    double y1 = random();
+    seed(1);
+    int x2 = random(1,100_000_000);
+    double y2 = random();
+
+    assert x1 == x2;
+    assert y1 == y2;
+  }
+
+  void testReallyRandom() {
+    seed();
+    int x1 = random(1,100_000_000);
+    double y1 = random();
+
+    seed();
+    int x2 = random(1,100_000_000);
+    double y2 = random();
+
+    // there is a tiny chance these
+    // randomly are the same...
+    assert x1 != x2;
+    assert y1 != y2;
+  }
+
+  void run() {
+    // seed() is done for complete randomness in run.
+  }
+}
+</code></pre></blockquote>
+</p>
+*/
     public static final void seed(double value) {
         RNG.seed(value);
     }
 
-    /** Ex: int dieRoll = random(1,6); You can change or reset the random
-        sequence using the seed() or seed(value) methods. */
+    /** Generate a psuedo-random int in some range, as in:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void testDice() {
+    println("test die # 1: "+random(1,6));
+    println("test coin: "+random(0,1));
+  }
+  void run() {
+    println("run die # 1: "+random(1,6));
+    println("run coin: "+random(0,1));
+  }
+}
+</code></pre></blockquote>
+The random values in from <code>run()</code> will change, but the random values in <code>testDice()</code> will stay the same.  You can create different (fixed) random sequences by calling {@see seed(double)} with different values, and different strongly random sequences by calling {@see seed()}.</p>
+    */
     public static final int random(int a, int b) {
         return RNG.random(a, b);
     }
 
-    /** The value is uniform on the interval [0,1). */
+    /** Generate a uniform psuedo-random double bigger than or equal to 0, but less than 1:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void run() {
+    if (random() < 1.0/3.0) {
+       println("one-third chance.");
+    }
+  }
+}
+</code></pre></blockquote>
+Because the random values from <code>run()</code> will change, the results of run() will change.  Remeber you will have to <code>seed()</code> the random number generator in a test to get different random results.</p>
+    */
     public static final double random() {
         return RNG.random();
     }
 
-    /** The command-line arguments the application got (except those
-        used by the kiss.util.Run method) */
+    /** <p>The command-line arguments the application got (except those used by the kiss.util.Run method).  If you want to use the command line arguments, you can use the APP_ARGS to get to them from within your program.</p>  
+
+For example, for the program <code>App.java</code> in the current directory:
+<blockquote><pre><code>
+import static kiss.API.*;
+
+class App {
+  void run() {
+    println("APP_ARGS:",APP_ARGS);
+  }
+}
+</code></pre></blockquote>
+which could be compiled with
+<blockquote><pre><code>
+javac -cp /path/to/kiss.jar App.java
+</code></pre></blockquote>
+could be run as (use a semi-colon (;) instead of a colon (:) in the classpath argument on windows systems):
+<blockquote><pre><code>
+java -cp .:../kiss.jar kiss.util.Run a b c
+</code></pre></blockquote>
+This produces the output:
+<blockquote><pre><code>
+APP_ARGS: [a,b,c]
+</code></pre></blockquote>
+    */
     public static String[] APP_ARGS; // updated by Run.main
 
-    /** The name of the class.  This is usually just "App", but
+    /** <p>The name of the class.  This is usually just "App", but
         might be something else if the "--app <app>" command line
-        argument is passed to kiss.util.Run */
+        argument is passed to kiss.util.Run</p>
+
+<p>For example, if the entry point in your application is <code>org.foozle.Runner</code>, as in
+<blockquote><pre><code>
+package org.foozle;
+
+class Runner {
+  void run() {
+    println(APP_NAME + ": foozling with args:",APP_ARGS);
+  }
+}
+</code></pre></blockquote>
+as <code>Runner.java</code> in the folder <code>org/fozzle</code> of the current directory.  This can be compiled with
+<blockquote><pre><code>
+javac -cp /path/to/kiss.jar org/foozle/Runner.java
+</code></pre></blockquote>
+
+After compiling, this could be run as (use a semi-colon (;) instead of a colon (:) in the classpath argument on windows systems):
+<blockquote><pre><code>
+java -cp .:../kiss.jar kiss.util.Run --app org.foozle.Runner a b c
+</code></pre></blockquote>
+This produces the output:
+<blockquote><pre><code>
+org.foozle.Runner: foozling with args: [a,b,c]
+</code></pre></blockquote>
+    */
     public static String APP_NAME; // updated by Run.main
 
     /** This is a refrence the single main App object, just
