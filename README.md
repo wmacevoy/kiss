@@ -189,14 +189,13 @@ This assures the file is closed, even in the case of an error.
 
 * `print/ln(...)` --- like PrintStream's print/ln, but sends the formatted strings to the current output stream (`System.out` by default) and does a nicer job with arrays and collections.  You can change the default output with `outOpen`, `outExpect`, and `outVerify`.
 
-* `outExpect(...)` --- makes an internal stream which is used to match against future output (until `inClose()` or the end of the try block).  If there is a mismatch an error thrown.
+* `outExpect(...)` --- makes an internal stream which is used to match against future output (until `inClose()` or the end of the try block).  If there is a mismatch an error is thrown.
 
 * `readXXX(...)` --- uses a `java.util.Scanner` on the current input stream (`System.in` by default).  You can change the default with `inOpen` and `inProvide`.
 
 * `inProvide(...)` --- makes an internal stream which is used for future input (until `inClose()` or the end of the try block).
 
 * `outVerify(String filename)` --- like `outExpect`, but matches against an external file for more complicated output.
-
 ### Math
 
 All the math functions and constants are imported, with the exception of `Math.random()` and `Math.random(int n)` which is replaced by an improved version below.
