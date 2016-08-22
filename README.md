@@ -198,13 +198,15 @@ This assures the file is closed, even in the case of an error.
 * `outVerify(String filename)` --- like `outExpect`, but matches against an external file for more complicated output.
 ### Math
 
-All the math functions and constants are imported, with the exception of `Math.random()` and `Math.random(int n)` which is replaced by an improved version below.
+All the math functions and constants are imported, with the exception of `Math.random()` and `Math.random(int n)` which are replaced by improved versions.
 
 ### RNG
 
 A fast (faster than the standard random number generator) but cryptographically strong pseudo-random number generator is provided by default.  Calling `seed()` strongly sets the seed, while `seed(double value)` sets it to a reproducible sequence.
 
 * `int random(int a, int b)` --- generates a uniformly random integer in the interval, including the endpoints.  If b<=a, this always returns a.
+
+* `int random(int n)` --- same as `random(0,n-1)`.
 
 * `double random()` --- returns a uniformly random double in the interval [0,1).
 
