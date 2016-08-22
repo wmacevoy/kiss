@@ -345,12 +345,12 @@ class TestAESPRNG
         // x=-1-eps, for eps<0
 
         double b=(3*PI*(4-PI))/(8*(PI-3)); // b=1/a on Wiki
-        double sigma=copySign(1,eps);
+        double sigma=Math.copySign(1,eps);
         eps=abs(eps);
         double t=log(eps*(2-eps));
         double Q=(2*b)/PI+t/2;
         double y=sqrt(Q*Q-t*b)-Q;
-        return copySign(sqrt(y),sigma);
+        return Math.copySign(sqrt(y),sigma);
     }
 
     public static double round(double x, double digits) {

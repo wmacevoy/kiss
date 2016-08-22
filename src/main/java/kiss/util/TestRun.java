@@ -196,9 +196,9 @@ public class TestRun {
     
     
     void testOrder() {
-        assert format(test(new Sample1()).order).equals("[a,b,c]");
-        assert format(test(new Sample2()).order).equals("[a,b,c]");
-        assert format(test(new Sample3()).order).equals("[a,b,c]");
-        assert format(test(new Sample4()).order).equals("[a,b,c]");        
+        assert asString(test(new Sample1()).order).equals("[a,b,c]");
+        assert asString(test(new Sample2()).order).equals("[a,b,c]");
+        assert asString(test(new Sample3()).order).equals("[a,b,c]");
+        assert asString(test(new Sample4()).order).equals("[a,b,c]");        
     }
 }

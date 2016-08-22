@@ -528,375 +528,6 @@ public class API {
         IO.inClose();
     }
 
-    /** <p>Like {@see #print(boolean value)}, but appends the text
-        to the string builder. </p>
-
-<p>For example:
-<blockquote><pre><code>
-import static kiss.API.*;
-
-class App {
-  void testFormatStringBuilderBoolean() {
-    StringBuilder sb = new StringBuilder();
-    boolean value = true;
-    format(sb,value);
-    assert sb.toString().equals("true");
-  }
-}
-</code></pre></blockquote>
-    */
-    public static final void format(StringBuilder ans, boolean value) {
-        IO.format(ans, value);
-    }
-
-    /** <p>Like {@see #print(byte value)}, but appends the text
-        to the string builder.</p>
-<p>For example:
-<blockquote><pre><code>
-import static kiss.API.*;
-
-class App {
-  void testFormatStringBuilderByte() {
-    StringBuilder sb = new StringBuilder();
-    byte value = 100;
-    format(sb,value);
-    assert sb.toString().equals("100");
-  }
-}
-</code></pre></blockquote>
-</p>
-    */
-    public static final void format(StringBuilder ans, byte value) {
-        IO.format(ans, value);
-    }
-
-    /** <p>Like {@see #print(char value)}, but appends the text
-        to the string builder.</p>
-
-<p>For example:
-<blockquote><pre><code>
-import static kiss.API.*;
-
-class App {
-  void testFormatStringBuilderChar() {
-    StringBuilder sb = new StringBuilder();
-    char value = 'x';
-    format(sb,value);
-    assert sb.toString().equals("x");
-  }
-}
-</code></pre></blockquote>
-</p>
- */
-    public static final void format(StringBuilder ans, char value) {
-        IO.format(ans, value);
-    }
-
-    /** <p>Like {@see #print(short value)}, but appends the text
-        to the string builder.</p>
-
-<p>For example:
-<blockquote><pre><code>
-import static kiss.API.*;
-
-class App {
-  void testFormatStringBuilderShort() {
-    StringBuilder sb = new StringBuilder();
-    short value = 10_000;
-    format(sb,value);
-    assert sb.toString().equals("10000");
-  }
-}
-</code></pre></blockquote>
-</p>
-*/
-    public static final void format(StringBuilder ans, short value) {
-        IO.format(ans, value);
-    }
-
-    /** <p>Like {@see #print(int value)}, but appends the text
-        to the string builder.</p>
-
-<p>For example:
-<blockquote><pre><code>
-import static kiss.API.*;
-
-class App {
-  void testFormatStringBuilderInt() {
-    StringBuilder sb = new StringBuilder();
-    int value = 100_000_000;
-    format(sb,value);
-    assert sb.toString().equals("100000000");
-  }
-}
-</code></pre></blockquote>
-</p>
-*/
-    public static final void format(StringBuilder ans, int value) {
-        IO.format(ans, value);
-    }
-
-    /** <p>Like {@see #print(long value)}, but appends the text
-        to the string builder. </p>
-
-<p>For example:
-<blockquote><pre><code>
-import static kiss.API.*;
-
-class App {
-  void testFormatStringBuilderLong() {
-    StringBuilder sb = new StringBuilder();
-    long value = 100_000_000_000_000;
-    format(sb,value);
-    assert sb.toString().equals("100000000000000");
-  }
-}
-</code></pre><blockqoute>
-</p>
-*/
-    public static final void format(StringBuilder ans, long value) {
-        IO.format(ans, value);
-    }
-
-    /** <p>Like {@see #print(float value)}, but appends the text
-        to the string builder. </p>
-
-<p>For example:
-<blockquote><pre><code>
-import static kiss.API.*;
-
-class App {
-  void testFormatStringBuilderFloat() {
-    StringBuilder sb = new StringBuilder();
-    float value = 3.1415;
-    format(sb,value);
-    assert sb.toString().equals("3.1415");
-  }
-}
-</code></pre></blockquote>
-</p>
-*/    
-    public static final void format(StringBuilder ans, float value) {
-        IO.format(ans, value);
-    }
-
-    /** <p>Like {@see #print(double value)}, but appends the text
-        to the string builder. </p>
-
-<p>For example:
-<blockquote><pre><code>
-import static kiss.API.*;
-
-class App {
-  void testFormatStringBuilderDouble() {
-    StringBuilder sb = new StringBuilder();
-    double value = PI;
-    format(sb,value);
-    assert sb.toString().equals("3.141592653589793");
-  }
-}
-</code></pre></blockquote>
-</p>
-*/    
-    public static final void format(StringBuilder ans, double value) {
-        IO.format(ans, value);
-    }
-
-    /** <p>Like {@see #print(Object value)}, but appends the text
-        to the string builder. </p>
-
-<p>For example:
-<blockquote><pre><code>
-import static kiss.API.*;
-
-class App {
-  void testFormatStringBuilderObject() {
-    StringBuilder sb = new StringBuilder();
-    Object value = new int[] {2,5,6};
-    format(sb,value);
-    assert sb.toString().equals("[2,5,6]");
-  }
-}
-</code></pre></blockquote>
-</p>
-*/    
-    public static final void format(StringBuilder ans, Object value) {
-        IO.format(ans, value);
-    }
-
-    /** <p>Like {@see #print(boolean value)}, but just returns a string.</p>
-
-<p>For example:
-<blockquote><pre><code>
-import static kiss.API.*;
-
-class App {
-  void testFormatBoolean() {
-    boolean value = true;
-    String string = format(value);
-    assert string.equals("true");
-  }
-}
-</code></pre></blockquote>
-    */
-    public static final String format(boolean value) {
-        return IO.format(value);
-    }
-
-    /** <p>Like {@see #print(byte value)}, but just returns a string.</p>
-
-<p>For example:
-<blockquote><pre><code>
-import static kiss.API.*;
-
-class App {
-  void testFormatByte() {
-    byte value = 100;
-    String string = format(value);
-    assert string.equals("100");
-  }
-}
-</code></pre></blockquote>
-    */
-    public static final String format(byte value) {
-        return IO.format(value);
-    }
-
-    /** <p>Like {@see #print(char value)}, but just returns a string.</p>
-
-<p>For example:
-<blockquote><pre><code>
-import static kiss.API.*;
-
-class App {
-  void testFormatChar() {
-    char value = 'x';
-    String string = format(value);
-    assert string.equals("x");
-  }
-}
-</code></pre></blockquote>
-    */
-    public static final String format(char value) {
-        return IO.format(value);
-    }
-
-    /** <p>Like {@see #print(short value)}, but just returns a string.</p>
-
-<p>For example:
-<blockquote><pre><code>
-import static kiss.API.*;
-
-class App {
-  void testFormatShort() {
-    short value = 10_000;
-    String string = format(value);
-    assert string.equals("10000");
-  }
-}
-</code></pre></blockquote>
-    */
-    public static final String format(short value) {
-        return IO.format(value);
-    }
-
-    /** <p>Like {@see #print(int value)}, but just returns a string.</p>
-
-<p>For example:
-<blockquote><pre><code>
-import static kiss.API.*;
-
-class App {
-  void testFormatInt() {
-    int value = 100_000_000;
-    String string = format(value);
-    assert string.equals("100000000");
-  }
-}
-</code></pre></blockquote>
-    */
-    public static final String format(int value) {
-        return IO.format(value);
-    }
-
-    /** <p>Like {@see #print(long value)}, but just returns a string.</p>
-
-<p>For example:
-<blockquote><pre><code>
-import static kiss.API.*;
-
-class App {
-  void testFormatLong() {
-    long value = 100_000_000_000;
-    String string = format(value);
-    assert string.equals("100000000000");
-  }
-}
-</code></pre></blockquote>
-    */
-    public static final String format(long value) {
-        return IO.format(value);
-    }
-
-    /** <p>Like {@see #print(float value)}, but just returns a string.</p>
-
-<p>For example:
-<blockquote><pre><code>
-import static kiss.API.*;
-
-class App {
-  void testFormatLong() {
-    float value = 3.1415;
-    String string = format(value);
-    assert string.equals("3.1415");
-  }
-}
-</code></pre></blockquote>
-    */
-    public static final String format(float value) {
-        return IO.format(value);
-    }
-
-    /** <p>Like {@see #print(float value)}, but just returns a string.</p>
-
-<p>For example:
-<blockquote><pre><code>
-import static kiss.API.*;
-
-class App {
-  void testFormatDouble() {
-    float value = PI;
-    String string = format(value);
-    assert string.equals("3.141592653589793");
-  }
-}
-</code></pre></blockquote>
-</p>
-    */
-    public static final String format(double value) {
-        return IO.format(value);
-    }
-
-    /** <p>Like {@see #print(Object value)}, but just returns a string.</p>
-
-<p>For example:
-<blockquote><pre><code>
-import static kiss.API.*;
-
-class App {
-  void testFormatObject() {
-    Object value = new int[] {2,5,6};
-    String string = format(value);
-    assert string.equals("[2,5,6]");
-  }
-}
-</code></pre></blockquote>
-</p>
-*/    
-    public static final String format(Object value) {
-        return IO.format(value);
-    }
-
     /** 
         <p>Format a boolean (true or false) value for output.  This prints the characters "true" or "false".  If this is the last thing on a line, use {@see #println(boolean)} instead.</p>
 
@@ -1693,12 +1324,14 @@ org.foozle.Runner: foozling with args: [a,b,c]
     }
 
 
-    /** Obscure part of Math, here for completeness. */
+    /** Obscure part of <code>java.Math.*</code>, here for completeness. 
+        See {@see java.lang.Math#copySign(double,double)}. */
     public static final double copySign(double magnitude, double sign) {
         return Math.copySign(magnitude,sign);
     }
 
-    /** Obscure part of Math, here for completeness. */
+    /** Obscure part of <code>java.Math.*</code>, here for completeness. 
+        See {@see java.lang.Math#copySign(float,float)}. */
     public static final float copySign(float magnitude, float sign) {
         return Math.copySign(magnitude, sign);
     }
@@ -1718,7 +1351,8 @@ org.foozle.Runner: foozling with args: [a,b,c]
         return Math.exp(a);
     }
 
-    /** Obscure part of Math, here for completeness. */
+    /** Obscure part of <code>java.Math.*</code>, here for completeness. 
+        See {@see java.lang.Math#expm1(double)}. */
     public static final double expm1(double x) {
         return Math.expm1(x);
     }
@@ -1728,22 +1362,26 @@ org.foozle.Runner: foozling with args: [a,b,c]
         return Math.floor(a);
     }
 
-    /** Obscure part of Math, here for completeness. */    
+    /** Obscure part of <code>java.Math.*</code>, here for completeness. 
+        See {@see java.lang.Math#getExponent(double)}. */
     public static final int getExponent(double d) {
         return Math.getExponent(d);
     }
 
-    /** Obscure part of Math, here for completeness. */
+    /** Obscure part of <code>java.Math.*</code>, here for completeness. 
+        See {@see java.lang.Math#getExponent(float)}. */
     public static final int getExponent(float f) {
         return Math.getExponent(f);
     }
 
-    /** Obscure part of Math, here for completeness. */
+    /** Obscure part of <code>java.Math.*</code>, here for completeness. 
+        See {@see java.lang.Math#hypot(double,double)}. */
     public static final double hypot(double x, double y) {
         return Math.hypot(x, y);
     }
 
-    /** Obscure part of Math, here for completeness. */
+    /** Obscure part of <code>java.Math.*</code>, here for completeness. 
+        See {@see java.lang.Math#IEEEremainder(double,double)}. */
     public static final double IEEEremainder(double f1, double f2) {
         return Math.IEEEremainder(f1,f2);
     }
@@ -1758,7 +1396,8 @@ org.foozle.Runner: foozling with args: [a,b,c]
         return Math.log10(a);
     }
 
-    /** Obscure part of Math, here for completeness. */    
+    /** Obscure part of <code>java.Math.*</code>, here for completeness. 
+        See {@see java.lang.Math#log1p(double)}. */
     public static final double log1p(double x) {
         return Math.log1p(x);
     }
@@ -1795,22 +1434,27 @@ org.foozle.Runner: foozling with args: [a,b,c]
         return Math.min(a, b);
     }
 
-    /** Obscure part of Math, here for completeness. */
+    /** Obscure part of <code>java.Math.*</code>, here for completeness. 
+        See {@see java.lang.Math#nextAfter(double,double)}. */
     public static final double nextAfter(double start, double direction) {
         return Math.nextAfter(start, direction);
     }
 
-    /** Obscure part of Math, here for completeness. */
+    /** Obscure part of <code>java.Math.*</code>, here for completeness. 
+        See {@see java.lang.Math#nextAfter(float,double)}. */
     public static final float nextAfter(float start, double direction) {
         return Math.nextAfter(start, direction);
     }
 
-    /** Obscure part of Math, here for completeness. */
+
+    /** Obscure part of <code>java.Math.*</code>, here for completeness. 
+        See {@see java.lang.Math#nextUp(double)}. */
     public static final double nextUp(double d) {
         return Math.nextUp(d);
     }
 
-    /** Obscure part of Math, here for completeness. */
+    /** Obscure part of <code>java.Math.*</code>, here for completeness. 
+        See {@see java.lang.Math#nextUp(float)}. */
     public static final float nextUp(float f) {
         return Math.nextUp(f);
     }
@@ -1836,12 +1480,14 @@ org.foozle.Runner: foozling with args: [a,b,c]
         return Math.round(a);
     }
 
-    /** Obscure part of Math, here for completeness. */
+    /** Obscure part of <code>java.Math.*</code>, here for completeness. 
+        See {@see java.lang.Math#scalb(double,int)}. */
     public static final double scalb(double d, int scaleFactor) {
         return Math.scalb(d, scaleFactor);
     }
 
-    /** Obscure part of Math, here for completeness. */    
+    /** Obscure part of <code>java.Math.*</code>, here for completeness. 
+        See {@see java.lang.Math#scalb(float,int)}. */
     public static final float scalb(float f, int scaleFactor) {
         return Math.scalb(f, scaleFactor);
     }
@@ -1891,12 +1537,14 @@ org.foozle.Runner: foozling with args: [a,b,c]
         return Math.toRadians(angdeg);
     }
 
-    /** Obscure part of Math, here for completeness. */
+    /** Obscure part of <code>java.Math.*</code>, here for completeness. 
+        See {@see java.lang.Math#ulp(double)}. */
     public static final double ulp(double d) {
         return Math.ulp(d);
     }
 
-    /** Obscure part of Math, here for completeness. */
+    /** Obscure part of <code>java.Math.*</code>, here for completeness. 
+        See {@see java.lang.Math#ulp(float)}. */
     public static final float ulp(float f) {
         return Math.ulp(f);
     }
@@ -2289,58 +1937,78 @@ org.foozle.Runner: foozling with args: [a,b,c]
     public static final double asDouble(Object x) {
         return As.asDouble(x);
     }
-    
+
+    /** "true" or "false" */
     public static final String asString(boolean x) {
         return As.asString(x);
     }
+
+    /** String version of printf(fmt,x) */
     public static final String asString(boolean x, CharSequence fmt) {
         return As.asString(x,fmt);
     }
     public static final String asString(char x) {
         return As.asString(x);
     }
+
+    /** String version of printf(fmt,x) */    
     public static final String asString(char x, CharSequence fmt) {
         return As.asString(x,fmt);
     }
     public static final String asString(byte x) {
         return As.asString(x);
     }
+
+    /** String version of printf(fmt,x) */    
     public static final String asString(byte x, CharSequence fmt) {
         return As.asString(x,fmt);
     }
     public static final String asString(short x) {
         return As.asString(x);
     }
+
+    /** String version of printf(fmt,x) */    
     public static final String asString(short x, CharSequence fmt) {
         return As.asString(x,fmt);
     }
     public static final String asString(int x) {
         return As.asString(x);
     }
+
+    /** String version of printf(fmt,x) */    
     public static final String asString(int x, CharSequence fmt) {
         return As.asString(x,fmt);
     }
     public static final String asString(String x) {
         return As.asString(x);
     }
+
+    /** String version of printf(fmt,x) */    
     public static final String asString(String x, CharSequence fmt) {
         return As.asString(x,fmt);
     }
     public static final String asString(float x) {
         return As.asString(x);
     }
+
+    /** String version of printf(fmt,x) */    
     public static final String asString(float x, CharSequence fmt) {
         return As.asString(x,fmt);
     }
     public static final String asString(double x) {
         return As.asString(x);
     }
+
+    /** String version of printf(fmt,x) */    
     public static final String asString(double x, CharSequence fmt) {
         return As.asString(x,fmt);
     }
+    
     public static final String asString(Object x) {
         return As.asString(x);
     }
+
+    /** String version of printf(fmt,x) */    
     public static final String asString(Object x, CharSequence fmt) {
         return As.asString(x,fmt);
     }
