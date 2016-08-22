@@ -2,8 +2,6 @@ package kiss.util;
 
 import static kiss.API.*;
 
-import java.util.Formatter;
-
 public class As {
     public static final boolean asBoolean(boolean x) { return x; }
     public static final boolean asBoolean(char x) { return x != 0; }
@@ -21,7 +19,7 @@ public class As {
     public static final boolean asBoolean(double x) { return x != 0; }
 
     public static final boolean asBoolean(Number x) {
-	return !(x.longValue() == 0 && x.doubleValue() == 0);
+	return !((x.longValue() == 0 && x.doubleValue() == 0));
     }
 
     public static final boolean asBoolean(Object x) {    

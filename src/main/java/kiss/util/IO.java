@@ -374,10 +374,12 @@ public class IO {
     }
 
     public static final void printVarArgs(PrintStream ps, Object args[]) {
+        StringBuilder sb = new StringBuilder();
         for (int i=0; i<args.length; ++i) {
-            if (i>0) ps.print(" ");
-            ps.print(format(args[i]));
+            if (i > 0) sb.append(" ");
+            format(sb,args[i]);
         }
+        ps.print(sb);
     }
 
     public static final void print(Object... args) {
