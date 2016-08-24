@@ -167,8 +167,9 @@ class TestAESPRNG
         for (int i=0; i<n; ++i) { sum += buf[i]; sum2 += buf[i]*buf[i]; }
         double xbar = sum/n;
         double sigma = sqrt(sum2/n);
-        assert abs(xbar) < 1/sqrt(n);
-        assert abs(sigma-1) < 1/sqrt(n);
+        assert abs(xbar) < 6/sqrt(n);
+        println("sigma: " + sigma);
+        assert abs(sigma-1) < 6/sqrt(n);
     }
 
     void testMonteCarloDoubles() {

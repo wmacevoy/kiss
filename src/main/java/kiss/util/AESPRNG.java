@@ -337,6 +337,8 @@ public class AESPRNG extends Random
         try {
             aeskey = java.util.Arrays.copyOf(value,16);
             aesecb.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(aeskey, "AES"));
+            aesecb.doFinal(value,8,16,aeskey);
+            aesecb.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(aeskey, "AES"));
             java.util.Arrays.fill(aeskey,(byte) 0);
             ctr0 = (((long) value[16+0]) >> (0*8))
                 |(((long) value[16+1]) >> (1*8))

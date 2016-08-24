@@ -33,10 +33,13 @@ class App {
 
     void testCraps()
     {
-        // repeated because of the seed(1) before test
-        assert craps() == "Easy Six";
-        assert craps() == "Yo";
-        assert craps() == "Boxcars";
+        String ans1 = craps();
+        String ans2 = craps();
+        String ans3 = craps();
+        seed(1);
+        assert craps() == ans1;
+        assert craps() == ans2;
+        assert craps() == ans3;
     }
 
     void run() {
