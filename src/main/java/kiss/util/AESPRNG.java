@@ -303,9 +303,11 @@ public class AESPRNG extends Random
     public final void seed() {
         byte [] value = new byte[24];
         try {
-            if (new FileInputStream("/dev/urandom").read(value) == 24) {
-                seed(value);
-                return;
+            try (FileInputStream in = new FileInputStream("/dev/urandom")) {
+                if (in.read(value) == 24) {
+                    seed(value);
+                    return;
+                }
             }
         } catch (Exception e) { }
         try {
