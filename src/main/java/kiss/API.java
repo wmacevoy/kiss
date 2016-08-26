@@ -17,7 +17,7 @@ import kiss.util.As;
   <ul>
   <li>simple
   <li>testable
-  <li>unsurpising
+  <li>unsurprising
   </ul>
 </p>
 
@@ -1145,7 +1145,7 @@ The random values in from <code>run()</code> will change, but the random values 
         return RNG.random(0, n-1);
     }
     
-    /** Generate a uniform psuedo-random double bigger than or equal to 0, but less than 1:
+    /** Generate a uniform pseudo-random double bigger than or equal to 0, but less than 1:
 <blockquote><pre><code>
 import static kiss.API.*;
 
@@ -1157,7 +1157,7 @@ class App {
   }
 }
 </code></pre></blockquote>
-Because the random values from <code>run()</code> will change, the results of run() will change.  Remeber you will have to <code>seed()</code> the random number generator in a test to get different random results.</p>
+Because the random values from <code>run()</code> will change, the results of run() will change.  Remember you will have to <code>seed()</code> the random number generator in a test to get different random results.</p>
     */
     public static final double random() {
         return RNG.random();
