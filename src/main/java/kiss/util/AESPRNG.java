@@ -48,8 +48,17 @@ public class AESPRNG extends Random implements kiss.API.Close
         if (aesecb != null) {
             byte[] zero = new byte[16];
             try {
-                aesecb.init(Cipher.ENCRYPT_MODE, 
-                            new SecretKeySpec(zero,"AES"));
+                SecretKeySpec key = null;
+                try {
+                    key = new SecretKeySpec(zero,"AES");
+                    aesecb.init(Cipher.ENCRYPT_MODE, key);
+                } finally {
+                    if (key != null) {
+                        try {
+                            key.destroy();
+                        } catch (Exception e) {}
+                    }
+                }
             } catch (Exception e) {
                 throw new Error("zero key failure: " + e.getMessage());
             }
@@ -89,8 +98,17 @@ public class AESPRNG extends Random implements kiss.API.Close
         try {
             if (aesecb == null) seed();
             aesecb.doFinal(data,0,page,data,0);
-            aesecb.init(Cipher.ENCRYPT_MODE, 
-                        new SecretKeySpec(data,0,16,"AES"));
+            SecretKeySpec key = null;
+            try {
+                key = new SecretKeySpec(data,0,16,"AES");
+                aesecb.init(Cipher.ENCRYPT_MODE, key);
+            } finally {
+                if (key != null) {
+                    try {
+                        key.destroy();
+                    } catch (Exception e) {}
+                }
+            }
             ctr0 = dataLongs.get(2);
         } catch (Exception e) {
             throw new Error("Block encryption failure.");
@@ -378,11 +396,29 @@ public class AESPRNG extends Random implements kiss.API.Close
         }
 
         try {
-            aesecb.init(Cipher.ENCRYPT_MODE, 
-                        new SecretKeySpec(value,0,16, "AES"));
+            SecretKeySpec key = null;
+            try {
+                key = new SecretKeySpec(value,0,16,"AES");
+                aesecb.init(Cipher.ENCRYPT_MODE, key);
+            } finally {
+                if (key != null) {
+                    try {
+                        key.destroy();
+                    } catch (Exception e) {}
+                }
+            }
             aesecb.doFinal(value,8,16,value,8);
-            aesecb.init(Cipher.ENCRYPT_MODE, 
-                        new SecretKeySpec(value,8,16, "AES"));
+            try {
+                key = new SecretKeySpec(value,8,16,"AES");
+                aesecb.init(Cipher.ENCRYPT_MODE, key);
+            } finally {
+                if (key != null) {
+                    try {
+                        key.destroy();
+                    } catch (Exception e) {}
+                }
+            }
+
             ctr0 = 
                  (((long) (value[0]^value[ 8])) >> (0*8))
                 |(((long) (value[1]^value[ 9])) >> (1*8))
