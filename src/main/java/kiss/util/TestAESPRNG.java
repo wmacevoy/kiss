@@ -188,7 +188,7 @@ class TestAESPRNG
                 numeric += cos(omega*x[i]);
             }
             numeric = numeric/n;
-            assert abs(exact-numeric) < 1/sqrt(n);
+            assert abs(exact-numeric) < 6/sqrt(n);
         }
     }
 
@@ -208,7 +208,7 @@ class TestAESPRNG
                 numeric += cos(omega*x[i]);
             }
             numeric = numeric/n;
-            assert abs(exact-numeric) < 1/sqrt(n);
+            assert abs(exact-numeric) < 6/sqrt(n);
         }
     }
 

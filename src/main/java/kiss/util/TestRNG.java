@@ -41,20 +41,4 @@ class TestRNG {
         seed(2);
         for (int i=0; i<samples.length; ++i) assert samples[i] != random();
     }
-
-    void testRandomDistribution() {
-        // try monte-carlo integration of $\int_0^1 cos(omega*x) dx
-        int n = 1000;
-        double[] omegas = new double[] { 0, 1, sqrt(2), 2*PI };
-        for (double omega : omegas) {
-            double exact = (omega != 0) ? sin(omega)/omega : 1;
-
-            double numeric = 0;
-            for (int i=0; i<n; ++i) {
-                numeric += cos(omega*random());
-            }
-            numeric = numeric/n;
-            assert abs(exact-numeric) < 1/sqrt(n);
-        }
-    }
 }

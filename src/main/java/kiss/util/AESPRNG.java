@@ -5,23 +5,57 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
+import java.nio.ByteOrder;
 import java.io.FileInputStream;
 import java.security.SecureRandom;
 import java.util.Random;
 
 /** When using bulk random numbers, AESPRNG is about twice as fast as
  *  Random on reasonably modern AES-accelerated hardware.  And AESPRNG
- *  produces cryptographically strong psuedo-random number sequences. */
+ *  produces cryptographically strong psuedo-random number sequences.
+ *
+ */
 
-public class AESPRNG extends Random
+public class AESPRNG extends Random implements kiss.API.Close
 {
     private Cipher aesecb;
-    private final int PAGE = 512;
+    private final int MIN_PAGE = 64;
+    private final int MAX_PAGE = 8192;
+    private int page = MIN_PAGE;
     private byte[] data;
     private ByteBuffer dataBuffer;
     private LongBuffer dataLongs;
     private IntBuffer dataInts;
     private boolean constructed = false;
+
+    public synchronized void close() {
+        if (gaussianQueue != null) {
+            java.util.Arrays.fill(gaussianQueue,0,page/16,(double) 0);
+            gaussianQueue = null;
+            gaussianAt = 0;
+            gaussianN = 0;
+        }
+        if (data != null) {
+            java.util.Arrays.fill(data,0,page,(byte) 0);
+            data = null;
+        }
+
+        page = MIN_PAGE;
+        at = page;
+        ctr = 0;
+        ctr0 = 0;
+
+        if (aesecb != null) {
+            byte[] zero = new byte[16];
+            try {
+                aesecb.init(Cipher.ENCRYPT_MODE, 
+                            new SecretKeySpec(zero,"AES"));
+            } catch (Exception e) {
+                throw new Error("zero key failure: " + e.getMessage());
+            }
+            aesecb = null;
+        }
+    }
 
     public AESPRNG() {
         // so Random's setSeed, called in
@@ -30,35 +64,43 @@ public class AESPRNG extends Random
         constructed = true;
     }
 
-    private volatile int at = PAGE;
+    private volatile int at = page;
     private long ctr0 = 0;
     private long ctr = 0;
 
     private final void readPage() {
         if (data == null) {
-            data = new byte[PAGE];
+            data = new byte[MAX_PAGE];
             dataBuffer = ByteBuffer.wrap(data);
+            dataBuffer.order(ByteOrder.LITTLE_ENDIAN);
             dataLongs = dataBuffer.asLongBuffer();
             dataInts = dataBuffer.asIntBuffer();            
         }
-        for (int i=0; i<PAGE/8; i += 2) {
+        if (page < MAX_PAGE) {
+            page *= 2;
+        }
+        int n=page/8;
+        for (int i=0; i<n; i += 2) {
             dataLongs.put(i+0,ctr);
             dataLongs.put(i+1,ctr0);
             ++ctr;
         }
+        at = 24;
         try {
             if (aesecb == null) seed();
-            aesecb.doFinal(data,0,PAGE,data,0);
+            aesecb.doFinal(data,0,page,data,0);
+            aesecb.init(Cipher.ENCRYPT_MODE, 
+                        new SecretKeySpec(data,0,16,"AES"));
+            ctr0 = dataLongs.get(2);
         } catch (Exception e) {
             throw new Error("Block encryption failure.");
         }
-        at = 0;
     }
 
     public synchronized final void nextBytes(byte[] buf, int offset, int length) {
         while (length > 0) {
-            if (at >= PAGE) readPage();
-            int n = PAGE-at;
+            if (at >= page) readPage();
+            int n = page-at;
             if (n > length) n=length;
             System.arraycopy(data,at,buf,offset,n);
             at += n;
@@ -68,7 +110,7 @@ public class AESPRNG extends Random
     }
 
     public synchronized final byte nextByte() {
-        if (at >= PAGE) readPage();
+        if (at >= page) readPage();
         byte ans = data[at];
         at += 1;
         return ans;
@@ -78,8 +120,8 @@ public class AESPRNG extends Random
     public synchronized final void nextLongs(long[] buf, int offset, int length) {
         at = (at+7) & ~7;
         while (length > 0) {
-            if (at >= PAGE) readPage();
-            int n = (PAGE-at)/8;
+            if (at >= page) readPage();
+            int n = (page-at)/8;
             if (n > length) n=length;
             dataLongs.position(at/8);
             dataLongs.get(buf,offset,n);
@@ -100,7 +142,7 @@ public class AESPRNG extends Random
     /** [Long.MIN_VALUE,Long.MAX_VALUE] */                    
     public synchronized final long nextLong() {
         at = (at+7) & ~7;
-        if (at >= PAGE) readPage();
+        if (at >= page) readPage();
         long ans = dataLongs.get(at/8);
         at += 8;
         return ans;
@@ -115,8 +157,8 @@ public class AESPRNG extends Random
     public synchronized final void nextInts(int[] buf, int offset, int length) {
         at = (at+3) & ~3;
         while (length > 0) {
-            if (at >= PAGE) readPage();
-            int n = (PAGE-at)/4;
+            if (at >= page) readPage();
+            int n = (page-at)/4;
             if (n > length) n=length;
             dataInts.position(at/4);
             dataInts.get(buf,offset,n);
@@ -137,7 +179,7 @@ public class AESPRNG extends Random
     /** [Integer.MIN_VALUE,Integer.MAX_VALUE] */    
     public synchronized final int nextInt() {
         at = (at+3) & ~3;
-        if (at >= PAGE) readPage();
+        if (at >= page) readPage();
         int ans = dataInts.get(at/4);
         at += 4;
         return ans;
@@ -153,8 +195,8 @@ public class AESPRNG extends Random
     {
         at = (at+7) & ~7;
         while (length > 0) {
-            if (at >= PAGE) readPage();
-            int n = (PAGE-at)/8;
+            if (at >= page) readPage();
+            int n = (page-at)/8;
             if (n > length) n=length;
             dataLongs.position(at/8);
             for (int i=0; i<n; ++i) {
@@ -179,8 +221,8 @@ public class AESPRNG extends Random
     {
         at = (at+3) & ~3;
         while (length > 0) {
-            if (at >= PAGE) readPage();
-            int n = (PAGE-at)/4;
+            if (at >= page) readPage();
+            int n = (page-at)/4;
             if (n > length) n=length;
             dataInts.position(at/4);
             for (int i=0; i<n; ++i) {
@@ -207,7 +249,7 @@ public class AESPRNG extends Random
 	    long D = ((long) max) - ((long) min) + ((long) 1);
 	    long x;
 	    for (;;) {
-		if (at >= PAGE) readPage();
+		if (at >= page) readPage();
 		x = dataLongs.get(at/8) & Long.MAX_VALUE;
 		at += 8;
 		
@@ -237,8 +279,8 @@ public class AESPRNG extends Random
 
         at = (at+7) & ~7;
         while (length > 0) {
-            if (at >= PAGE) readPage();
-            int n = (PAGE-at)/8;
+            if (at >= page) readPage();
+            int n = (page-at)/8;
             if (n > length) n=length;
             dataLongs.position(at/8);
 	    int k=0;
@@ -335,29 +377,29 @@ public class AESPRNG extends Random
             }
         }
 
-	byte[] aeskey = null;	
         try {
-            aeskey = java.util.Arrays.copyOf(value,16);
-            aesecb.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(aeskey, "AES"));
-            aesecb.doFinal(value,8,16,aeskey);
-            aesecb.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(aeskey, "AES"));
-            java.util.Arrays.fill(aeskey,(byte) 0);
-            ctr0 = (((long) value[16+0]) >> (0*8))
-                |(((long) value[16+1]) >> (1*8))
-                |(((long) value[16+2]) >> (2*8))
-                |(((long) value[16+3]) >> (3*8))
-                |(((long) value[16+4]) >> (4*8))
-                |(((long) value[16+5]) >> (5*8))
-                |(((long) value[16+6]) >> (6*8))
-                |(((long) value[16+7]) >> (7*8));
+            aesecb.init(Cipher.ENCRYPT_MODE, 
+                        new SecretKeySpec(value,0,16, "AES"));
+            aesecb.doFinal(value,8,16,value,8);
+            aesecb.init(Cipher.ENCRYPT_MODE, 
+                        new SecretKeySpec(value,8,16, "AES"));
+            ctr0 = 
+                 (((long) (value[0]^value[ 8])) >> (0*8))
+                |(((long) (value[1]^value[ 9])) >> (1*8))
+                |(((long) (value[2]^value[10])) >> (2*8))
+                |(((long) (value[3]^value[11])) >> (3*8))
+                |(((long) (value[4]^value[12])) >> (4*8))
+                |(((long) (value[5]^value[13])) >> (5*8))
+                |(((long) (value[6]^value[14])) >> (6*8))
+                |(((long) (value[7]^value[15])) >> (7*8));
         } catch (Exception ex) {
             ex.printStackTrace();
             throw new Error("Failing to set aes key is inconceivable.");
         } finally {
-            if (aeskey != null) java.util.Arrays.fill(aeskey,(byte) 0);
             java.util.Arrays.fill(value,(byte) 0);	    
 	}
-        at = PAGE;
+        page=MIN_PAGE;
+        at = page;
         ctr = 0;
         gaussianAt = 0;
         gaussianN  = 0;
@@ -374,12 +416,13 @@ public class AESPRNG extends Random
     private int gaussianN = 0;    
 
     private final void nextGaussianPage() {
-        if (gaussianQueue == null) gaussianQueue = new double[PAGE/16];
+        if (gaussianQueue == null) gaussianQueue = new double[MAX_PAGE/16];
         gaussianAt = 0;
         gaussianN = 0;
         while (gaussianN == 0) {
-            nextDoubles(gaussianQueue,0,PAGE/16);
-            for (int i=0; i<gaussianQueue.length; i += 2) {
+            int n = page/16;
+            nextDoubles(gaussianQueue,0,n);
+            for (int i=0; i < n; i += 2) {
                 double v1, v2, s;
                 v1 = 2 * gaussianQueue[i] - 1;   // between -1.0 and 1.0
                 v2 = 2 * gaussianQueue[i+1] - 1;   // between -1.0 and 1.0
@@ -421,21 +464,16 @@ public class AESPRNG extends Random
 
     public final void seed(long _value) {
 
-        byte[] value = new byte[]
-            { (byte) 0xe5, (byte) 0xcb, (byte) 0xf1, (byte) 0xd2,
-              (byte) 0x0a, (byte) 0x29, (byte) 0x48, (byte) 0x3c,
-              (byte) 0x50, (byte) 0x64, (byte) 0xb1, (byte) 0x25,
-              (byte) 0x3b, (byte) 0xa1, (byte) 0xf3, (byte) 0xa3,
-              (byte) 0xdc, (byte) 0x9e, (byte) 0xaa, (byte) 0x1d,
-              (byte) 0x76, (byte) 0xc5, (byte) 0x4c, (byte) 0xa8 };
-        value[0] ^=(byte) (_value >> (0*8));
-        value[1] ^=(byte) (_value >> (1*8));
-        value[2] ^=(byte) (_value >> (2*8));
-        value[3] ^=(byte) (_value >> (3*8));
-        value[4] ^=(byte) (_value >> (4*8));
-        value[5] ^=(byte) (_value >> (5*8));
-        value[6] ^=(byte) (_value >> (6*8));
-        value[7] ^=(byte) (_value >> (7*8));
+        byte[] value = new byte[24];
+
+        value[0] =(byte) (_value >> (0*8));
+        value[1] =(byte) (_value >> (1*8));
+        value[2] =(byte) (_value >> (2*8));
+        value[3] =(byte) (_value >> (3*8));
+        value[4] =(byte) (_value >> (4*8));
+        value[5] =(byte) (_value >> (5*8));
+        value[6] =(byte) (_value >> (6*8));
+        value[7] =(byte) (_value >> (7*8));
 
         seed(value);
     }
