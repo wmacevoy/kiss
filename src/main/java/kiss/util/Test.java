@@ -8,4 +8,5 @@ public class Test {
     void testRNG() { test(new TestRNG()); }
     void testRun() { test(new TestRun()); }
     void testAESPRNG() { test(new TestAESPRNG()); }
+    void testCrypt() { test(new TestCrypt()); }
 }
