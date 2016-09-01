@@ -68,37 +68,35 @@ public class Crypt {
     }
 
     // AES-GCM parameters
-    public static final int AES_KEY_BITS = 128;
-    public static final int GCM_NONCE_BITS = 96;
-    public static final int GCM_TAG_BITS = 128;
+    public static final int AES_KEY_LEN = 16;
+    public static final int GCM_NONCE_LEN = 12;
+    public static final int GCM_TAG_LEN = 16;
+    public static final int PKCS5_LEN = 16;
 
     static final AESPRNG rng = new AESPRNG();
 
-    static final byte[] pad = new byte[] { 1, 0, 0, 0,
-                                           0, 0, 0, 0,
-                                           0, 0, 0, 0,
-                                           0, 0, 0, 0 };
-
     public static final byte[] encrypt(byte[] key, byte[] plain) {
-        int padlen = ((plain.length+16) & ~15) - plain.length;
-        int enclen = GCM_NONCE_BITS/8 + plain.length + padlen + GCM_TAG_BITS/8;
+        byte padlen = (byte)(PKCS5_LEN-(plain.length%PKCS5_LEN));
+        int enclen = GCM_NONCE_LEN + plain.length + padlen + GCM_TAG_LEN;
         byte[] enc = new byte[enclen];
 
         try {
             SecretKeySpec aesKey = 
-                new SecretKeySpec(Arrays.copyOf(sha256(key),AES_KEY_BITS/8),
+                new SecretKeySpec(Arrays.copyOf(sha256(key),AES_KEY_LEN),
                                   "AES");
 
-            rng.nextBytes(enc,0,GCM_NONCE_BITS/8);
+            rng.nextBytes(enc,0,GCM_NONCE_LEN);
             
             Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-            final byte[] nonce = new byte[GCM_NONCE_BITS/8];
-            rng.nextBytes(nonce);
-            GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_BITS, nonce);
+            rng.nextBytes(enc,0,GCM_NONCE_LEN);
+            GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LEN*8, enc, 0, GCM_NONCE_LEN);
             cipher.init(Cipher.ENCRYPT_MODE, aesKey, spec);
-            System.arraycopy(nonce,0,enc,0,nonce.length);
-            int n = cipher.update(plain,0,plain.length,enc,nonce.length);
-            cipher.doFinal(pad,0,padlen,enc,n+nonce.length);
+            int n = cipher.update(plain,0,plain.length,enc,GCM_NONCE_LEN);
+            byte[] pad = new byte[PKCS5_LEN];
+            for (int i=0; i<padlen; ++i) {
+                pad[i]=padlen;
+            }
+            cipher.doFinal(pad,0,padlen,enc,n+GCM_NONCE_LEN);
             return enc;
         } catch (Exception e) {
             throw new Error("encrypt failed: " + e);
@@ -110,32 +108,35 @@ public class Crypt {
     }
 
     public static final byte[] decrypt(byte[] key, byte[] enc) {
-        if (enc == null || enc.length < GCM_NONCE_BITS/8 + 16 + GCM_TAG_BITS/8) {
+        if (enc == null || 
+            enc.length < GCM_NONCE_LEN + PKCS5_LEN + GCM_TAG_LEN) {
             return null;
         }
         try {
-            int plainPadLen = enc.length - (GCM_NONCE_BITS/8 + GCM_TAG_BITS/8);
+            int plainPadLen = enc.length - (GCM_NONCE_LEN + GCM_TAG_LEN);
             byte[] plainPad = new byte[plainPadLen];
             SecretKeySpec aesKey = 
-                new SecretKeySpec(Arrays.copyOf(sha256(key),AES_KEY_BITS/8),
+                new SecretKeySpec(Arrays.copyOf(sha256(key),AES_KEY_LEN),
                                   "AES");
 
             Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");        
-            byte[] nonce = Arrays.copyOf(enc,GCM_NONCE_BITS/8);
-            GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_BITS, nonce);
+            byte[] nonce = Arrays.copyOf(enc,GCM_NONCE_LEN);
+            GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LEN*8, nonce);
             cipher.init(Cipher.DECRYPT_MODE, aesKey, spec);
-            cipher.doFinal(enc,nonce.length,enc.length-nonce.length,plainPad,0);
-            int pad = plainPad.length-1;
-            while (pad > 0 && plainPad[pad] != 1) --pad;
-            return Arrays.copyOf(plainPad,pad);
+            cipher.doFinal(enc,nonce.length,
+                           enc.length-nonce.length,plainPad,0);
+            byte padlen = plainPad[plainPad.length-1];
+            return Arrays.copyOf(plainPad,plainPad.length-padlen);
         } catch (Exception e) {
             return null;
         }
     }
 
-    static final byte[] asBytes(String string) {
+    public static final Charset CHARSET_UTF8 = Charset.forName("UTF-8");
+
+    public static final byte[] asBytes(String string) {
         if (string != null) {
-            return string.getBytes(Charset.forName("UTF-8"));
+            return string.getBytes(CHARSET_UTF8);
         } else { 
             return null;
         }
@@ -143,7 +144,7 @@ public class Crypt {
 
     static final String asString(byte[] bytes) {
         if (bytes != null) {
-            return new String(bytes,Charset.forName("UTF-8"));
+            return new String(bytes,CHARSET_UTF8);
         } else {
             return null;
         }
