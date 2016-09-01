@@ -2,17 +2,16 @@ package kiss.util;
 
 import java.security.SecureRandom;
 import java.security.MessageDigest;
-import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import javax.crypto.spec.GCMParameterSpec;
 import java.util.Arrays;
 import java.nio.charset.Charset;
 
-public class Crypt {
+public class Cipher {
     static char [] codes = new char [] { 
         '0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f' 
     };
-    static void hex(StringBuilder sb, byte[] bin, int offset, int length) {
+    public static void hex(StringBuilder sb, byte[] bin, int offset, int length) {
         for (int i=0; i<length; ++i) {
             byte b=bin[i+offset];
             sb.append(codes[((b>>4) & 0xF)]);
@@ -20,14 +19,16 @@ public class Crypt {
         }
     }
 
-    static String hex(byte[] bin) {
+    public static String hex(byte[] bin) {
+        if (bin == null) return null;
         StringBuilder sb = new StringBuilder(bin.length*2);
         hex(sb,bin,0,bin.length);
         return sb.toString();
     }
 
-    static byte[] bin(CharSequence hex) {
-        byte[] ans = new byte[hex.length()/2];
+    public static byte[] bin(CharSequence hex) {
+        if (hex == null) return null;
+        byte[] ans = new byte[(hex.length()+1)/2];
         int j=0;
         byte b=0;
         for (int i=0; i<hex.length(); ++i) {
@@ -47,6 +48,11 @@ public class Crypt {
             }
             ++j;
         }
+        if ((j % 2) == 1) {
+            ans[j/2]=b;
+            ++j;
+        }
+        j = j/2;
         if (j < ans.length) {
             ans = java.util.Arrays.copyOf(ans,j);
         }
@@ -87,10 +93,10 @@ public class Crypt {
 
             rng.nextBytes(enc,0,GCM_NONCE_LEN);
             
-            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+            javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance("AES/GCM/NoPadding");
             rng.nextBytes(enc,0,GCM_NONCE_LEN);
             GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LEN*8, enc, 0, GCM_NONCE_LEN);
-            cipher.init(Cipher.ENCRYPT_MODE, aesKey, spec);
+            cipher.init(javax.crypto.Cipher.ENCRYPT_MODE, aesKey, spec);
             int n = cipher.update(plain,0,plain.length,enc,GCM_NONCE_LEN);
             byte[] pad = new byte[PKCS5_LEN];
             for (int i=0; i<padlen; ++i) {
@@ -119,10 +125,10 @@ public class Crypt {
                 new SecretKeySpec(Arrays.copyOf(sha256(key),AES_KEY_LEN),
                                   "AES");
 
-            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");        
+            javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance("AES/GCM/NoPadding");        
             byte[] nonce = Arrays.copyOf(enc,GCM_NONCE_LEN);
             GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LEN*8, nonce);
-            cipher.init(Cipher.DECRYPT_MODE, aesKey, spec);
+            cipher.init(javax.crypto.Cipher.DECRYPT_MODE, aesKey, spec);
             cipher.doFinal(enc,nonce.length,
                            enc.length-nonce.length,plainPad,0);
             byte padlen = plainPad[plainPad.length-1];
@@ -142,7 +148,7 @@ public class Crypt {
         }
     }
 
-    static final String asString(byte[] bytes) {
+    public static final String asString(byte[] bytes) {
         if (bytes != null) {
             return new String(bytes,CHARSET_UTF8);
         } else {
