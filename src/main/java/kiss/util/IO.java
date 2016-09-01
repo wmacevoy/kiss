@@ -200,7 +200,7 @@ public class IO {
                     if (first) {
                         first = false;
                     } else {
-                        ans.append(",");
+                        ans.append(", ");
                     }
                     format(ans, array[i]);
                 }
