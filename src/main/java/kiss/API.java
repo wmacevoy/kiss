@@ -9,7 +9,7 @@ import kiss.util.IO;
 import kiss.util.RNG;
 import kiss.util.Run;
 import kiss.util.As;
-import kiss.util.Crypt;
+import kiss.util.Cipher;
 
 /** 
  <p>The kiss library promotes good software development practices from the beginning.</p>
@@ -2021,16 +2021,16 @@ org.foozle.Runner: foozling with args: [a,b,c]
 
     /** returns a hexadecimal string (0-9, a-f) encrypting the plain string */
     public static final String encrypt(String key, String plain) {
-        return Crypt.encrypt(key,plain);
+        return Cipher.encrypt(key,plain);
     }
 
     /** returns a plain string from encryption, provided the original key and encrypted data */
     public static final String decrypt(String key, String encrypted) {
-        return Crypt.decrypt(key,encrypted);
+        return Cipher.decrypt(key,encrypted);
     }
 
     /** sha256 is a common secure hash */
     public static final String sha256(String message) {
-        return Crypt.sha256(message);
+        return Cipher.sha256(message);
     }
 }
