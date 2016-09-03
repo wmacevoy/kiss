@@ -7,6 +7,7 @@ import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.nio.ByteOrder;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.security.SecureRandom;
 import java.util.Random;
 
@@ -78,6 +79,22 @@ public class AESPRNG extends Random implements kiss.API.Close
     private long ctr = 0;
 
     private final void readPage() {
+        readPage(false);
+    }
+
+    public synchronized void skip(long length) {
+        while (length > 0) {
+            if (at >= page) {
+                readPage(length > MAX_PAGE);
+            }
+            int n = page-at;
+            if (((long) n) > length) n=(int) length;
+            at += n;
+            length -= n;
+        }
+    }
+
+    private final void readPage(boolean skip) {
         if (data == null) {
             data = new byte[MAX_PAGE];
             dataBuffer = ByteBuffer.wrap(data);
@@ -88,16 +105,16 @@ public class AESPRNG extends Random implements kiss.API.Close
         if (page < MAX_PAGE) {
             page *= 2;
         }
-        int n=page/8;
-        for (int i=0; i<n; i += 2) {
-            dataLongs.put(i+0,ctr);
-            dataLongs.put(i+1,ctr0);
-            ++ctr;
+        
+        for (int i=skip ? 1 : (page/16-1); i>=0; --i) {
+            dataLongs.put(2*i+0,ctr+i);
+            dataLongs.put(2*i+1,ctr0);
         }
+        ctr += page/8;
         at = 24;
         try {
             if (aesecb == null) seed();
-            aesecb.doFinal(data,0,page,data,0);
+            aesecb.doFinal(data,0,skip ? 32 : page,data,0);
             SecretKeySpec key = null;
             try {
                 key = new SecretKeySpec(data,0,16,"AES");
@@ -513,4 +530,34 @@ public class AESPRNG extends Random implements kiss.API.Close
 
         seed(value);
     }
+
+    class Stream extends InputStream {
+        public final void insecure() {
+            throw new 
+                UnsupportedOperationException("supporting this operation is insecure");
+        }
+        @Override public final long skip(long n) { 
+            AESPRNG.this.skip(n); 
+            return n;
+        }
+
+        @Override public final int available() { return Integer.MAX_VALUE; }
+    
+
+        @Override public final void mark(int readlimit) { insecure(); }
+        
+        @Override public final void reset() { insecure(); }
+        @Override public final boolean markSupported() { return false; }
+        @Override public int read() { return 0xff & (int) nextByte(); }
+        @Override public int read(byte[] b) { 
+            nextBytes(b,0,b.length); 
+            return b.length; 
+        }
+        @Override public int read(byte[] b, int offset, int length) {
+            nextBytes(b,offset,length); 
+            return length;
+        }
+    }
+
+    InputStream stream() { return new Stream(); }
 }

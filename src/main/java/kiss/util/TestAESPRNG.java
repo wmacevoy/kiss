@@ -436,5 +436,100 @@ class TestAESPRNG
         assert s/t < 5;
     }
 
+    void testSkip() {
+        AESPRNG prng1 = new AESPRNG();
+        AESPRNG prng2 = new AESPRNG();
 
+        byte[] buf1 = new byte[16*1024];
+        byte[] buf2 = new byte[16*1024];
+
+        for (int k=0; k<2; ++k) {
+            for (int i=0; i<256; ++i) {
+                prng1.seed(1);
+                prng2.seed(1);
+                
+                if (k == 1) {
+                    int n = random(0,buf1.length);
+                    if (random(0,1) == 1) {
+                        prng1.nextBytes(buf1,0,n);
+                    } else {
+                        prng1.skip(n);
+                    }
+                    if (random(0,1) == 1) {
+                        prng2.nextBytes(buf2,0,n);
+                    } else {
+                        prng2.skip(n);
+                    }
+                }
+                
+                prng1.skip(i);
+                prng2.nextBytes(buf2,0,i);
+                
+                prng1.nextBytes(buf1,0,4);
+                prng2.nextBytes(buf2,0,4);
+                
+                for (int j=0; j<4; ++j) {
+                    assert buf1[j] == buf2[j];
+                }
+            }
+        }
+    }
+
+    void testStreamReseed() throws Exception {
+        AESPRNG rng = new AESPRNG();
+
+        java.io.InputStream ris = rng.stream();
+
+        rng.seed(1);
+        byte[] buf = new byte[64*1024];
+        assert ris.read(buf) == buf.length;
+
+        rng.seed(1);
+        for (int i=0; i<buf.length; ++i) {
+            assert ris.read() == ((0xff) & ((int) buf[i]));
+        }
+    }
+
+    void testStreamSeek() throws Exception {
+        AESPRNG rng = new AESPRNG();
+
+        java.io.InputStream ris = rng.stream();
+
+        byte[] buf1 = new byte[64*1024];
+        byte[] buf2 = new byte[64*1024];
+
+        for (int k=0; k<1000; ++k) {
+            int n = random(0,64*1024);
+            int m = random(0,64*1024);
+
+            rng.seed(1);
+            if (random(0,1) == 0) {
+                assert ris.read(buf1,0,n) == n;
+            } else {
+                assert ris.skip(n) == n;
+            }
+            if (random(0,1) == 0) {
+                assert ris.read(buf1,0,m) == m;
+            } else {
+                assert ris.skip(m) == m;
+            }
+            assert ris.read(buf1,0,8) == 8;
+            
+            rng.seed(1);
+            if (random(0,1) == 0) {
+                assert ris.read(buf2,0,n) == n;
+            } else {
+                assert ris.skip(n) == n;
+            }
+            if (random(0,1) == 0) {
+                assert ris.read(buf2,0,m) == m;
+            } else {
+                assert ris.skip(m) == m;
+            }
+            assert ris.read(buf2,0,8) == 8;
+            for (int i=0; i<8; ++i) {
+                assert buf1[i] == buf2[i];
+            }
+        }
+    }
 }
