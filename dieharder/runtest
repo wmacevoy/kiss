@@ -1,0 +1,36 @@
+#!/bin/bash
+n=$1
+
+echo n=$n
+
+jpid=""
+fifo=""
+
+finish() {
+  if [ ! -z "$jpid" ] ; then kill -9 $jpid ; fi
+  if [ ! -z "$fifo" ] ; then /bin/rm -rf $fifo ; fi
+}
+trap finish EXIT
+
+fifo=tmp/rng-$n
+log=rng-$n.log
+
+echo "fifo=$fifo"
+echo "log=$log"
+
+/bin/rm -rf $fifo $log
+mkfifo $fifo
+
+if [ tmp/App.class -ot src/App.java ] ; then
+   javac -cp ../kiss.jar:tmp -d tmp -s src src/App.java
+fi
+
+java -cp ../kiss.jar:tmp kiss.util.Run - > $fifo &
+jpid=$!
+
+echo "jpid=$jpid"
+
+date -u > $log
+time dieharder -a -g 201 -f $fifo | tee -a $log
+kill $jpid
+

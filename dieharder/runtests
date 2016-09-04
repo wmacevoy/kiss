@@ -1,0 +1,17 @@
+#!/bin/bash
+
+n=4
+
+for i in $(seq 1 $n) 
+do
+  ./runtest $i &
+  p[${i}]=$!
+done
+
+for i in $(seq 1 $n) 
+do
+  wait ${p[$i]}
+done
+
+ruby merge.rb $n > rngs.csv
+
