@@ -1,6 +1,8 @@
 .PHONY: all
 all : lib examples test
 
+BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
+
 SRC:=$(shell find src/main/java -regex '[^._].*\.java$$')
 
 kiss.jar kiss-without-tests.jar : $(SRC)
@@ -9,6 +11,14 @@ kiss.jar kiss-without-tests.jar : $(SRC)
 	javac -Xlint:unchecked -cp target/classes -d target/classes -s src/main/java $$(find src/main/java -regex '[^._].*\.java$$')
 	cd target/classes; jar cvfe ../../kiss-without-tests.jar kiss.util.Run $$(find . -name '*.class' -and -not -iname 'test*')
 	cd target/classes; jar cfe ../../kiss.jar kiss.util.Run .
+
+branch : kiss-$(BRANCH).jar kiss-$(BRANCH).jar.sha256
+
+kiss-$(BRANCH).jar : kiss.jar
+	cp $< $@
+
+kiss-$(BRANCH).jar.sha256 : kiss.jar.sha256
+	cp $< $@
 
 %.sha256 : %
 	openssl dgst -out $@ -sha256 $<
