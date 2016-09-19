@@ -3,18 +3,18 @@ all : lib examples test
 
 SRC:=$(shell find src/main/java -regex '[^._].*\.java$$')
 
-kiss.jar kiss-with-tests.jar : $(SRC)
+kiss.jar kiss-without-tests.jar : $(SRC)
 	/bin/rm -rf target/classes/*
 	if [ ! -d target/classes ] ; then mkdir -p target/classes ; fi
 	javac -Xlint:unchecked -cp target/classes -d target/classes -s src/main/java $$(find src/main/java -regex '[^._].*\.java$$')
-	cd target/classes; jar cvfe ../../kiss.jar kiss.util.Run $$(find . -name '*.class' -and -not -iname 'test*')
-	cd target/classes; jar cfe ../../kiss-with-tests.jar kiss.util.Run .
+	cd target/classes; jar cvfe ../../kiss-without-tests.jar kiss.util.Run $$(find . -name '*.class' -and -not -iname 'test*')
+	cd target/classes; jar cfe ../../kiss.jar kiss.util.Run .
 
 %.sha256 : %
 	openssl dgst -out $@ -sha256 $<
 
 .PHONY: lib
-lib :   kiss.jar kiss.jar.sha256 kiss-with-tests.jar kiss-with-tests.jar.sha256
+lib :   kiss.jar kiss.jar.sha256 kiss-without-tests.jar kiss-without-tests.jar.sha256
 
 .PHONY: doc
 doc :
@@ -22,7 +22,7 @@ doc :
 
 .PHONY: verify
 verify:
-	for file in kiss.jar kiss-with-tests.jar ; do \
+	for file in kiss.jar kiss-without-tests.jar ; do \
 	  if openssl dgst -sha256 "$$file" | diff -q - "$$file.sha256" ; \
 	    then \
 	      echo "$$file checksum matches $$file.sha256" ; \
@@ -45,7 +45,7 @@ clean: # mvn clean
 
 deploy: clean all
 	git add -f kiss.jar kiss.jar.sha256 \
-	           kiss-with-tests.jar kiss-with-tests.jar.sha256
+	           kiss-without-tests.jar kiss-without-tests.jar.sha256
 	git commit --allow-empty -m "deploy `date -u`"
 	git push
 	mvn clean
@@ -57,7 +57,7 @@ test: self-test example-tests
 
 .PHONY: self-test
 self-test:
-	java -cp kiss-with-tests.jar kiss.util.Run --app kiss.util.Test
+	java -cp kiss.jar kiss.util.Run --app kiss.util.Test
 
 .PHONY: example-tests
 example-tests:
