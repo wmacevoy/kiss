@@ -8,7 +8,7 @@
 
 [student videos: getting started](https://www.youtube.com/channel/UC5Fchcau0ofytGrUbQd_J0w)
 
-[latest kiss.jar](https://github.com/wmacevoy/kiss/blob/master/kiss.jar?raw=true) --- latest master build
+[kiss 0.3.0](https://github.com/wmacevoy/kiss/releases/tag/v0.3.0)
 
 ## kiss Java
 
