@@ -8,26 +8,26 @@ import java.io.IOException;
 
 class TestIO {
     void testOutExpect() {
-        outExpect(1,2,3,EOL,
-                  "testing",EOL,
-                  "ok",EOL,
-                  1.0,2.0,3.0,EOL,
-                  "alpha","beta","tango");
-        println(1,2,3);
+        outExpect(1, 2, 3, EOL,
+                "testing", EOL,
+                "ok", EOL,
+                1.0, 2.0, 3.0, EOL,
+                "alpha", "beta", "tango");
+        println(1, 2, 3);
         println("testing");
-        println("ok");        
-        println(1.0,2.0,3.0);
-        println("alpha","beta","tango");
+        println("ok");
+        println(1.0, 2.0, 3.0);
+        println("alpha", "beta", "tango");
         outClose();
 
     }
 
     void testInProvide() {
-        inProvide(1,2,3,EOL,
-                  "testing",EOL,
-                  "ok",EOL,
-                  1.5,2.0,3.0,EOL,
-                  "alpha","beta","tango");
+        inProvide(1, 2, 3, EOL,
+                "testing", EOL,
+                "ok", EOL,
+                1.5, 2.0, 3.0, EOL,
+                "alpha", "beta", "tango");
 
         assert readInt() == 1;
         assert readInt() == 2;
@@ -44,18 +44,22 @@ class TestIO {
         inClose();
     }
 
-        void testVerify() {
+    void testVerify() {
+        boolean skip = false;
         try { // use java.io stuff to confidently create file content
             try (PrintStream ps
-                 = new PrintStream(new FileOutputStream("test.txt"))) {
-            
+                         = new PrintStream(new FileOutputStream("test.txt"))) {
+
                 ps.println("Testing 1 2 3...");
                 ps.println(1);
                 ps.println(PI);
             }
         } catch (IOException e) {
-            print("how hard can it be? " + e);
+            print("failed file i/o --- maybe android? Error: " + e);
+            print("skipping this test");
+            return;
         }
+
 
         // verify with the kiss approach
         try (Close vfy = outVerify("test.txt")) {
@@ -79,12 +83,12 @@ class TestIO {
     }
 
     void testPrintf() {
-	try (Close out = outExpect("Hello, World!",EOL)) {
-	    printf("Hello, %s!\n","World");
-	}
-	try (Close out = outExpect("3.14",EOL)) {
-	    printf("%1.2f\n",PI);
-	}
+        try (Close out = outExpect("Hello, World!", EOL)) {
+            printf("Hello, %s!\n", "World");
+        }
+        try (Close out = outExpect("3.14", EOL)) {
+            printf("%1.2f\n", PI);
+        }
 
     }
 }

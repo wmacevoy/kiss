@@ -6,6 +6,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Array;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -110,6 +111,14 @@ public class Reflect {
         int offset;
     }
 
+    static class ByLength implements Comparator<Method> {
+
+        @Override
+        public int compare(Method a, Method b) {
+            return b.getName().length()-a.getName().length();
+        }
+    }
+
     /** Grok the bytecode to get the declared order */
     public static Method[] getDeclaredMethodsInOrder(Class clazz) {
         Method[] methods = null;
@@ -118,10 +127,14 @@ public class Reflect {
 
             methods = clazz.getDeclaredMethods();
 
-            java.util.Arrays.sort(methods,(a,b)->b.getName().length()-a.getName().length());
-
             InputStream is = clazz.getClassLoader()
                 .getResourceAsStream(resource);
+
+            if (is == null) {
+                return methods;
+            }
+
+            java.util.Arrays.sort(methods,new ByLength());
             ArrayList<byte[]> blocks = new ArrayList<byte[]>();
             int length = 0;
             for (;;) {
