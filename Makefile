@@ -7,8 +7,8 @@ kiss.jar kiss-with-tests.jar : $(SRC)
 	/bin/rm -rf target/classes/*
 	if [ ! -d target/classes ] ; then mkdir -p target/classes ; fi
 	javac -Xlint:unchecked -cp target/classes -d target/classes -s src/main/java $$(find src/main/java -regex '[^._].*\.java$$')
-	cd target/classes; jar cvfe ../../kiss.jar kiss.util.Run $$(find . -name '*.class' -and -not -iname 'test*')
-	cd target/classes; jar cfe ../../kiss-with-tests.jar kiss.util.Run .
+	cd target/classes; jar cvfe ../../kiss.jar kiss.API $$(find . -name '*.class' -and -not -iname 'test*')
+	cd target/classes; jar cfe ../../kiss-with-tests.jar kiss.API .
 
 %.sha256 : %
 	openssl dgst -out $@ -sha256 $<
@@ -57,7 +57,7 @@ test: self-test example-tests
 
 .PHONY: self-test
 self-test:
-	java -cp kiss-with-tests.jar kiss.util.Run --app kiss.util.Test
+	java -cp kiss-with-tests.jar kiss.API --app kiss.util.Test
 
 .PHONY: example-tests
 example-tests:

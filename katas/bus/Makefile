@@ -12,11 +12,11 @@ this:
 
 .PHONY: run
 run:
-	java -cp "../../kiss.jar:target/classes" kiss.util.Run
+	java -cp "../../kiss.jar:target/classes" kiss.API
 
 .PHONY: test
 test: 
-	java -cp "../../kiss.jar:target/classes" kiss.util.Run --norun
+	java -cp "../../kiss.jar:target/classes" kiss.API --norun
 
 .PHONY: clean
 clean:

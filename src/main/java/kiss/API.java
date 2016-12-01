@@ -2033,4 +2033,8 @@ org.foozle.Runner: foozling with args: [a,b,c]
     public static final String sha256(String message) {
         return Cipher.sha256(message);
     }
+
+    public static void main(String[] args) throws Exception {
+	kiss.util.Run.main(args);
+    }
 }
