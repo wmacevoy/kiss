@@ -1,22 +1,22 @@
 <img align="right" src="java-kiss.png">
 
-# java kiss API
+# Java kiss API
 
 ## Download
 
-[instructor video: why kiss?](https://youtu.be/YiftHVmbxgU)
+[Instructor video: why kiss?](https://youtu.be/YiftHVmbxgU)
 
-[student videos: getting started](https://www.youtube.com/channel/UC5Fchcau0ofytGrUbQd_J0w)
+[Student videos: getting started](https://www.youtube.com/channel/UC5Fchcau0ofytGrUbQd_J0w)
 
 [kiss 0.3.0](https://github.com/wmacevoy/kiss/releases/tag/v0.3.0)
 
 ## kiss Java
 
-The goal is to make the launching and testing of java programs for beginners
-easy: no explanations of static methods, simplified IO, and a simple
+The goal is to make the launching and testing of Java programs for beginners
+easy: no explanations of static methods, simplified I/O, and a simple
 test framework that beginners can use to write and validate their code.
 
-In order to keep it simple, this is incorporated into one library, `kiss`, so students do not have to download other library dependencies and have a single import statement to start using it.  Here is the hello world program:
+In order to keep it simple, this is incorporated into one library, `kiss`, so students do not have to download other library dependencies and have a single import statement to start using it.  Here is the Hello, World! program:
 
 ```java
 import static kiss.API.*;
@@ -28,7 +28,7 @@ class App {
 }
 ```
 
-To see the classic message, you need the kiss jar file in your project and use "kiss.API" as your main class.  If you use maven (supported by most common IDE's) there are pre-built `pom.xml` files in the example projects.
+To see the classic message, you need the kiss JAR file in your project and use "kiss.API" as your main class.  If you use Maven (supported by most common IDE's) there are pre-built `pom.xml` files in the example projects.
 
 ## Test Hello World
 
@@ -79,7 +79,7 @@ The java.Math static methods are effectively also imported, so you just use `sqr
 
 ## Obvious Output
 
-Here is a java program that makes a space-separated CSV file
+Here is a Java program that makes a space-separated CSV file
 with 100 die rolls pairs:
 
 ```java
@@ -166,7 +166,7 @@ Only the first instance of an object is tested (or use `testAlways` instead).  I
 
 * `Object APP` --- Once the application object is constructed, this is a global reference to the application object.
 
-### IO
+### I/O
 
 * `outOpen(String filename)` --- redirects print/ln() output to the specified
   file.  These can be nested and each thread is independent.  There must be a
@@ -178,7 +178,7 @@ try (Close out=outOpen("hi.txt")) {
 ```
 This assures the file is closed, even in the case of an error.
 
-* `inOpen(String filename)` --- redirects readXXX() to use this input file.  Thse can be nested and each thread is independent.  There must be a matching `inClose()` to close the file.  The best-practice pattern is a try-with-resources:
+* `inOpen(String filename)` --- redirects readXXX() to use this input file.  These can be nested and each thread is independent.  There must be a matching `inClose()` to close the file.  The best-practice pattern is a try-with-resources:
 ```java
 try (Close in=inOpen("words.txt")) {
   String word = readLine();
@@ -187,7 +187,7 @@ try (Close in=inOpen("words.txt")) {
 ```
 This assures the file is closed, even in the case of an error.
 
-* `print/ln(...)` --- like PrintStream's print/ln, but sends the formatted strings to the current output stream (`System.out` by default) and does a nicer job with arrays and collections.  You can change the default output with `outOpen`, `outExpect`, and `outVerify`.
+* `print/ln(...)` --- like PrintStream's print/ln, but it sends the formatted strings to the current output stream (`System.out` by default) and does a nicer job with arrays and collections.  You can change the default output with `outOpen`, `outExpect`, and `outVerify`.
 
 * `outExpect(...)` --- makes an internal stream which is used to match against future output (until `inClose()` or the end of the try block).  If there is a mismatch an error is thrown.
 
@@ -202,7 +202,7 @@ All the math functions and constants are imported, with the exception of `Math.r
 
 ### RNG
 
-A fast (faster than the standard random number generator) but cryptographically strong pseudo-random number generator is provided by default.  Calling `seed()` strongly sets the seed, while `seed(double value)` sets it to a reproducible sequence.
+A fast (faster than the standard random number generator), but cryptographically strong pseudo-random number generator is provided by default.  Calling `seed()` strongly sets the seed, while `seed(double value)` sets it to a reproducible sequence.
 
 * `int random(int a, int b)` --- generates a uniformly random integer in the interval, including the endpoints.  If b<=a, this always returns a.
 
@@ -261,7 +261,7 @@ assert asBoolean(1) == true;
 
 ### Crypt
 
-Simple to use but strong symmetric key encryption.
+Simple to use, but strong symmetric key encryption.
 
 * String encrypt(String key, String plain) -- Encrypt message with key producing a hex encoded string.
 
