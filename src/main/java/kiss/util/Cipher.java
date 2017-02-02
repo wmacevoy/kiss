@@ -91,8 +91,6 @@ public class Cipher {
                 new SecretKeySpec(Arrays.copyOf(sha256(key),AES_KEY_LEN),
                                   "AES");
 
-            rng.nextBytes(enc,0,GCM_NONCE_LEN);
-            
             javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance("AES/GCM/NoPadding");
             rng.nextBytes(enc,0,GCM_NONCE_LEN);
             GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LEN*8, enc, 0, GCM_NONCE_LEN);
