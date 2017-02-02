@@ -4,8 +4,10 @@ all : clean lib examples test
 SRC:=$(shell find src/main/java -regex '[^._].*\.java$$')
 
 kiss-pi.jar: $(SRC)
-	if [ ! -d target/classes ] ; then mkdir -p target/classes ; fi
-	javac -Xlint:unchecked -cp target/classes:/opt/pi4j/lib/'*' -d target/classes -s src/main/java $$(find src/main/java -regex '[^._].*\.java$$')
+	$(MAKE) -C .. lib
+	/bin/rm -rf target/classes
+	mkdir target/classes
+	javac -Xlint:unchecked -cp ../kiss.jar:target/classes:/opt/pi4j/lib/'*' -d target/classes -s src/main/java $$(find src/main/java -regex '[^._].*\.java$$')
 	cd target/classes; jar cf ../../kiss-pi.jar .
 
 %.sha256 : %
