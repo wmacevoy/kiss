@@ -10,6 +10,22 @@
 
 [kiss 1.1](https://github.com/wmacevoy/kiss/releases/tag/v1.1)
 
+maven/pom.xml:
+
+```xml
+<project ...>
+  ...
+  <dependencies>
+      <dependency>
+	<groupId>com.github.wmacevoy</groupId>
+	<artifactId>kiss</artifactId>
+	<version>LATEST</version>
+      </dependency>
+      ...
+  </dependencies>
+  ...
+</project>
+```
 ## kiss Java
 
 The goal is to make the launching and testing of Java programs for beginners
