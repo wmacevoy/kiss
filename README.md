@@ -17,9 +17,9 @@ maven/pom.xml:
   ...
   <dependencies>
       <dependency>
-	<groupId>com.github.wmacevoy</groupId>
-	<artifactId>kiss</artifactId>
-	<version>LATEST</version>
+        <groupId>com.github.wmacevoy</groupId>
+        <artifactId>kiss</artifactId>
+        <version>LATEST</version>
       </dependency>
       ...
   </dependencies>
