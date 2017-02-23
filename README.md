@@ -279,9 +279,11 @@ assert asBoolean(1) == true;
 
 Simple to use, but strong symmetric key encryption.
 
-* String encrypt(String key, String plain) -- Encrypt message with key producing a hex encoded string.
+* String encrypt(String key, String plain) -- Encrypt message with key producing a hex encoded string (changed in v1.1 compared to previous version).
 
-* String decrypt(String key, String secret) -- Decrypt a hex encoded string (like those made by encrypt) to recreate the message.
+* String decrypt(String key, String secret) -- Decrypt a hex encoded string (like those made by encrypt) to recreate the message (changed in v1.1 compared to previous version).
+
+* String sha256(String text) -- Common secure hash.
 
 [logo]: kiss/java-kiss.png "Java Duke with Kiss"
 
