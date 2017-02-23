@@ -337,7 +337,7 @@ public class AESPRNG extends Random implements kiss.API.Close {
                     //
                     // B is computed efficiently using Java's operations
                     // and relies on known overflow behavior.
-                    long B = Long.MIN_VALUE - (Long.MIN_VALUE % n) - 1;
+                    long B = Long.MIN_VALUE - (Long.MIN_VALUE % D) - 1;
                     if (x > B) continue;
                 }
                 buf[offset + k] = (int) ((x % D) + min);

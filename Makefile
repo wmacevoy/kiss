@@ -6,7 +6,7 @@ SRC:=$(shell find src/main/java -regex '[^._].*\.java$$')
 kiss.jar kiss-with-tests.jar : $(SRC)
 	/bin/rm -rf target/classes/*
 	if [ ! -d target/classes ] ; then mkdir -p target/classes ; fi
-	javac -Xlint:unchecked -cp target/classes -d target/classes -s src/main/java $$(find src/main/java -regex '[^._].*\.java$$')
+	javac -target 1.7 -source 1.7 -Xlint:unchecked -cp target/classes -d target/classes -s src/main/java $$(find src/main/java -regex '[^._].*\.java$$')
 	cd target/classes; jar cvfe ../../kiss.jar kiss.API $$(find . -name '*.class' -and -not -iname 'test*')
 	cd target/classes; jar cfe ../../kiss-with-tests.jar kiss.API .
 
@@ -41,6 +41,7 @@ examples:
 .PHONY: clean
 clean: # mvn clean
 	/bin/rm -rf tmp/* target/* examples/*/target/* examples/*/tmp/*
+	/bin/rm -rf kiss.jar kiss.jar.sha256 kiss-with-tests.jar kiss-with-tests.jar.sha256
 	/bin/rm -rf $$(find . -name '*~' -o -name '._*' -o -name '#*')
 
 deploy: clean all
@@ -50,6 +51,7 @@ deploy: clean all
 	git push
 	mvn clean
 	mvn compile
+	mvn package
 	mvn deploy
 
 .PHONY: test
