@@ -8,7 +8,7 @@
 
 [Student videos: getting started](https://www.youtube.com/channel/UC5Fchcau0ofytGrUbQd_J0w)
 
-[kiss 0.3.0](https://github.com/wmacevoy/kiss/releases/tag/v0.3.0)
+[kiss 1.1](https://github.com/wmacevoy/kiss/releases/tag/v1.1)
 
 ## kiss Java
 
