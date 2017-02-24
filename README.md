@@ -34,13 +34,13 @@ maven/pom.xml:
 
 ## Why
 
-[Instructor video: why kiss?](https://youtu.be/YiftHVmbxgU)
 
-[Student videos: getting started](https://www.youtube.com/channel/UC5Fchcau0ofytGrUbQd_J0w)
 
 KISS keeps it simple, so Java can be used to teach software development concepts.
-* Simplified run, input, output, math, casting, ciphers and testing.
-* All in one library with no dependencies available as a jar file and hosted on maven central.
+* Simplified run, testing, input, output, math, casting, events and ciphers.
+* Just one jar file with no dependencies available as release and hosted on maven central.
+* [Instructor video: why kiss?](https://youtu.be/YiftHVmbxgU)
+* [Student videos: getting started](https://www.youtube.com/channel/UC5Fchcau0ofytGrUbQd_J0w)
 
 ## Hello, World!
 There is no need to understand packages, static methods, access modifiers, arrays, or method invocations to write simple programs.  Here is "Hello World!":
