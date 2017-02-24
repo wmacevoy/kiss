@@ -1,14 +1,10 @@
 <img align="right" src="java-kiss.png">
 
-# Java kiss API
+# KISS Java API
 
-## Download
+## Get/Use/Download
 
-[Instructor video: why kiss?](https://youtu.be/YiftHVmbxgU)
-
-[Student videos: getting started](https://www.youtube.com/channel/UC5Fchcau0ofytGrUbQd_J0w)
-
-[kiss 1.1](https://github.com/wmacevoy/kiss/releases/tag/v1.1)
+[kiss releases](https://github.com/wmacevoy/kiss/releases)
 
 maven/pom.xml:
 
@@ -26,47 +22,35 @@ maven/pom.xml:
   ...
 </project>
 ```
-## kiss Java
 
-The goal is to make the launching and testing of Java programs for beginners
-easy: no explanations of static methods, simplified I/O, and a simple
-test framework that beginners can use to write and validate their code.
+## Why
 
-In order to keep it simple, this is incorporated into one library, `kiss`, so students do not have to download other library dependencies and have a single import statement to start using it.  Here is the Hello, World! program:
+[Instructor video: why kiss?](https://youtu.be/YiftHVmbxgU)
 
-```java
-import static kiss.API.*;
+[Student videos: getting started](https://www.youtube.com/channel/UC5Fchcau0ofytGrUbQd_J0w)
 
-class App {
-    void run() {
-        println("Hello, World!");
-    }
-}
-```
+KISS keeps it simple, so Java can be used to teach software development concepts.
+* Simplified run, input, output, math, casting, ciphers and testing.
+* All in one library with no dependencies available as a jar file and hosted on maven central.
 
-To see the classic message, you need the kiss JAR file in your project and use "kiss.API" as your main class.  If you use Maven (supported by most common IDE's) there are pre-built `pom.xml` files in the example projects.
-
-## Test Hello World
-
-So it is not hard to say hello.  Now let's test it:
+## Hello, World!
+There is no need to understand packages, static methods, access modifiers, arrays, or method invocations to write simple programs.  Here is "Hello World!":
 
 ```java
 import static kiss.API.*;
 
-class App {
-    void testRun() {
-        try (Close out=outExpect("Hello, World!")) {
-          run();
-        }
-    }
-
+class App
+{
     void run()
     {
         println("Hello, World!");
     }
 }
 ```
-If you don't want to introduce the try block yet, you can alternatively use
+To see the classic message, you need the kiss JAR file in your project and use "kiss.API" as your main class.  If you use Maven (supported by most common IDE's) there are pre-built `pom.xml` files in the example projects.
+
+## "Hello World!", Tested!!
+Wouldn't it be nice to introduce testing right away?
 ```java
 import static kiss.API.*;
 
@@ -76,14 +60,30 @@ class App {
         run();
         outClose();
     }
-
-    void run()
-    {
+    void run() {
         println("Hello, World!");
     }
 }
 ```
+
 Any `testXXX` method is automatically called before the `run` method.  Want to write a test?  Just write the test!
+
+Or, since you can't write much Java without a try block anyway, a better version is:
+```java
+import static kiss.API.*;
+
+class App {
+    void testRun() {
+        try (Close out=outExpect("Hello, World!")) {
+            run();
+	}
+    }
+
+    void run() {
+        println("Hello, World!");
+    }
+}
+```
 
 ## Randomness a kindergartener understands
 
