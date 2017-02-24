@@ -1,6 +1,15 @@
 <img align="right" src="java-kiss.png">
 
 # KISS Java API
+```java
+import static kiss.API.*;
+
+class App {
+    void run() {
+        println("Hello, World!");
+    }
+}
+```
 
 ## Get/Use/Download
 
@@ -35,14 +44,11 @@ KISS keeps it simple, so Java can be used to teach software development concepts
 
 ## Hello, World!
 There is no need to understand packages, static methods, access modifiers, arrays, or method invocations to write simple programs.  Here is "Hello World!":
-
 ```java
 import static kiss.API.*;
 
-class App
-{
-    void run()
-    {
+class App {
+    void run() {
         println("Hello, World!");
     }
 }
