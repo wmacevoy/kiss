@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.wmacevoy</groupId>
     <artifactId>kiss-examples-helloworld</artifactId>
-    <version>1.0</version>
+    <version>1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -21,22 +21,45 @@
     
   <build>
     <plugins>
-      <plugin>
+      <plugin> <!-- mvn javadoc:javadoc -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+	<version>2.10.4</version>
+        <configuration>
+	  <additionalparam>-Xdoclint:none</additionalparam>
+          <show>private</show>
+          <nohelp>true</nohelp>
+        </configuration>
+	<executions>
+	  <execution>
+	    <id>attach-javadocs</id>
+	    <goals>
+	      <goal>jar</goal>
+	    </goals>
+	  </execution>
+	</executions>
+      </plugin>
+
+      <plugin> <!-- mvn package -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
+	<version>3.0.2</version>
         <configuration>
+	  <descriptorRefs>
+	    <descriptorRef>jar-with-dependencies</descriptorRef>
+	  </descriptorRefs>
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>kiss.util.Run</mainClass>
+              <mainClass>kiss.API</mainClass>
             </manifest>
           </archive>
         </configuration>
       </plugin>
-      <plugin>
+      <plugin> <!-- mvn exec:exec -->
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-        <version>1.5.0</version>
+	<version>1.5.0</version>
         <executions>
           <execution>
             <goals>
@@ -50,9 +73,9 @@
             <argument>-cp</argument>
             <classpath/>
             <argument>-ea</argument><!-- enable assertions -->
-            <argument>kiss.util.Run</argument>
+            <argument>kiss.API</argument><!-- main class for kiss startup -->
             <argument>--app</argument>
-            <argument>App</argument><!-- the app class -->
+            <argument>App</argument><!-- the main app class, App by default  -->
           </arguments>
         </configuration>
       </plugin>
