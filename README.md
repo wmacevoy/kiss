@@ -218,6 +218,7 @@ This assures the file is closed, even in the case of an error.
 * `inProvide(...)` --- makes an internal stream which is used for future input (until `inClose()` or the end of the try block).
 
 * `outVerify(String filename)` --- like `outExpect`, but matches against an external file for more complicated output.
+
 ### Math
 
 All the math functions and constants are imported, with the exception of `Math.random()` and `Math.random(int n)` which are replaced by improved versions.
@@ -285,11 +286,11 @@ assert asBoolean(1) == true;
 
 Simple to use, but strong symmetric key encryption.
 
-* String encrypt(String key, String plain) -- Encrypt message with key producing a hex encoded string (changed in v1.1 compared to previous version).
+* String encrypt(String key, String plain) --- Encrypt message with key producing a hex encoded string (changed in v1.1 compared to previous version).
 
-* String decrypt(String key, String secret) -- Decrypt a hex encoded string (like those made by encrypt) to recreate the message (changed in v1.1 compared to previous version).
+* String decrypt(String key, String secret) --- Decrypt a hex encoded string (like those made by encrypt) to recreate the message (changed in v1.1 compared to previous version).
 
-* String sha256(String text) -- Common secure hash.
+* String sha256(String text) --- Common secure hash.
 
 [logo]: kiss/java-kiss.png "Java Duke with Kiss"
 
