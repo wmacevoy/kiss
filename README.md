@@ -1,22 +1,12 @@
 <img align="right" src="java-kiss.png">
 
 # KISS Java API
-```java
-import static kiss.API.*;
 
-class App {
-    void run() {
-        println("Hello, World!");
-    }
-}
-```
-
-## Get/Use/Download
+### Get/Use/Download
 
 [kiss releases](https://github.com/wmacevoy/kiss/releases)
 
-maven/pom.xml:
-
+[maven complete pom] (examples/helloworld/pom.xml)
 ```xml
 <project ...>
   ...
@@ -32,9 +22,7 @@ maven/pom.xml:
 </project>
 ```
 
-## Why
-
-
+## Why KISS Java?
 
 KISS keeps it simple, so Java can be used to teach software development concepts.
 * Simplified run, testing, input, output, math, casting, events and ciphers.
