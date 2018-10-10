@@ -9,4 +9,5 @@ public class Test {
     void testRun() { test(new TestRun()); }
     void testAESPRNG() { test(new TestAESPRNG()); }
     void testCipher() { test(new TestCipher()); }
+    void testEvent() { test(new TestEvent()); }
 }

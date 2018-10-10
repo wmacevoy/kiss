@@ -396,9 +396,9 @@ public class API {
          *      these changes will only impact future (not current) send 
          *      operations.
          *
-         *   <p>Send is not synchronized (and should not be).  Mutliple threads
+         *   <p>Send is not synchronized (and should not be).  Multiple threads
          *      can safely send from the same Generator, provided the
-         *      listeners are prepared for aynsynchronous receives.
+         *      listeners are prepared for asynchronous receives.
          */
         protected final void send(Event event) {
             Listener < Event > [] tmp = listeners;
