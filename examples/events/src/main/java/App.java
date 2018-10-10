@@ -9,14 +9,14 @@ class Light {
 
     Light(String _location) { location=_location; }
 
-    void onReceiveState(State state) {
+    void receive(State state) {
         println("light in " + location + " is " + state);
     }
 }
 
 // A Remote extends Generator<State> to generate State messages, so
 //
-//   * Any Light (or other objects with an onReceiveState(...)) can
+//   * Any Light (or other objects with an receive(...)) can
 //     listen to a Remote to receive State messages.
 //
 //   * Remote can send(State msg) to send a message to all added
