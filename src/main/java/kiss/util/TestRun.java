@@ -3,6 +3,9 @@ package kiss.util;
 import static kiss.API.*;
 
 public class TestRun {
+    public static void main(String [] args) {
+        test(new TestRun());
+    }
     void testTime() {
         double s=java.lang.System.currentTimeMillis()/1000.0;
         double t=time();
@@ -10,10 +13,11 @@ public class TestRun {
     }
 
     void testPause() {
+        double dt = 0.1;
         double t0=time();
-        pause(0.1);
+        pause(dt);
         double t=time()-t0;
-        assert abs(t-0.1) < 0.01;
+        assert t >= dt;
     }
 
     void testMain() throws Exception {
