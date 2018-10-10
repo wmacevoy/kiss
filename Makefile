@@ -52,7 +52,7 @@ deploy: clean all
 	mvn clean
 	mvn compile
 	mvn package
-	mvn deploy
+	export GPG_TTY=$$(tty); mvn deploy
 
 .PHONY: test
 test: self-test example-tests
