@@ -171,8 +171,9 @@ public class Run {
     public static final void pause(double duration) {
         if (duration > 0) {
             try {
-                long millis = (long) (duration*1000);
-                int nanos =  (int) ((duration*1000-millis)*1000);
+                duration *= 1000.0;
+                long millis = (long) (duration);
+                int nanos =  (int) ((duration-millis)*1_000_000.0);
                 Thread.sleep(millis,nanos);
             } catch (InterruptedException e) {
                 e.printStackTrace();

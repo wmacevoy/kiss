@@ -44,6 +44,8 @@ clean: # mvn clean
 	/bin/rm -rf kiss.jar kiss.jar.sha256 kiss-with-tests.jar kiss-with-tests.jar.sha256
 	/bin/rm -rf $$(find . -name '*~' -o -name '._*' -o -name '#*')
 
+tt:
+	 echo $$GPG_TTY
 deploy: clean all
 	git add -f kiss.jar kiss.jar.sha256 \
 	           kiss-with-tests.jar kiss-with-tests.jar.sha256
@@ -52,7 +54,7 @@ deploy: clean all
 	mvn clean
 	mvn compile
 	mvn package
-	export GPG_TTY=$$(tty); mvn deploy
+	mvn deploy
 
 .PHONY: test
 test: self-test example-tests
