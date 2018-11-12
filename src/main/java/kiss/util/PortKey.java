@@ -35,7 +35,7 @@ public class PortKey implements kiss.API.Close {
 
     public final SecretKeySpec data;
 
-    PortKey(SecretKeySpec _data) {
+    public PortKey(SecretKeySpec _data) {
         data = _data;
     }
 
