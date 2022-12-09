@@ -42,7 +42,6 @@
   </distributionManagement>
 
   <build>
-
     <plugins>
       <plugin>
 	<groupId>org.sonatype.plugins</groupId>
@@ -63,7 +62,7 @@
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
-        </configuration>
+       </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -104,6 +103,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.4.1</version>
         <configuration>
           <additionalparam>-Xdoclint:none</additionalparam>
         </configuration>
@@ -138,12 +138,4 @@
       </plugin>
     </plugins>
   </build>
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
 </project>

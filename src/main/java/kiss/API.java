@@ -20,10 +20,9 @@ import kiss.util.Cipher;
   <li>testable
   <li>unsurprising
   </ul>
-</p>
 
 
-<p><strong>Simple.</strong>  Here is Hello World (specify {@see kiss.util.Run#main} as the main class):
+<p><strong>Simple.</strong>  Here is Hello World (specify {@link kiss.util.Run#main} as the main class):
 <pre><code>
 import static kiss.API.*;
 
@@ -33,7 +32,6 @@ class App {
   }
 }
 </code></pre>
-</p>
 
 <p><strong>Testable.</strong> Here is hello world, tested:
 <pre><code>
@@ -50,7 +48,6 @@ class App {
   }
 }
 </code></pre>
-</p>
 
 <p>A safer habit is to use try-with-resources:
 <pre><code>
@@ -67,14 +64,12 @@ class App {
   }
 }
 </code></pre>
-</p>
 
 <strong>Unsurprising.</strong>  Which of the following seems easier to read or understand:
-
-<table>
+<table summary="kiss io vs java io">
 <tr>
 <td>
-<pre><code>
+<div><pre><code>
 import static kiss.API.*;
 
 class App {
@@ -101,10 +96,10 @@ class App {
     outClose();
   }
 }
-</code></pre>
+</code></pre></div>
 </td>
 <td>
-<pre><code>
+<div><pre><code>
 import java.io.FileWriter;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -143,7 +138,7 @@ public class App {
     }
   }
 }
-</code></pre>
+</code></pre></div>
 </td>
 </tr>
 </table>
@@ -152,10 +147,10 @@ public class App {
 
 <p>The kiss version on the right is easy to test.  Below are two versions: the left uses nested open/close, while the version on the right uses try-with-resources.</p>
 
-<table>
+<table summary="close vs try">
 <tr>
 <td>
-<code><pre>
+<div><pre><code>
 import static kiss.API.*;
 
 class App {
@@ -205,9 +200,9 @@ class App {
     outClose();
   }
 }
-</code></pre>
+</code></pre></div>
 </td><td>
-<pre><code>
+<div><pre><code>
 import static kiss.API.*;
 
 class App {
@@ -258,7 +253,7 @@ class App {
     }
   }
 }
-</code></pre>
+</code></pre></div>
 </tr></table>
 
  */
@@ -271,13 +266,17 @@ public class API {
         void close(); // no exceptions
     }
 
-    /** Objects that implement Listener<Event> can listen to events/messages
-        from Objects that extend Generator<Event>.  This interface is automatically used by Generator with the addListener(event->action) or the addListener(onReceiveEvent) methods, so you usually don't use it explicitly.  See the events example for how to use events. */
+    /** Objects that implement Listener&lt;Event&gt; can listen to events/messages
+        from Objects that extend Generator&lt;Event&gt;.  This interface is automatically used by Generator with the addListener(event-&gt;action) or the addListener(onReceiveEvent) methods, so you usually don't use it explicitly.  See the events example for how to use events. */
     public static interface Listener < Event > {
+	/** Receive an Event
+	 *  
+	 *  @param event The event from a Generator.
+	 */
         public void receive(Event event);
     }
 
-    /**  Objects that extend Generator<Event> keep track of other objects
+    /**  Objects that extend Generator&lt;Event&gt; keep track of other objects
          that listen to them, and provide a send(event) method to send a
          message to all added listeners.
 
@@ -297,7 +296,7 @@ public class API {
         
         private transient Listener < Event > [] listeners = ( Listener < Event > [] ) NONE; 
         /** Returns a duplicate of the current listeners. */
-        @SuppressWarnings("unchecked")        
+        @SuppressWarnings("unchecked")
         public Listener < Event > [] getListeners() {
             Listener < Event > [] tmp = listeners;
             Listener < Event > [] dup = ( Listener < Event > [] ) 
@@ -320,9 +319,9 @@ public class API {
         }
         
         /**
-         *  <p>Synchronously register a listener with this Generator.
-         *  <p>This has no effect if the listener is already registered or is null.
-         *  <p>This only effects future (not current) send operations.
+         *  Add listener to this generator for future send operations.
+	 *
+	 *  @param listener The listener to add.
          */
         @SuppressWarnings("unchecked")        
         public void addListener ( Listener < Event > listener ) 
@@ -342,21 +341,24 @@ public class API {
 
     
         /**
-         *  <p>Add a listener to this generator.  It looks for a method with
-         *     the signature  onReceive[Event](Event event) which is inovked
-         *     when messages are sent to the listening object.
+         *  Add generic object listener to this generator.  This looks
+	 *  for method with the signature  onReceive[Event](Event event).
+	 *  For example, if event was {@code Clicked} then the method should
+	 *  be called {@code void onReceiveClicked(Clicked event)}
+	 *
+	 *  @param object The object with the corresponding method.
          */
         @SuppressWarnings("unchecked")
         public void addListener(Object object) {
-        kiss.util.AutoListener<Event> listener =
-            new kiss.util.AutoListener(type,object);
-        addListener(listener);
-    }
+	    kiss.util.AutoListener<Event> listener =
+		new kiss.util.AutoListener(type,object);
+	    addListener(listener);
+	}
         
         /**
-         *  <p>Remove a listener from this Generator.
-         *  <p>This has no effect if the listener is not registered.
-         *  <p>This only effects future (not current) send operations.
+         *  Remove a listener from this Generator for future events.
+	 *
+	 *  @param listener The listener
          */
         @SuppressWarnings("unchecked")
         public void removeListener ( Listener < Event > listener ) 
@@ -399,6 +401,8 @@ public class API {
          *   <p>Send is not synchronized (and should not be).  Multiple threads
          *      can safely send from the same Generator, provided the
          *      listeners are prepared for asynchronous receives.
+	 *.
+	 *   @param event The event to send to listeners.
          */
         protected final void send(Event event) {
             Listener < Event > [] tmp = listeners;
@@ -451,73 +455,130 @@ public class API {
     public static final String EOL = IO.EOL;
 
     /** Create an internal output stream that verifies against an
-        expected sequence of output.  Object are separated by
-        a single space unless it is an EOL, which expects the
-        end-of-line sequence. 
-
-        See the basics example to see how this is used. 
+     *  expected sequence of output.  Object are separated by
+     *  a single space unless it is an EOL, which expects the
+     *  end-of-line sequence. 
+     *
+     *  See the basics example to see how this is used.
+     *
+     *	@param args The expected output for a test.
+     *
+     *  @return The close object {@code try (Close me=outExpect(...)) { ... }} for automatically closing the file.
     */
     public static final Close outExpect(Object... args) {
         return IO.outExpectVarArgs(args);
     }
         
     /** Create an internal input stream can be used to read
-        values from like inOpen or the console.
-
-        See the basics example to see how this is used. 
+     *  values from like inOpen or the console.  This is usually for
+     *	testing console applications.  Nested {@code readInt()} etc
+     *  read from this (fake) input instead of standard input.
+     *
+     *  See the basics example to see how this is used.
+     *
+     *	@param args The fake input.
+     *
+     *  @return The close object {@code try (Close me=inProvide(...)) { ... }} for automatically closing the file.
     */
     public static final Close inProvide(Object... args) {
         return IO.inProvideVarArgs(args);
     }
 
     /** Open an external output file which is matched against
-        future output.  This can be used to test that certain
-        output is produced by an action.  For simple output,
-        the outExpect() method is easier to use. */
+     *  future output.  This can be used to test that certain
+     *  output is produced by an action.  For simple output,
+     *  the outExpect() method is easier to use.
+     *
+     *  @param filename Name of file with data to check against.
+     *
+     *  @return The close object {@code try (Close me=outVerify(...)) { ... }} for automatically closing the file.
+     *  
+     */
     public static final Close outVerify(String filename) {
         return IO.outVerify(filename);
     }
 
     /** Open an output file so future print/ln statments are
-        redirected to this file.  The best way to use this is
-        a try-with resources like:
-
-        try (Close out = outOpen("myfile.dat")) { ... }
-
-        This insures the file is properly closed even if an
-        error occures.
-    */
+     *  redirected to this file.  The best way to use this is
+     *	a try-with resources like:
+     *
+     *  try (Close out = outOpen("myfile.dat")) { ... }
+     *
+     *  This insures the file is properly closed even if an
+     *  error occures.
+     *
+     *  @param filename Name of output file.
+     *
+     *  @return The close object {@code try (Close me=outOpen(...)) { ... }} for automatically closing the file.
+     */
     public static final Close outOpen(String filename) {
         return IO.outOpen(filename);
-    }
+     }
 
     /** Like outOpen(String filename), but assumes you are using
-        Java's File object to refer to the file. */
+     *  Java's File object to refer to the file. 
+     *
+     *  @param file file to write to.
+     *
+     *  @return The close object {@code try (Close me=outOpen(...)) { ... }} for automatically closing the file.
+     */
     public static final Close outOpen(File file) {
         return IO.outOpen(file);
     }
 
     /** Close an open output file.  It is better to use the try-with-resources
-        notation so you don't explicitly have to call this at all. */
+     *  notation so you don't explicitly have to call this at all.  So instead of
+     *
+     *  <code>
+     *    outOpen("output.txt");
+     *    println("Hello Output");
+     *    outClose();
+     *  </code>
+     *
+     *  It is better to write:
+     *
+     *  <code>
+     *    try (Close me=outOpen("output.txt")) {
+     *      println("Hello Output");
+     *    }
+     *  </code>
+     *
+     *  The second version closes the file even if there is an I/O error, early return etc.
+     */
+    
     public static final void outClose() {
         IO.outClose();
     }
 
     /** Open an input file so future readXXX() statments are
-        read from file.  The best way to use this is
-        a try-with resources like:
-
-        try (Close in = inOpen("myfile.dat")) { ... }
-
-        This insures the file is properly closed even if an
-        error occures.
-    */
+     *  read from file.  The best way to use this is
+     *  a try-with resources like:
+     *
+     *  try (Close me = inOpen("myfile.dat")) { ... }
+     *
+     *  This insures the file is properly closed even if an
+     *  error occures.
+     *
+     * @param filename The file to open.
+     *	@return the close object for automatically closing this file.
+     */
     public static final Close inOpen(String filename) {
         return IO.inOpen(filename);
     }
 
-    /** Like inOpen(String filename), but assumes you are using
-        Java's File object to refer to the file. */
+    /**
+      Open an input file so future readXXX() statments are
+      read from file.  The best way to use this is
+      a try-with resources like:
+     
+      try (Close me = inOpen(myFile)) { ... }
+
+       This insures the file is properly closed even if an
+       error occures.
+
+       @param file the file to open.
+       @return the close object for automatically closing this file.
+    */
     public static final Close inOpen(File file) {
         return IO.inOpen(file);
     }
@@ -530,9 +591,11 @@ public class API {
     }
 
     /** 
-        <p>Format a boolean (true or false) value for output.  This prints the characters "true" or "false".  If this is the last thing on a line, use {@see #println(boolean)} instead.</p>
+        Format a boolean (true or false) value for output.  
 
-<p>For example:
+	This prints the characters "true" or "false".  If this is the last thing on a line, use {@link #println(boolean)} instead.
+
+	For example:
 <blockquote><pre><code>
 import static kiss.API.*;
 
@@ -545,17 +608,19 @@ class App {
   }
 }
 </code></pre></blockquote>
+
 This prints <code>value=true.</code> on a single line.
-</p>
+
+@param value Value to print.
     */
     public static final void print(boolean value) {
         IO.print(value);
     }
 
     /** 
-        <p>Format a byte (-128 to 127) value for output.  This prints the decimal version of the value.  If this is the last thing on a line, use {@see #println(byte)} instead.</p>
+        Format a byte (-128 to 127) value for output.  This prints the decimal version of the value.  If this is the last thing on a line, use {@link #println(byte)} instead.
 
-<p>For example:
+For example:
 <blockquote><pre><code>
 import static kiss.API.*;
 
@@ -568,21 +633,22 @@ class App {
   }
 }
 </code></pre></blockquote>
+
 This prints <code>value=100.</code> on a single line.
-</p>
+
+@param value Value to print.
     */
     public static final void print(byte value) {
         IO.print(value);
     }
 
     /** 
-        <p>Format a unicode code point (single letters and symbols from almost every languages) in the range 0 to 65535.  This prints the character version of the value.  This may look like a box if the character does not have a representation in the current font, or a few special formatting actions; like '\n' (code 12) often starts a new line.  If this is the last thing on a line, use {@see #println(char)} instead.</p>
+        Format a unicode code point (single letters and symbols from almost every languages) in the range 0 to 65535.  This prints the character version of the value.  This may look like a box if the character does not have a representation in the current font, or a few special formatting actions; like '\n' (code 12) often starts a new line.  If this is the last thing on a line, use {@link #println(char)} instead.
 
-<p><i>A detail beginners do not have to worry about.</i>
-Modern unicode includes code points that fall outside the range 0..65535.  These will not fit onto a Java char.  This means they cannot be represented as a single java char value.  You should look at the API in {@see java.lang.String} to deal with multi-char unicode.  If you are just getting started don't worry about it; the first 65_536 codes (0..65535) that can be represented as a single java char cover the vast variety of modern languages.
-</p>
+<i>A detail beginners do not have to worry about.</i>
+Modern unicode includes code points that fall outside the range 0..65535.  These will not fit onto a Java char.  This means they cannot be represented as a single java char value.  You should look at the API in {@link java.lang.String} to deal with multi-char unicode.  If you are just getting started don't worry about it; the first 65_536 codes (0..65535) that can be represented as a single java char cover the vast variety of modern languages.
 
-<p>For example:
+For example:
 <blockquote><pre><code>
 import static kiss.API.*;
 
@@ -596,22 +662,23 @@ class App {
 }
 </code></pre></blockquote>
 This prints <code>value=x.</code> on a single line.
-</p>
+
+@param value Value to print.
     */
     public static final void print(char value) {
         IO.print(value);
     }
 
     /** 
-        <p>Format a short (-32_768 to 32767) value for output.  This prints the decimal version of the value.  If this is the last thing on a line, use {@see #println(short)} instead.</p>
+        Format a short (-32_768 to 32767) value for output.  This prints the decimal version of the value.  If this is the last thing on a line, use {@link #println(short)} instead.
 
-<p>For example:
+For example:
 <blockquote><pre><code>
 import static kiss.API.*;
 
 class App {
   void run() {
-    short value = asShort(10_0000);
+    short value = asShort(10_000);
     print("value=");
     print(value);
     println(".");
@@ -619,16 +686,17 @@ class App {
 }
 </code></pre></blockquote>
 This prints <code>value=10000.</code> on a single line.
-</p>
+
+@param value Value to print.
     */
     public static final void print(short value) {
         IO.print(value);
     }
 
     /** 
-        <p>Print an int (-2_147_483_648 to 2_147_483_647) value.  This prints the decimal version of the value.  If this is the last thing on a line, use {@see #println(int)} instead.</p>
+Print an int (-2_147_483_648 to 2_147_483_647) value.  This prints the decimal version of the value.  If this is the last thing on a line, use {@link #println(int)} instead.
 
-<p>For example:
+For example:
 <blockquote><pre><code>
 import static kiss.API.*;
 
@@ -642,16 +710,17 @@ class App {
 }
 </code></pre></blockquote>
 This prints <code>value=10000000.</code> on a single line.
-</p>
+
+@param value Value to print.
     */
     public static final void print(int value) {
         IO.print(value);
     }
 
     /** 
-        <p>Print a long (-9_223_372_036_854_775_808 to 9_223_372_036_854_775_807) value.  This prints the decimal version of the value.  If this is the last thing on a line, use {@see #println(long)} instead.</p>
+Print a long (-9_223_372_036_854_775_808 to 9_223_372_036_854_775_807) value.  This prints the decimal version of the value.  If this is the last thing on a line, use {@link #println(long)} instead.
 
-<p>For example:
+For example:
 <blockquote><pre><code>
 import static kiss.API.*;
 
@@ -664,17 +733,19 @@ class App {
   }
 }
 </code></pre></blockquote>
+
 This prints <code>value=10000000000.</code> on a single line.
-</p>
+
+@param value Value to print.
     */
     public static final void print(long value) {
         IO.print(value);
     }
 
     /** 
-        <p>Print a float (about seven decimal digits of precision) value.  If this is the last thing on a line, use {@see #println(float)} instead.</p>
+Print a float (about seven decimal digits of precision) value.  If this is the last thing on a line, use {@link #println(float)} instead.
 
-<p>For example:
+For example:
 <blockquote><pre><code>
 import static kiss.API.*;
 
@@ -687,17 +758,19 @@ class App {
   }
 }
 </code></pre></blockquote>
+
 This prints <code>value=3.1415.</code> on a single line.
-</p>
+
+@param value Value to print.
     */
     public static final void print(float value) {
         IO.print(value);
     }
 
     /** 
-        <p>Print a double (about fifteen decimal digits of precision) value for output. If this is the last thing on a line, use {@see #println(double)} instead.</p>
+Print a double (about fifteen decimal digits of precision) value for output. If this is the last thing on a line, use {@link #println(double)} instead.
 
-<p>For example:
+For example:
 <blockquote><pre><code>
 import static kiss.API.*;
 
@@ -710,15 +783,18 @@ class App {
   }
 }
 </code></pre></blockquote>
+
 This prints <code>value=3.141592653589793.</code> on a single line.
-</p>
+
+@param value Value to print.
     */
     public static final void print(double value) {
         IO.print(value);
     }
 
-    /** <p>Prints an object.  This is a lot like printing the {@see Object#toString()}, but tries to format arrays and lists into nicer strucures.  If this is the last thing on a line, use {@see println(Object)} instead. </p>
-<p>For example:
+    /** Prints an object.  This is a lot like printing the {@link Object#toString()}, but tries to format arrays and lists into nicer strucures.  If this is the last thing on a line, use {@link println(Object)} instead.
+
+For example:
 <blockquote><pre><code>
 import static kiss.API.*;
 
@@ -731,95 +807,132 @@ class App {
   }
 }
 </code></pre></blockquote>
+
 This prints <code>value=[2,5,6].</code> on a single line.
-</p>
+
+@param value Value to print.
     */
     public static final void print(Object value) {
         IO.print(value);
     }
 
-    /** {@see print(boolean)} with a newline. */
+    /** {@link print(boolean)} with a newline. 
+
+	@param value Value to print.
+    */
     public static final void println(boolean value) {
         IO.println(value);
     }
 
-    /** {@see print(byte)} with a newline. */    
+    /** {@link print(byte)} with a newline. 
+
+	@param value Value to print.
+    */    
     public static final void println(byte value) {
         IO.println(value);
     }
 
-    /** {@see print(char)} with a newline. */        
+
+    /** {@link print(char)} with a newline. 
+
+	@param value Value to print.
+    */        
     public static final void println(char value) {
         IO.println(value);
     }
 
-    /** {@see print(short)} with a newline. */            
+    /** {@link print(short)} with a newline. 
+
+	@param value Value to print.
+    */            
     public static final void println(short value) {
         IO.println(value);
     }
 
-    /** {@see print(int)} with a newline. */                
+    /** {@link print(int)} with a newline. 
+
+	@param value Value to print.
+*/
     public static final void println(int value) {
         IO.println(value);
     }
 
-    /** {@see print(long)} with a newline. */                    
+    /** {@link print(long)} with a newline. 
+	@param value Value to print.
+    */
     public static final void println(long value) {
         IO.println(value);
     }
 
-    /** {@see print(float)} with a newline. */                        
+    /** {@link print(float)} with a newline. 
+
+	@param value Value to print.
+    */                    
     public static final void println(float value) {
         IO.println(value);
     }
 
-    /** {@see print(double)} with a newline. */                            
+    /** {@link print(double)} with a newline. 
+	@param value Value to print.
+    */
     public static final void println(double value) {
         IO.println(value);
     }
 
-    /** {@see print(Object)} with a newline. */                                public static final void println(Object value) {
+    /** {@link print(Object)} with a newline.
+
+  	@param value Value to print. 
+    */
+    public static final void println(Object value) {
         IO.println(value);
     }
 
     /** Prints all the listed items, 
-        separated with a blank ' ' character */
+        separated with a blank ' ' character.
+
+	@param value Value to print.
+    */
     public static final void print(Object... value) {
         IO.printVarArgs(value);
     }
 
     /** Prints all the listed items, 
-        separated with a blank ' ' character, follwed by a newline */
+        separated with a blank ' ' character, follwed by a newline.
+
+	@param value Value(s) to print.
+    */
     public static final void println(Object... value) {
         IO.printlnVarArgs(value);
     }
 
-    /** <p>Format arguments like {@see PrintStream.printf()}.  This is especially helpful for formatting numbers.</p>
+    /** Format arguments like {@code PrintStream.printf()}.  This is especially helpful for formatting numbers.
 
-    <p>For example:
+    For example:
 <blockquote><pre><code>
 import static kiss.API.*;
 
 class App {
   void run() {
-    outExpect("|0100| 3.142|");
-    printf("|%04x|%6.3f|",256,PI);
-    outClose();
+    try (Close me=outExpect("|0100| 3.142|")) {
+      printf("|%04x|%6.3f|",256,PI);
+    }
   }
 }
 </code></pre></blockquote>
-</p>
+
+@param fmt Format string.
+@param value Value(s) to format.
 */
     public static final void printf(CharSequence fmt, Object... value) {
         IO.printfVarArgs(fmt,value);
     }
 
     /**
-       <p>Read in an end-of-line.  This is helpful in reading
+       Read in an end-of-line.  This is helpful in reading
        information into your program when it is broken into
-       multiple lines.</p>
+       multiple lines.
 
-    <p>For example:
+    For example:
 <blockquote><pre><code>
 import static kiss.API.*;
 
@@ -828,27 +941,27 @@ class App {
     int i;
     double d;
     String s;
-    inProvide(13,1.3,"thirteen", EOL,
-              "next line");
-    assert readInt() == 13;
-    assert readDouble() == 1.3;
-    assert readString().equals("thirteen");
-    assert readEOL().equals(EOL);
-    assert readLine().equals("next line");
-    inClose();
+    try (Close me=inProvide(13,1.3,"thirteen", EOL,
+              "next line") {
+      assert readInt() == 13;
+      assert readDouble() == 1.3;
+      assert readString().equals("thirteen");
+      assert readEOL().equals(EOL);
+      assert readLine().equals("next line");
+    }
   }
 }
 </code></pre></blockquote>
-</p>
 */
     public static final String readEOL() {
         return IO.readEOL();
     }
 
-    /** <p>Read from the input everything to the next end-of-line
+    /** Read from the input everything to the next end-of-line
         and return it as a string (with the end-of-line marker
-        removed.</p>
-    <p>For example:
+        removed.
+
+    For example:
 <blockquote><pre><code>
 import static kiss.API.*;
 
@@ -860,16 +973,15 @@ class App {
   }
 }
 </code></pre></blockquote>
-</p>
     */
     public static final String readLine() {
         return IO.readLine();
     }
 
-    /** <p>Read in a simple string (no white space) and return it
-        as a String.</p>
+    /** Read in a simple string (no white space) and return it
+        as a String.
 
-<p>For example:
+For example:
 <blockquote><pre><code>
 import static kiss.API.*;
 
@@ -891,7 +1003,6 @@ class App {
   }
 }
 </code></pre></blockquote>
-</p>
     */
     public static final String readString() {
         return IO.readString();
@@ -914,7 +1025,6 @@ class App {
   }
 }
 </code></pre></blockquote>
-</p>
     */
     public static final Boolean readBoolean() {
         return IO.readBoolean();
@@ -934,7 +1044,6 @@ class App {
   }
 }
 </code></pre></blockquote>
-</p>
     */
     public static final Byte readByte() {
         return IO.readByte();
@@ -954,7 +1063,6 @@ class App {
   }
 }
 </code></pre></blockquote>
-</p>
     */
     public static final Integer readInteger() {
         return IO.readInteger();
@@ -979,7 +1087,6 @@ class App {
   }
 }
 </code></pre></blockquote>
-</p>
     */
     public static final Long readLong() {
         return IO.readLong();
@@ -999,7 +1106,6 @@ class App {
   }
 }
 </code></pre></blockquote>
-</p>
     */
     public static final Float readFloat() {
         return IO.readFloat();
@@ -1019,7 +1125,6 @@ class App {
   }
 }
 </code></pre></blockquote>
-</p>
     */
     public static final Double readDouble() {
         return IO.readDouble();
@@ -1066,13 +1171,12 @@ class App {
   }
 }
 </code></pre></blockquote>
-</p>
 */
     public static final void seed() {
         RNG.seed();
     }
 
-    /** <p>Seed the kiss random-number generator for a fixed pattern.  Small changes in the seed will have big changes in the sequence, but for real (cryptographically strong) randomness use {@see seed()} instead.</p>
+    /** <p>Seed the kiss random-number generator for a fixed pattern.  Small changes in the seed will have big changes in the sequence, but for real (cryptographically strong) randomness use {@link seed()} instead.</p>
 
 <p>Seeding each test with <code>seed(1)</code> makes tests more repeatable, which helps figure out what went wrong, so this is done automatically before each test.  Before <code>run()</code> the random number generator is seeded with <code>seed()</code> so it is strongly random.</p>
 
@@ -1114,7 +1218,8 @@ class App {
   }
 }
 </code></pre></blockquote>
-</p>
+
+@param value Seed value.
 */
     public static final void seed(double value) {
         RNG.seed(value);
@@ -1135,13 +1240,16 @@ class App {
   }
 }
 </code></pre></blockquote>
-The random values in from <code>run()</code> will change, but the random values in <code>testDice()</code> will stay the same.  You can create different (fixed) random sequences by calling {@see seed(double)} with different values, and different strongly random sequences by calling {@see seed()}.</p>
+The random values in from <code>run()</code> will change, but the random values in <code>testDice()</code> will stay the same.  You can create different (fixed) random sequences by calling {@link seed(double)} with different values, and different strongly random sequences by calling {@link seed()}.
+
+@param a Inclusive lower bound.
+@param b Inclusive upper bound.
     */
     public static final int random(int a, int b) {
         return RNG.random(a, b);
     }
 
-    /** Equivalent to `random(0,n-1)`.  {@see random(int,int)} */
+    /** Equivalent to `random(0,n-1)`.  {@link random(int,int)}  @param n Range 0 .. n-1.*/
     public static final int random(int n) {
         return RNG.random(0, n-1);
     }
@@ -1152,13 +1260,13 @@ import static kiss.API.*;
 
 class App {
   void run() {
-    if (random() < 1.0/3.0) {
+    if (random() &lt; 1.0/3.0) {
        println("one-third chance.");
     }
   }
 }
 </code></pre></blockquote>
-Because the random values from <code>run()</code> will change, the results of run() will change.  Remember you will have to <code>seed()</code> the random number generator in a test to get different random results.</p>
+Because the random values from <code>run()</code> will change, the results of run() will change.  Remember you will have to <code>seed()</code> the random number generator in a test to get different random results.
     */
     public static final double random() {
         return RNG.random();
@@ -1192,7 +1300,7 @@ APP_ARGS: [a,b,c]
     public static String[] APP_ARGS; // updated by Run.main
 
     /** <p>The name of the class.  This is usually just "App", but
-        might be something else if the "--app <app>" command line
+        might be something else if the "--app &lt;app&gt;" command line
         argument is passed to kiss.util.Run</p>
 
 <p>For example, if the entry point in your application is <code>org.foozle.Runner</code>, as in
@@ -1238,30 +1346,45 @@ org.foozle.Runner: foozling with args: [a,b,c]
 </pre>
 
         Will test all the parts in app.
+
+	@param object Object to run tests on.
     */
     public static final <T> T test(T object) {
         return Run.test(object);
     }
 
     /** Does nothing.  This makes it easy to stop/start testing an object:
-        just use un/test(object) */
+        just use un/test(object) 
+
+        @param object Object to skip tests on. 
+    */
     public static final <T> T untest(T object) {
         return object;
     }
 
     /** Like test(obj), but always runs tests.  This can create
-        a lot of redundant tests. */
+        a lot of redundant tests. 
+
+        @param object Object to always run tests on.
+*/
     public static final <T> T testAlways(T object) {
         return Run.testAlways(object);
     }
 
     /** Does nothing.  This makes it easy to stop/start always testing
-        an object: just use un/testAlways(object) */
+        an object: just use un/testAlways(object) 
+
+        @param object Object to always skip tests on.
+
+    */
     public static final <T> T untestAlways(T object) {
         return object;
     }
 
-    /** Pause application for given duration in seconds. */
+    /** Pause application for given duration in seconds. 
+
+     @param duration Duration in seconds. 
+    */
     public static final void pause(double duration) {
         Run.pause(duration);
     }
@@ -1283,111 +1406,184 @@ org.foozle.Runner: foozling with args: [a,b,c]
     public static final double E = Math.E;
     public static final double PI = Math.PI;
 
-    public static final double abs(double a) {
-        return Math.abs(a);
+    /** 
+	Absolute value of argument.
+
+	Ex: {@code abs(3.14) == 3.14 && abs(-3.14) == 3.14}
+
+	@param value Argument.
+	@return absolute value.
+    */
+    public static final double abs(double value) {
+        return Math.abs(value);
     }
 
-    public static final float abs(float a) {
-        return Math.abs(a);
+    /** 
+	Absolute value of argument.
+
+	Ex: {@code abs(3.14f) == 3.14f && abs(-3.14f) == 3.14f}
+
+	@param value Argument.
+	@return absolute value.
+    */
+    public static final float abs(float value) {
+        return Math.abs(value);
     }
 
-    public static final int abs(int a) {
-        return Math.abs(a);
+    /** 
+	Absolute value of argument.
+
+	Ex: {@code abs(3) == 3 && abs(-3) == 3}
+
+	@param value Argument.
+	@return absolute value.
+    */
+    public static final int abs(int value) {
+        return Math.abs(value);
     }
 
-    public static final long abs(long a) {
-        return Math.abs(a);
+    /** 
+	Absolute value of argument.
+
+	Ex: {@code abs(3L) == 3L && abs(-3L) == 3L}
+
+	@param value Argument.
+	@return absolute value.
+    */
+    public static final long abs(long value) {
+        return Math.abs(value);
     }
 
-    /** Ex: acos(0)==PI/2, toDegrees(acos(0))==90. */
-    public static final double acos(double a) {
-        return Math.acos(a);
+    /** Arc (inverse) cosine to radian angle between 0 .. PI.
+
+	Ex: {@code acos(1.0) == 0 && acos(-1.0) == PI}
+
+        @param value - cosine of angle.
+	@return angle in radians 0 .. PI.
+    */
+    public static final double acos(double value) {
+        return Math.acos(value);
     }
 
-    /** Ex: asin(1.0)==PI/2.0, toDegrees(asin(1.0))==90. */
-    public static final double asin(double a) {
-        return Math.asin(a);
+    /** Arc (inverse) sine to radian angle between -PI/2 .. PI/2.
+
+	Ex: {@code asin(-1.0) == -PI/2.0 && asin(1.0) == PI/2}
+
+        @param value - sine of angle.
+	@return angle in radians -PI/2 .. PI/2.
+    */
+    public static final double asin(double value) {
+        return Math.asin(value);
     }
 
-    /** Ex: atan(1.0)==PI/4.0; toDegrees(atan(1.0))==45. */
-    public static final double atan(double a) {
-        return Math.atan(a);
+    /** Arc (inverse) tangent to radian angle between -PI/2 .. PI/2.
+
+	Ex: {@code atan(-1.0) == -PI/4 && atan(1.0) == PI/4.0}
+
+        @param value - tangent of angle.
+	@return angle in radians -PI/2 .. PI/2.
+    */
+    public static final double atan(double value) {
+        return Math.atan(value);
     }
 
-    /** Ex: atan2(0.0,-1.0) == PI; toDegrees(atan2(0.0,-1.0))==180. */    
+    /** For the cartesian coordinate (x,y), atan2(y,x) computes the radian angle coordinate (x,y) between -PI..PI.
+
+	Note x and y are reversed in the argument list because all the libraries do it this way.
+
+	Ex: {@code atan2(0,1) == 0 && atan2(1,0) == PI/2}
+
+        @param y - y coordinate (note first argument).
+        @param x - x coordinate (note second argument).
+
+	@return angle in radians -PI..PI
+
+      */    
     public static final double atan2(double y, double x) {
         return Math.atan2(y, x);
     }
 
-    /** Cube root.  Ex: cbrt(1000) == 10. */
-    public static final double cbrt(double a) {
-        return Math.cbrt(a);
+    /** Cube root .  
+	
+	Ex: {@code cbrt(1000.0) == 10.0}
+
+	@param value Value.
+	@return cube root.
+    */
+    public static final double cbrt(double value) {
+        return Math.cbrt(value);
     }
 
-    /** Ceiling (smallest integer >= a): Ex: ceil(-3.5)==-3, ceil(3.5)==4. */
-    public static final double ceil(double a) {
-        return Math.ceil(a);
+    /** Ceiling (smallest integer &gt;= value).
+
+	Ex: {@code ceil(-3.5)==-3 && ceil(3.5)==4}
+
+	@param value Value
+	@return ceiling of value.
+    */
+    public static final double ceil(double value) {
+        return Math.ceil(value);
     }
 
 
     /** Obscure part of <code>java.Math.*</code>, here for completeness. 
-        See {@see java.lang.Math#copySign(double,double)}. */
+        See {@link java.lang.Math#copySign(double,double)}. */
     public static final double copySign(double magnitude, double sign) {
         return Math.copySign(magnitude,sign);
     }
 
     /** Obscure part of <code>java.Math.*</code>, here for completeness. 
-        See {@see java.lang.Math#copySign(float,float)}. */
+        See {@link java.lang.Math#copySign(float,float)}. */
     public static final float copySign(float magnitude, float sign) {
         return Math.copySign(magnitude, sign);
     }
 
     /** Ex: cos(PI) == -1.0, cos(toRadians(180)) == -1.0 */
-    public static final double cos(double a) {
-        return Math.cos(a);
+    public static final double cos(double value) {
+        return Math.cos(value);
     }
 
     /** Hyperbolic cosine */
-    public static final double cosh(double x) {
-        return Math.cosh(x);
+    public static final double cosh(double value) {
+        return Math.cosh(value);
     }
 
     /** Natural exponent, exp(x)==pow(E,x). */
-    public static final double exp(double a) {
-        return Math.exp(a);
+    public static final double exp(double value) {
+        return Math.exp(value);
     }
 
     /** Obscure part of <code>java.Math.*</code>, here for completeness. 
-        See {@see java.lang.Math#expm1(double)}. */
-    public static final double expm1(double x) {
-        return Math.expm1(x);
+        See {@link java.lang.Math#expm1(double)}. */
+    public static final double expm1(double value) {
+        return Math.expm1(value);
     }
 
-    /** Floor (largest integer <= a): Ex: floor(-3.5)==-4, floor(3.5)==3. */
-    public static final double floor(double a) {
-        return Math.floor(a);
-    }
-
-    /** Obscure part of <code>java.Math.*</code>, here for completeness. 
-        See {@see java.lang.Math#getExponent(double)}. */
-    public static final int getExponent(double d) {
-        return Math.getExponent(d);
+    /** Floor (largest integer &lt;= a): Ex: floor(-3.5)==-4, floor(3.5)==3. */
+    public static final double floor(double value) {
+        return Math.floor(value);
     }
 
     /** Obscure part of <code>java.Math.*</code>, here for completeness. 
-        See {@see java.lang.Math#getExponent(float)}. */
-    public static final int getExponent(float f) {
-        return Math.getExponent(f);
+        See {@link java.lang.Math#getExponent(double)}. */
+    public static final int getExponent(double value) {
+        return Math.getExponent(value);
     }
 
     /** Obscure part of <code>java.Math.*</code>, here for completeness. 
-        See {@see java.lang.Math#hypot(double,double)}. */
+        See {@link java.lang.Math#getExponent(float)}. */
+    public static final int getExponent(float value) {
+        return Math.getExponent(value);
+    }
+
+    /** Obscure part of <code>java.Math.*</code>, here for completeness. 
+        See {@link java.lang.Math#hypot(double,double)}. */
     public static final double hypot(double x, double y) {
         return Math.hypot(x, y);
     }
 
     /** Obscure part of <code>java.Math.*</code>, here for completeness. 
-        See {@see java.lang.Math#IEEEremainder(double,double)}. */
+        See {@link java.lang.Math#IEEEremainder(double,double)}. */
     public static final double IEEEremainder(double f1, double f2) {
         return Math.IEEEremainder(f1,f2);
     }
@@ -1403,7 +1599,7 @@ org.foozle.Runner: foozling with args: [a,b,c]
     }
 
     /** Obscure part of <code>java.Math.*</code>, here for completeness. 
-        See {@see java.lang.Math#log1p(double)}. */
+        See {@link java.lang.Math#log1p(double)}. */
     public static final double log1p(double x) {
         return Math.log1p(x);
     }
@@ -1441,26 +1637,26 @@ org.foozle.Runner: foozling with args: [a,b,c]
     }
 
     /** Obscure part of <code>java.Math.*</code>, here for completeness. 
-        See {@see java.lang.Math#nextAfter(double,double)}. */
+        See {@link java.lang.Math#nextAfter(double,double)}. */
     public static final double nextAfter(double start, double direction) {
         return Math.nextAfter(start, direction);
     }
 
     /** Obscure part of <code>java.Math.*</code>, here for completeness. 
-        See {@see java.lang.Math#nextAfter(float,double)}. */
+        See {@link java.lang.Math#nextAfter(float,double)}. */
     public static final float nextAfter(float start, double direction) {
         return Math.nextAfter(start, direction);
     }
 
 
     /** Obscure part of <code>java.Math.*</code>, here for completeness. 
-        See {@see java.lang.Math#nextUp(double)}. */
+        See {@link java.lang.Math#nextUp(double)}. */
     public static final double nextUp(double d) {
         return Math.nextUp(d);
     }
 
     /** Obscure part of <code>java.Math.*</code>, here for completeness. 
-        See {@see java.lang.Math#nextUp(float)}. */
+        See {@link java.lang.Math#nextUp(float)}. */
     public static final float nextUp(float f) {
         return Math.nextUp(f);
     }
@@ -1487,13 +1683,13 @@ org.foozle.Runner: foozling with args: [a,b,c]
     }
 
     /** Obscure part of <code>java.Math.*</code>, here for completeness. 
-        See {@see java.lang.Math#scalb(double,int)}. */
+        See {@link java.lang.Math#scalb(double,int)}. */
     public static final double scalb(double d, int scaleFactor) {
         return Math.scalb(d, scaleFactor);
     }
 
     /** Obscure part of <code>java.Math.*</code>, here for completeness. 
-        See {@see java.lang.Math#scalb(float,int)}. */
+        See {@link java.lang.Math#scalb(float,int)}. */
     public static final float scalb(float f, int scaleFactor) {
         return Math.scalb(f, scaleFactor);
     }
@@ -1544,13 +1740,13 @@ org.foozle.Runner: foozling with args: [a,b,c]
     }
 
     /** Obscure part of <code>java.Math.*</code>, here for completeness. 
-        See {@see java.lang.Math#ulp(double)}. */
+        See {@link java.lang.Math#ulp(double)}. */
     public static final double ulp(double d) {
         return Math.ulp(d);
     }
 
     /** Obscure part of <code>java.Math.*</code>, here for completeness. 
-        See {@see java.lang.Math#ulp(float)}. */
+        See {@link java.lang.Math#ulp(float)}. */
     public static final float ulp(float f) {
         return Math.ulp(f);
     }

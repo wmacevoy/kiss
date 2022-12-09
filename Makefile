@@ -1,5 +1,5 @@
 .PHONY: all
-all : lib examples test
+all : lib examples test doc
 
 SRC:=$(shell find src/main/java -regex '[^._].*\.java$$')
 
@@ -18,7 +18,7 @@ lib :   kiss.jar kiss.jar.sha256 kiss-with-tests.jar kiss-with-tests.jar.sha256
 
 .PHONY: doc
 doc :
-	mvn javadoc:javadoc
+	mvn javadoc:javadoc | sed -e 's/^\[[^]]*\] //'
 
 .PHONY: verify
 verify:
