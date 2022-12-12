@@ -283,18 +283,26 @@ public class API {
         See the events example for how to use events. */
     public static class Generator < Event > 
         implements java.io.Serializable, Cloneable {
-        private Class<Event> type;
-        {
+        @SuppressWarnings("unchecked")
+	private final Class<Event> initType() {
             type=(Class<Event>)
                 kiss.util.Reflect.getTypeArguments(Generator.class,
                                                    getClass()).get(0);
             assert type != null;
-        }
+	    return type;
+	}
+        private Class<Event> type = initType();
         
         private static final Listener < ? > [] NONE =
             new Listener < ? > [ 0 ];
+
+        @SuppressWarnings("unchecked")	
+	private final Listener < Event > [] initListeners() {
+	    return ( Listener < Event > [] ) NONE;
+	}
         
-        private transient Listener < Event > [] listeners = ( Listener < Event > [] ) NONE; 
+        private transient Listener < Event > [] listeners = initListeners();
+	
         /** Returns a duplicate of the current listeners. */
         @SuppressWarnings("unchecked")
         public Listener < Event > [] getListeners() {
@@ -952,6 +960,8 @@ class App {
   }
 }
 </code></pre></blockquote>
+
+@return The string it matched.
 */
     public static final String readEOL() {
         return IO.readEOL();
@@ -973,6 +983,8 @@ class App {
   }
 }
 </code></pre></blockquote>
+
+@return the line read.
     */
     public static final String readLine() {
         return IO.readLine();
@@ -1003,6 +1015,8 @@ class App {
   }
 }
 </code></pre></blockquote>
+
+@return The read string.
     */
     public static final String readString() {
         return IO.readString();
@@ -1025,13 +1039,15 @@ class App {
   }
 }
 </code></pre></blockquote>
+
+@return the read boolean.
     */
     public static final Boolean readBoolean() {
         return IO.readBoolean();
     }
 
     /** 
-<p>Read a boolean (true/false) value.</p>
+<p>Read a byte (-128 .. 127) value.</p>
 <p>For example:
 <blockquote><pre><code>
 import static kiss.API.*;
@@ -1044,6 +1060,8 @@ class App {
   }
 }
 </code></pre></blockquote>
+
+@return the read byte.
     */
     public static final Byte readByte() {
         return IO.readByte();
@@ -1063,12 +1081,16 @@ class App {
   }
 }
 </code></pre></blockquote>
+
+@return The read int.
     */
     public static final Integer readInteger() {
         return IO.readInteger();
     }
 
-    /** synonym for readInteger */
+    /** Synonym for readInteger 
+
+	@return the read int. */
     public static final Integer readInt() {
         return IO.readInteger();
     }
@@ -1087,6 +1109,8 @@ class App {
   }
 }
 </code></pre></blockquote>
+
+@return The read long.
     */
     public static final Long readLong() {
         return IO.readLong();
@@ -1106,6 +1130,8 @@ class App {
   }
 }
 </code></pre></blockquote>
+
+@return The read float.
     */
     public static final Float readFloat() {
         return IO.readFloat();
@@ -1125,6 +1151,8 @@ class App {
   }
 }
 </code></pre></blockquote>
+
+@return The read double.
     */
     public static final Double readDouble() {
         return IO.readDouble();

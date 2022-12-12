@@ -28,4 +28,7 @@ RUN groupadd --gid $USER_GID $USER_NAME \
 USER $USER_NAME
 WORKDIR $USER_DIR
 
+RUN git config --global user.email "wmacevoy@gmail.com"
+RUN git config --global user.name "Warren MacEvoy"
+
 ENTRYPOINT ["/bin/bash","-i","-c","\"$@\"","--"]
