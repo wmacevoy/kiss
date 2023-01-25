@@ -2,7 +2,7 @@
 
 # KISS Java API
 
-### Get/Use/Download
+### Get, Use, or Download
 
 [kiss releases](https://github.com/wmacevoy/kiss/releases)
 
