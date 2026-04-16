@@ -752,7 +752,7 @@ async function compileAndRun(testsOnly) {
             compileResult = await cheerpjRunMain(
                 "org.eclipse.jdt.internal.compiler.batch.Main",
                 ecjJar + ":" + kissJar,
-                "-cp", kissJar, "-d", "/str/", "-source", "1.8", "-target", "1.8",
+                "-cp", kissJar, "-d", "/files/", "-source", "1.8", "-target", "1.8",
                  "-nowarn", ...srcPaths
             );
         } catch(compileErr) {
@@ -782,7 +782,7 @@ async function compileAndRun(testsOnly) {
         try {
             await cheerpjRunMain(
                 "kiss.API",
-                kissJar + ":/str/",
+                kissJar + ":/files/",
                 ...runArgs
             );
         } catch(runErr) {
