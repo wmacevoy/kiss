@@ -58,13 +58,11 @@ deploy: clean all
 
 .PHONY: site
 site: lib
-	cp kiss.jar site/
-	cp site/index.html docs/
 	cp kiss.jar docs/
 
 .PHONY: serve
 serve: site
-	python3 site/serve.py 8080
+	python3 docs/serve.py 8080
 
 .PHONY: docker-test
 docker-test:
