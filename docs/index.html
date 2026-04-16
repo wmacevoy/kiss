@@ -71,8 +71,12 @@ footer{background:var(--surface);padding:8px 16px;display:flex;align-items:cente
   <button id="save-btn">Save As...</button>
   <button id="delete-btn" class="danger">Delete</button>
   <span class="spacer"></span>
-  <button id="run-btn" class="primary">Run</button>
-  <button id="test-btn">Tests Only</button>
+  <select id="run-mode">
+    <option value="all">Test & Run</option>
+    <option value="test">Tests Only</option>
+    <option value="run">Run Only</option>
+  </select>
+  <button id="run-btn" class="primary">Go</button>
 </header>
 
 <main>
@@ -577,6 +581,7 @@ function loadExample(name) {
     inputEl.value = ex.input || "";
     renderTabs();
     autoSave();
+    updateRunModes();
     conWrite("Loaded example: " + name, "info");
 }
 
@@ -658,9 +663,67 @@ savesEl.onchange = function() {
     inputEl.value = save.input || "";
     renderTabs();
     autoSave();
+    updateRunModes();
     conWrite("Loaded: " + this.value, "info");
     this.value = "";
 };
+
+// ── Test method parsing ───────────────────────────────────
+const runModeEl = document.getElementById("run-mode");
+
+function parseTestMethods() {
+    const tests = [];
+    for (const [filename, content] of Object.entries(files)) {
+        // Track class declarations by position
+        const classes = [];
+        const classRe = /\bclass\s+(\w+)/g;
+        let cm;
+        while ((cm = classRe.exec(content)) !== null) {
+            classes.push({ name: cm[1], pos: cm.index });
+        }
+        // Find testXXX() methods
+        const testRe = /\bvoid\s+(test\w+)\s*\(/g;
+        let tm;
+        while ((tm = testRe.exec(content)) !== null) {
+            // Associate with nearest class above this position
+            let className = filename.replace(".java", "");
+            for (const cls of classes) {
+                if (cls.pos <= tm.index) className = cls.name;
+            }
+            tests.push({ className, method: tm[1] });
+        }
+    }
+    return tests;
+}
+
+function updateRunModes() {
+    files[activeFile] = editor.value;
+    // Keep the fixed options, rebuild the dynamic ones
+    const val = runModeEl.value;
+    runModeEl.innerHTML = "";
+    ["all", "test", "run"].forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v;
+        opt.textContent = v === "all" ? "Test & Run" : v === "test" ? "Tests Only" : "Run Only";
+        runModeEl.appendChild(opt);
+    });
+    const tests = parseTestMethods();
+    if (tests.length > 0) {
+        const group = document.createElement("optgroup");
+        group.label = "Single Test";
+        tests.forEach(t => {
+            const opt = document.createElement("option");
+            opt.value = "single:" + t.className + "." + t.method;
+            opt.textContent = t.className + "." + t.method + "()";
+            group.appendChild(opt);
+        });
+        runModeEl.appendChild(group);
+    }
+    // Restore selection if it still exists
+    if (runModeEl.querySelector(`option[value="${val}"]`)) {
+        runModeEl.value = val;
+    }
+}
 
 // ── Editor ────────────────────────────────────────────────
 editor.addEventListener("keydown", function(e) {
@@ -676,7 +739,7 @@ editor.addEventListener("keydown", function(e) {
 let saveTimer;
 editor.addEventListener("input", () => {
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(autoSave, 1000);
+    saveTimer = setTimeout(() => { autoSave(); updateRunModes(); }, 1000);
 });
 inputEl.addEventListener("input", () => {
     clearTimeout(saveTimer);
@@ -710,7 +773,7 @@ async function initCheerpJ() {
     }
 }
 
-async function compileAndRun(testsOnly) {
+async function compileAndRun(mode) {
     if (!cjReady) { conWrite("CheerpJ not ready.", "err"); return; }
     if (running) { conWrite("Already running.", "warn"); return; }
 
@@ -719,8 +782,7 @@ async function compileAndRun(testsOnly) {
     autoSave();
 
     const runBtn = document.getElementById("run-btn");
-    const testBtn = document.getElementById("test-btn");
-    runBtn.disabled = testBtn.disabled = true;
+    runBtn.disabled = true;
     statusEl.textContent = "Compiling...";
     conWrite("--- Compiling ---", "info");
 
@@ -737,15 +799,20 @@ async function compileAndRun(testsOnly) {
             srcPaths.push(path);
         }
 
+        // For single test mode, generate a runner class
+        if (mode.startsWith("single:")) {
+            const parts = mode.substring(7).split(".");
+            const cls = parts[0], method = parts[1];
+            const runner = "import static kiss.API.*;\nclass _Runner_ {\n" +
+                "    void run() { seed(1); new " + cls + "()." + method + "(); }\n}\n";
+            cheerpOSAddStringFile("/str/_Runner_.java", runner);
+            srcPaths.push("/str/_Runner_.java");
+        }
+
         // Write stdin input
         if (inputEl.value) {
             cheerpOSAddStringFile("/str/stdin.txt", inputEl.value);
         }
-
-        // Compile with ECJ (Eclipse Compiler for Java)
-        conWrite("ecj: " + ecjJar, "info");
-        conWrite("kiss: " + kissJar, "info");
-        conWrite("files: " + srcPaths.join(", "), "info");
         capturing = true;
         let compileResult;
         try {
@@ -773,11 +840,17 @@ async function compileAndRun(testsOnly) {
             return;
         }
 
-        conWrite("--- Running ---", "info");
-        statusEl.textContent = testsOnly ? "Running tests..." : "Running...";
+        const modeLabel = mode === "all" ? "Test & Run" : mode === "test" ? "Tests"
+            : mode === "run" ? "Run" : mode.substring(7);
+        conWrite("--- " + modeLabel + " ---", "info");
+        statusEl.textContent = modeLabel + "...";
 
         // Run with kiss.API
-        const runArgs = testsOnly ? ["--norun"] : [];
+        let runArgs;
+        if (mode === "test") runArgs = ["--norun"];
+        else if (mode === "run") runArgs = ["--notest"];
+        else if (mode.startsWith("single:")) runArgs = ["--app", "_Runner_", "--notest"];
+        else runArgs = [];
         capturing = true;
         try {
             await cheerpjRunMain(
@@ -809,12 +882,11 @@ async function compileAndRun(testsOnly) {
         statusEl.textContent = "Error";
     } finally {
         running = false;
-        runBtn.disabled = testBtn.disabled = false;
+        runBtn.disabled = false;
     }
 }
 
-document.getElementById("run-btn").onclick = () => compileAndRun(false);
-document.getElementById("test-btn").onclick = () => compileAndRun(true);
+document.getElementById("run-btn").onclick = () => compileAndRun(runModeEl.value);
 
 // ── Init ──────────────────────────────────────────────────
 populateExamples();
@@ -823,6 +895,7 @@ populateSaves();
 if (!loadState()) {
     loadExample("Hello World");
 }
+updateRunModes();
 
 // Load CheerpJ from CDN
 const script = document.createElement("script");
