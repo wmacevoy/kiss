@@ -794,11 +794,13 @@ async function compileAndRun(mode) {
     const ecjJar = APP + "ecj.jar";
 
     try {
-        // Write source files to virtual filesystem
+        // Write source files to virtual filesystem (unique names per run
+        // because CheerpJ /str/ corrupts buffers on overwrite)
+        const tag = "_r" + seq;
         const fileNames = Object.keys(files);
         const srcPaths = [];
         for (const name of fileNames) {
-            const path = "/str/" + name;
+            const path = "/str/" + tag + name;
             cheerpOSAddStringFile(path, files[name]);
             srcPaths.push(path);
         }
@@ -821,14 +823,13 @@ async function compileAndRun(mode) {
                 "        }\n" +
                 "    }\n" +
                 "}\n";
-            cheerpOSAddStringFile("/str/_Runner_.java", runner);
-            srcPaths.push("/str/_Runner_.java");
-            conWrite("_Runner_: new " + cls + "()." + method + "()", "info");
+            cheerpOSAddStringFile("/str/" + tag + "_Runner_.java", runner);
+            srcPaths.push("/str/" + tag + "_Runner_.java");
         }
 
         // Write stdin input
         if (inputEl.value) {
-            cheerpOSAddStringFile("/str/stdin.txt", inputEl.value);
+            cheerpOSAddStringFile("/str/" + tag + "stdin.txt", inputEl.value);
         }
         capturing = true;
         let compileResult;
