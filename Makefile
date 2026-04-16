@@ -64,8 +64,7 @@ site: lib
 
 .PHONY: serve
 serve: site
-	@echo "Open http://localhost:8080 in your browser"
-	cd docs && python3 -m http.server 8080
+	python3 site/serve.py 8080
 
 .PHONY: docker-test
 docker-test:
