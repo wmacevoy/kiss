@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KISS Java Playground</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#1e1e2e;--surface:#313244;--overlay:#45475a;--text:#cdd6f4;--subtext:#a6adc8;--green:#a6e3a1;--red:#f38ba8;--yellow:#f9e2af;--blue:#89b4fa;--mauve:#cba6f7;--teal:#94e2d5}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+header{background:var(--surface);padding:8px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--overlay)}
+header h1{font-size:16px;color:var(--mauve);white-space:nowrap}
+header h1 span{color:var(--subtext);font-weight:normal;font-size:13px}
+select,button{background:var(--overlay);color:var(--text);border:1px solid transparent;padding:5px 10px;border-radius:4px;font-size:13px;cursor:pointer}
+select:hover,button:hover{border-color:var(--blue)}
+button.primary{background:var(--blue);color:var(--bg);font-weight:600}
+button.primary:hover{opacity:0.9}
+button.danger{color:var(--red)}
+button.warn{background:var(--yellow);color:var(--bg)}
+.spacer{flex:1}
+main{flex:1;display:flex;overflow:hidden}
+.editor-panel{flex:1;display:flex;flex-direction:column;min-width:0;border-right:1px solid var(--overlay)}
+.file-tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--overlay);overflow-x:auto}
+.file-tab{padding:6px 14px;font-size:13px;cursor:pointer;border-right:1px solid var(--overlay);white-space:nowrap;color:var(--subtext);display:flex;align-items:center;gap:6px}
+.file-tab.active{background:var(--bg);color:var(--text)}
+.file-tab .close{font-size:11px;opacity:0.5;padding:0 2px}
+.file-tab .close:hover{opacity:1;color:var(--red)}
+.file-tab.add{color:var(--blue);font-weight:bold;padding:6px 10px}
+#editor{flex:1;background:var(--bg);color:var(--text);border:none;resize:none;padding:12px;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:14px;line-height:1.5;tab-size:4;outline:none;overflow:auto}
+.output-panel{width:40%;min-width:280px;display:flex;flex-direction:column}
+.panel-header{padding:6px 12px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--subtext);background:var(--surface);border-bottom:1px solid var(--overlay)}
+.input-section{border-bottom:1px solid var(--overlay)}
+#input{background:var(--bg);color:var(--text);border:none;resize:none;padding:8px 12px;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:13px;line-height:1.4;height:80px;width:100%;outline:none}
+.console-section{flex:1;display:flex;flex-direction:column;overflow:hidden}
+#console{flex:1;overflow:auto;padding:8px 12px;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:13px;line-height:1.4;white-space:pre-wrap;word-break:break-all}
+#console .err{color:var(--red)}
+#console .info{color:var(--subtext)}
+#console .ok{color:var(--green)}
+#console .warn{color:var(--yellow)}
+footer{background:var(--surface);padding:8px 16px;display:flex;align-items:center;gap:10px;border-top:1px solid var(--overlay)}
+#status{font-size:13px;color:var(--subtext)}
+.loading-overlay{position:fixed;inset:0;background:rgba(30,30,46,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100}
+.loading-overlay h2{color:var(--mauve);margin-bottom:12px}
+.loading-overlay p{color:var(--subtext);font-size:14px}
+.spinner{width:40px;height:40px;border:3px solid var(--overlay);border-top-color:var(--blue);border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hidden{display:none!important}
+@media(max-width:768px){
+  main{flex-direction:column}
+  .editor-panel{border-right:none;border-bottom:1px solid var(--overlay);flex:none;height:50%}
+  .output-panel{width:100%;flex:1}
+}
+</style>
+</head>
+<body>
+
+<div id="loading" class="loading-overlay">
+  <div class="spinner"></div>
+  <h2>KISS Java Playground</h2>
+  <p id="load-status">Loading CheerpJ runtime...</p>
+</div>
+
+<header>
+  <h1>KISS Java <span>Playground</span></h1>
+  <select id="examples" title="Load an example">
+    <option value="">-- Examples --</option>
+  </select>
+  <select id="saves" title="Load saved work">
+    <option value="">-- My Saves --</option>
+  </select>
+  <button id="save-btn">Save As...</button>
+  <button id="delete-btn" class="danger">Delete</button>
+  <span class="spacer"></span>
+  <button id="run-btn" class="primary">Run</button>
+  <button id="test-btn">Tests Only</button>
+</header>
+
+<main>
+  <div class="editor-panel">
+    <div class="file-tabs" id="file-tabs"></div>
+    <textarea id="editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+  </div>
+  <div class="output-panel">
+    <div class="input-section">
+      <div class="panel-header">Input (stdin)</div>
+      <textarea id="input" placeholder="Enter input for your program here..."></textarea>
+    </div>
+    <div class="console-section">
+      <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Console</span>
+        <button id="clear-btn" style="padding:2px 8px;font-size:11px">Clear</button>
+      </div>
+      <pre id="console"></pre>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <span id="status">Initializing...</span>
+</footer>
+
+<script>
+// ── Examples ──────────────────────────────────────────────
+const EXAMPLES = {
+  "Hello World": {
+    files: {"App.java": `import static kiss.API.*;
+
+class App {
+    void testRun() {
+        try (Close out = outExpect("Hello, World!")) {
+            run();
+        }
+    }
+
+    void run() {
+        println("Hello, World!");
+    }
+}`}},
+  "Basics": {
+    files: {"App.java": `import static kiss.API.*;
+
+class App {
+    void testHi() {
+        String name = "Alice";
+        try (Close in = inProvide(name)) {
+            try (Close out = outExpect("Hi, " + name + ".")) {
+                hi();
+            }
+        }
+    }
+    void hi() {
+        String name = readLine();
+        println("Hi, " + name + ".");
+    }
+
+    void testBooleanValues() {
+        assert true == true;
+        assert false == false;
+        assert true != false;
+    }
+
+    void testBooleanOutput() {
+        try (Close out = outExpect("true")) { println(true); }
+        try (Close out = outExpect("false")) { println(false); }
+    }
+
+    void testIntRanges() {
+        assert Integer.MIN_VALUE == -2_147_483_648;
+        assert Integer.MAX_VALUE ==  2_147_483_647;
+        assert Integer.MIN_VALUE - 1 == Integer.MAX_VALUE;
+        assert Integer.MAX_VALUE + 1 == Integer.MIN_VALUE;
+    }
+
+    void testIntArithmetic() {
+        assert 7 + 3 == 10;
+        assert 7 - 3 ==  4;
+        assert 7 * 3 == 21;
+        assert 7 / 3 ==  2;
+        assert 7 % 3 ==  1;
+    }
+
+    void testMath() {
+        assert round(3.33) == 3;
+        assert round(3.67) == 4;
+        assert sqrt(25.0) == 5.0;
+        assert pow(5.0,2.0) == 25.0;
+        assert sin(PI/2.0) == 1.0;
+    }
+
+    void testDoubleRandom() {
+        double p = 0.55;
+        int n = 10000;
+        int hits = 0;
+        for (int i=0; i<n; ++i) {
+            if (random() < p) ++hits;
+        }
+        assert abs(hits-n*p) < 6*sqrt(n*p*(1-p));
+    }
+
+    void testStringValues() {
+        String hello = "Hello";
+        assert hello.length() == 5;
+        assert hello.charAt(0) == 'H';
+        assert ("Hello" + ", World!").equals("Hello, World!");
+        assert "Hello, World!".substring(7,12).equals("World");
+    }
+}`}},
+  "Hi": {
+    files: {"App.java": `import static kiss.API.*;
+
+class App {
+    void testHiAda() {
+        inProvide("Ada",EOL,42);
+        outExpect("What is your name? What is a number? Hello, Ada!",EOL,
+                  "I like 42 too.");
+        hi();
+        outClose();
+        inClose();
+    }
+
+    void hi() {
+        print("What is your name? ");
+        String name = readLine();
+        print("What is a number? ");
+        int number = readInt(); readEOL();
+        println("Hello, " + name + "!");
+        println("I like " + number + " too.");
+    }
+}`}},
+  "Fall": {
+    files: {"App.java": `import static kiss.API.*;
+
+class App {
+    void testEarth() {
+        double t=1, g=9.8;
+        inProvide(t,g);
+        outExpect("time(seconds)? gravity(meters/second^2)? "
+                  +"It fell 490 centimeters.");
+        run();
+        outClose();
+        inClose();
+    }
+
+    void testMoon() {
+        double t=1, g=1.6;
+        inProvide(t,g);
+        outExpect("time(seconds)? gravity(meters/second^2)? "
+                  +"It fell 80 centimeters.");
+        run();
+        outClose();
+        inClose();
+    }
+
+    void run() {
+       print("time(seconds)? ");
+       double t = readDouble();
+       print("gravity(meters/second^2)? ");
+       double g = readDouble();
+       double d = 0.5*g*pow(t,2);
+       println("It fell " + round(d*100) + " centimeters.");
+    }
+}`}},
+  "Craps": {
+    files: {
+"Die.java": `import static kiss.API.*;
+
+class Die {
+    private int value;
+    void roll() { value = random(1,6); }
+    int getValue() { return value; }
+    Die() { roll(); }
+
+    void testDieStats() {
+        int n=10000;
+        int[] bins = new int[6];
+        for (int i=0; i<n; ++i) {
+            roll();
+            assert 1 <= value && value <= 6;
+            ++bins[value-1];
+        }
+        for (int i=0; i<6; ++i) {
+            assert abs(((double)bins[i])/n-1.0/6.0) < 1/sqrt(n);
+        }
+    }
+}`,
+"App.java": `import static kiss.API.*;
+
+class App {
+    Die die1 = test(new Die());
+    Die die2 = test(new Die());
+
+    void roll() { die1.roll(); die2.roll(); }
+
+    String craps() {
+        roll();
+        boolean same = (die1.getValue() == die2.getValue());
+        int sum = die1.getValue()+die2.getValue();
+        switch(sum) {
+        case 2: return "Snake Eyes";
+        case 3: return "Ace Deuce";
+        case 4: return same ? "Hard Four" : "Easy Four";
+        case 5: return "Fever Five";
+        case 6: return same ? "Hard Six" : "Easy Six";
+        case 7: return "Natural";
+        case 8: return same ? "Hard Eight" : "Easy Eight";
+        case 9: return "Nina";
+        case 10: return same ? "Hard Ten" : "Easy Ten";
+        case 11: return "Yo";
+        case 12: return "Boxcars";
+        }
+        throw new Error("Impossible");
+    }
+
+    void testCraps() {
+        String ans1 = craps();
+        String ans2 = craps();
+        String ans3 = craps();
+        seed(1);
+        assert craps() == ans1;
+        assert craps() == ans2;
+        assert craps() == ans3;
+    }
+
+    void run() {
+        println("Roll # 1: " + craps());
+        println("Roll # 2: " + craps());
+        println("Roll # 3: " + craps());
+    }
+}`}},
+  "Events": {
+    files: {"App.java": `import static kiss.API.*;
+
+enum State { off, on }
+
+class Light {
+    String location;
+    Light(String _location) { location=_location; }
+    void receive(State state) {
+        println("light in " + location + " is " + state);
+    }
+}
+
+class Remote extends Generator<State> {
+    void on() { send(State.on); }
+    void off() { send(State.off); }
+}
+
+class App {
+    void testHouse() {
+        Light bedroomLight = new Light("bedroom");
+        Light kitchenLight = new Light("kitchen");
+        Remote remote = new Remote();
+
+        remote.addListener(bedroomLight);
+        remote.addListener(kitchenLight);
+        remote.addListener((state)->println("sent " + state));
+
+        try (Close out = outExpect("light in bedroom is on",EOL,
+                                   "light in kitchen is on",EOL,
+                                   "sent on")) {
+            remote.on();
+        }
+        try (Close out = outExpect("light in bedroom is off",EOL,
+                                   "light in kitchen is off",EOL,
+                                   "sent off")) {
+            remote.off();
+        }
+    }
+}`}},
+  "Prime": {
+    files: {"App.java": `import static kiss.API.*;
+
+class App {
+    void testIsPrimeSmallTrueCases() {
+        assert isPrime(2) == true;
+        assert isPrime(3) == true;
+        assert isPrime(5) == true;
+        assert isPrime(7) == true;
+    }
+
+    void testIsPrimeSmallFalseCases() {
+        assert isPrime(-1) == false;
+        assert isPrime(0) == false;
+        assert isPrime(1) == false;
+        assert isPrime(4) == false;
+        assert isPrime(9) == false;
+    }
+
+    void testIsPrimeLargeCases() {
+        assert isPrime(101) == true;
+        assert isPrime(1009) == true;
+        assert isPrime(10007) == true;
+        assert isPrime(100003) == true;
+        assert isPrime(1000000007) == true;
+    }
+
+    void testIsPrimeRandomCompositeCases() {
+        int n=(int) floor(sqrt(Integer.MAX_VALUE));
+        for (int i=0; i<100; ++i) {
+            assert isPrime(random(2,n)*random(2,n)) == false;
+        }
+    }
+
+    boolean isPrime(int x) {
+        if (x > 1) {
+            if (x == 2) return true;
+            if (x % 2 == 0) return false;
+            int i=3;
+            while (i*i <= x) {
+                if (x % i == 0) return false;
+                i = i + 2;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    void run() {
+        for (int i=2; i<=50; ++i) {
+            if (isPrime(i)) print(i + " ");
+        }
+        println();
+    }
+}`}},
+  "Rock Paper Scissors": {
+    files: {"App.java": `import static kiss.API.*;
+
+class App {
+    enum Choice { Rock, Paper, Scissors }
+
+    Choice computer;
+    Choice person;
+
+    void computerPick() {
+        switch(random(1,3)) {
+        case 1: computer = Choice.Rock; break;
+        case 2: computer = Choice.Paper; break;
+        case 3: computer = Choice.Scissors; break;
+        }
+    }
+
+    boolean beats(Choice a, Choice b) {
+        switch(a) {
+        case Rock: return b == Choice.Scissors;
+        case Paper: return b == Choice.Rock;
+        case Scissors: return b == Choice.Paper;
+        }
+        throw new Error("Impossible");
+    }
+
+    void testBeats() {
+        assert beats(Choice.Rock, Choice.Scissors);
+        assert beats(Choice.Paper, Choice.Rock);
+        assert beats(Choice.Scissors, Choice.Paper);
+        assert !beats(Choice.Rock, Choice.Paper);
+        assert !beats(Choice.Rock, Choice.Rock);
+    }
+
+    void run() {
+        String[] names = {"Rock","Paper","Scissors"};
+        Choice[] choices = Choice.values();
+        for (int i=0; i<5; ++i) {
+            computerPick();
+            person = choices[random(0,2)];
+            print(person + " vs " + computer + ": ");
+            if (beats(person,computer)) println("you win!");
+            else if (beats(computer,person)) println("computer wins!");
+            else println("tie.");
+        }
+    }
+}`}}
+};
+
+// ── State ─────────────────────────────────────────────────
+let files = {};
+let activeFile = "App.java";
+let running = false;
+let cjReady = false;
+
+const editor = document.getElementById("editor");
+const consoleEl = document.getElementById("console");
+const inputEl = document.getElementById("input");
+const statusEl = document.getElementById("status");
+const tabsEl = document.getElementById("file-tabs");
+const examplesEl = document.getElementById("examples");
+const savesEl = document.getElementById("saves");
+const loadingEl = document.getElementById("loading");
+const loadStatusEl = document.getElementById("load-status");
+
+// ── Console output ────────────────────────────────────────
+function conWrite(text, cls) {
+    const span = document.createElement("span");
+    if (cls) span.className = cls;
+    span.textContent = text + "\n";
+    consoleEl.appendChild(span);
+    consoleEl.scrollTop = consoleEl.scrollHeight;
+}
+function conClear() { consoleEl.textContent = ""; }
+
+// Capture Java stdout/stderr from CheerpJ (goes to console.log)
+let capturing = false;
+const _log = console.log;
+const _error = console.error;
+const _warn = console.warn;
+
+console.log = function(...args) {
+    if (capturing) {
+        const msg = args.map(a => typeof a === "object" ? JSON.stringify(a) : String(a)).join(" ");
+        // Filter CheerpJ internal messages
+        if (!msg.startsWith("[CheerpJ]")) conWrite(msg);
+    }
+    _log.apply(console, args);
+};
+console.error = function(...args) {
+    if (capturing) {
+        const msg = args.map(a => typeof a === "object" ? JSON.stringify(a) : String(a)).join(" ");
+        if (!msg.startsWith("[CheerpJ]")) conWrite(msg, "err");
+    }
+    _error.apply(console, args);
+};
+
+// ── File tabs ─────────────────────────────────────────────
+function renderTabs() {
+    tabsEl.innerHTML = "";
+    const names = Object.keys(files);
+    names.forEach(name => {
+        const tab = document.createElement("div");
+        tab.className = "file-tab" + (name === activeFile ? " active" : "");
+        tab.innerHTML = name;
+        if (names.length > 1) {
+            const close = document.createElement("span");
+            close.className = "close";
+            close.textContent = "\u00d7";
+            close.onclick = (e) => { e.stopPropagation(); deleteFile(name); };
+            tab.appendChild(close);
+        }
+        tab.onclick = () => switchFile(name);
+        tabsEl.appendChild(tab);
+    });
+    const addTab = document.createElement("div");
+    addTab.className = "file-tab add";
+    addTab.textContent = "+";
+    addTab.title = "Add file";
+    addTab.onclick = addFile;
+    tabsEl.appendChild(addTab);
+}
+
+function switchFile(name) {
+    files[activeFile] = editor.value;
+    activeFile = name;
+    editor.value = files[name] || "";
+    renderTabs();
+    autoSave();
+}
+
+function addFile() {
+    const name = prompt("File name (e.g. Helper.java):");
+    if (!name || !name.endsWith(".java")) return;
+    if (files[name]) { switchFile(name); return; }
+    files[activeFile] = editor.value;
+    files[name] = "import static kiss.API.*;\n\nclass " +
+        name.replace(".java","") + " {\n    \n}\n";
+    activeFile = name;
+    editor.value = files[name];
+    renderTabs();
+    autoSave();
+}
+
+function deleteFile(name) {
+    if (Object.keys(files).length <= 1) return;
+    delete files[name];
+    if (activeFile === name) {
+        activeFile = Object.keys(files)[0];
+        editor.value = files[activeFile];
+    }
+    renderTabs();
+    autoSave();
+}
+
+// ── Examples ──────────────────────────────────────────────
+function populateExamples() {
+    Object.keys(EXAMPLES).forEach(name => {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        examplesEl.appendChild(opt);
+    });
+}
+
+function loadExample(name) {
+    const ex = EXAMPLES[name];
+    if (!ex) return;
+    files = {};
+    Object.keys(ex.files).forEach(f => files[f] = ex.files[f]);
+    activeFile = files["App.java"] !== undefined ? "App.java" : Object.keys(files)[0];
+    editor.value = files[activeFile];
+    inputEl.value = ex.input || "";
+    renderTabs();
+    autoSave();
+    conWrite("Loaded example: " + name, "info");
+}
+
+examplesEl.onchange = function() {
+    if (this.value) { loadExample(this.value); this.value = ""; }
+};
+
+// ── Save / Load ───────────────────────────────────────────
+const SAVE_KEY = "kiss-playground-saves";
+const CURRENT_KEY = "kiss-playground-current";
+
+function getSaves() {
+    try { return JSON.parse(localStorage.getItem(SAVE_KEY)) || {}; } catch(e) { return {}; }
+}
+
+function populateSaves() {
+    savesEl.innerHTML = '<option value="">-- My Saves --</option>';
+    const saves = getSaves();
+    Object.keys(saves).sort().forEach(name => {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        savesEl.appendChild(opt);
+    });
+}
+
+function autoSave() {
+    files[activeFile] = editor.value;
+    const state = { files: {...files}, activeFile, input: inputEl.value };
+    localStorage.setItem(CURRENT_KEY, JSON.stringify(state));
+}
+
+function loadState() {
+    try {
+        const state = JSON.parse(localStorage.getItem(CURRENT_KEY));
+        if (state && state.files && Object.keys(state.files).length > 0) {
+            files = state.files;
+            activeFile = state.activeFile || Object.keys(files)[0];
+            editor.value = files[activeFile] || "";
+            inputEl.value = state.input || "";
+            renderTabs();
+            return true;
+        }
+    } catch(e) {}
+    return false;
+}
+
+document.getElementById("save-btn").onclick = function() {
+    const name = prompt("Save name:");
+    if (!name) return;
+    files[activeFile] = editor.value;
+    const saves = getSaves();
+    saves[name] = { files: {...files}, input: inputEl.value };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(saves));
+    populateSaves();
+    conWrite("Saved: " + name, "info");
+};
+
+document.getElementById("delete-btn").onclick = function() {
+    const saves = getSaves();
+    const names = Object.keys(saves);
+    if (names.length === 0) { conWrite("No saves to delete.", "info"); return; }
+    const name = prompt("Delete which save?\n" + names.join(", "));
+    if (!name || !saves[name]) return;
+    delete saves[name];
+    localStorage.setItem(SAVE_KEY, JSON.stringify(saves));
+    populateSaves();
+    conWrite("Deleted: " + name, "info");
+};
+
+savesEl.onchange = function() {
+    if (!this.value) return;
+    const saves = getSaves();
+    const save = saves[this.value];
+    if (!save) return;
+    files = {...save.files};
+    activeFile = Object.keys(files)[0];
+    editor.value = files[activeFile] || "";
+    inputEl.value = save.input || "";
+    renderTabs();
+    autoSave();
+    conWrite("Loaded: " + this.value, "info");
+    this.value = "";
+};
+
+// ── Editor ────────────────────────────────────────────────
+editor.addEventListener("keydown", function(e) {
+    if (e.key === "Tab") {
+        e.preventDefault();
+        const start = this.selectionStart;
+        const end = this.selectionEnd;
+        this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
+        this.selectionStart = this.selectionEnd = start + 4;
+    }
+});
+
+let saveTimer;
+editor.addEventListener("input", () => {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(autoSave, 1000);
+});
+inputEl.addEventListener("input", () => {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(autoSave, 1000);
+});
+
+document.getElementById("clear-btn").onclick = conClear;
+
+// ── CheerpJ ──────────────────────────────────────────────
+async function initCheerpJ() {
+    statusEl.textContent = "Loading CheerpJ...";
+    loadStatusEl.textContent = "Loading CheerpJ runtime (this may take a moment)...";
+    try {
+        await cheerpjInit({
+            version: 8,
+            status: "none"
+        });
+        cjReady = true;
+        statusEl.textContent = "Ready";
+        loadingEl.classList.add("hidden");
+        conWrite("CheerpJ initialized. Ready to compile and run.", "ok");
+    } catch(e) {
+        statusEl.textContent = "CheerpJ failed to load";
+        loadStatusEl.textContent = "Failed to load CheerpJ: " + e.message +
+            "\n\nMake sure you're serving this page via HTTP (not file://).";
+        conWrite("CheerpJ failed: " + e.message, "err");
+        conWrite("Serve via HTTP: python3 -m http.server 8080", "info");
+    }
+}
+
+async function compileAndRun(testsOnly) {
+    if (!cjReady) { conWrite("CheerpJ not ready.", "err"); return; }
+    if (running) { conWrite("Already running.", "warn"); return; }
+
+    running = true;
+    files[activeFile] = editor.value;
+    autoSave();
+
+    const runBtn = document.getElementById("run-btn");
+    const testBtn = document.getElementById("test-btn");
+    runBtn.disabled = testBtn.disabled = true;
+    statusEl.textContent = "Compiling...";
+    conWrite("--- Compiling ---", "info");
+
+    try {
+        // Write source files to virtual filesystem
+        const fileNames = Object.keys(files);
+        const srcPaths = [];
+        for (const name of fileNames) {
+            const path = "/str/" + name;
+            cheerpjAddStringFile(path, files[name]);
+            srcPaths.push(path);
+        }
+
+        // Write stdin input
+        if (inputEl.value) {
+            cheerpjAddStringFile("/str/stdin.txt", inputEl.value);
+        }
+
+        // Try to compile with javac
+        capturing = true;
+        const compileArgs = ["-cp", "/app/kiss.jar", "-d", "/str/"];
+        compileArgs.push(...srcPaths);
+
+        let compileResult;
+        try {
+            compileResult = await cheerpjRunMain(
+                "com.sun.tools.javac.Main",
+                "/app/kiss.jar",
+                compileArgs
+            );
+        } catch(compErr) {
+            // javac might not be available, try ECJ
+            conWrite("javac not available, trying ECJ...", "warn");
+            try {
+                compileResult = await cheerpjRunMain(
+                    "org.eclipse.jdt.internal.compiler.batch.Main",
+                    "/app/ecj.jar",
+                    ["-cp", "/app/kiss.jar", "-d", "/str/", "-source", "1.8", "-target", "1.8", ...srcPaths]
+                );
+            } catch(ecjErr) {
+                conWrite("No compiler available.", "err");
+                conWrite("Need javac (in CheerpJ) or ecj.jar alongside this page.", "err");
+                return;
+            }
+        }
+        capturing = false;
+
+        if (compileResult !== 0 && compileResult !== undefined) {
+            conWrite("Compilation failed (exit code " + compileResult + ")", "err");
+            statusEl.textContent = "Compile error";
+            return;
+        }
+
+        conWrite("--- Running ---", "info");
+        statusEl.textContent = testsOnly ? "Running tests..." : "Running...";
+
+        // Run with kiss.API
+        const runArgs = testsOnly ? ["--norun"] : [];
+        capturing = true;
+        await cheerpjRunMain(
+            "kiss.API",
+            "/app/kiss.jar:/str/",
+            runArgs
+        );
+        capturing = false;
+
+        conWrite("--- Done ---", "ok");
+        statusEl.textContent = "Ready";
+
+    } catch(e) {
+        capturing = false;
+        conWrite("Error: " + e.message, "err");
+        statusEl.textContent = "Error";
+    } finally {
+        running = false;
+        runBtn.disabled = testBtn.disabled = false;
+    }
+}
+
+document.getElementById("run-btn").onclick = () => compileAndRun(false);
+document.getElementById("test-btn").onclick = () => compileAndRun(true);
+
+// ── Init ──────────────────────────────────────────────────
+populateExamples();
+populateSaves();
+
+if (!loadState()) {
+    loadExample("Hello World");
+}
+
+// Load CheerpJ from CDN
+const script = document.createElement("script");
+script.src = "https://cjrtnc.leaningtech.com/4.2/loader.js";
+script.onload = () => initCheerpJ();
+script.onerror = () => {
+    loadStatusEl.textContent = "Failed to load CheerpJ script. Check your network connection.";
+    statusEl.textContent = "CheerpJ unavailable";
+};
+document.head.appendChild(script);
+</script>
+</body>
+</html>

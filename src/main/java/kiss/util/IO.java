@@ -64,7 +64,7 @@ public class IO {
         try {
             outs.get().addLast(new PrintStream(new VerifyOutputStream(new FileInputStream(filename))));
         } catch (IOException ex) {
-            ex.printStackTrace();
+            perror("outVerify:", ex.getMessage());
             return null;
         }
         return OUT_CLOSE;
@@ -113,7 +113,7 @@ public class IO {
         try {
             outs.get().addLast(new PrintStream(new FileOutputStream(file)));
         } catch (IOException ex) {
-            ex.printStackTrace();
+            perror("outOpen:", ex.getMessage());
             return null;
         }
         return OUT_CLOSE;
@@ -142,8 +142,7 @@ public class IO {
         try {
             ins.get().addLast(config(new Scanner(file)));
         } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            perror("inOpen:", e.getMessage());
             return null;
         }
         return IN_CLOSE;
@@ -408,6 +407,10 @@ public class IO {
         out().printf(fmt.toString(),args);
     }
 
+    public static final void perror(Object... args) {
+        printVarArgs(System.err, args);
+        System.err.println();
+    }
 
     public static final String readString() {
     	Scanner in=in();

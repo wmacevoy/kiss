@@ -6,11 +6,11 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Array;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.io.DataInputStream;
 import java.io.InputStream;
 
 public class Reflect {
@@ -111,93 +111,156 @@ public class Reflect {
         int offset;
     }
 
-    static class ByLength implements Comparator<Method> {
-
-        @Override
-        public int compare(Method a, Method b) {
-            return b.getName().length()-a.getName().length();
-        }
-    }
-
-    /** Grok the bytecode to get the declared order */
+    /** Parse the class file LineNumberTable to get source declaration order */
     public static Method[] getDeclaredMethodsInOrder(Class clazz) {
-        Method[] methods = null;
+        Method[] methods = clazz.getDeclaredMethods();
         try {
-            String resource = clazz.getName().replace('.', '/')+".class";
+            String resource = clazz.getName().replace('.', '/') + ".class";
+            InputStream raw = clazz.getClassLoader().getResourceAsStream(resource);
+            if (raw == null) return methods;
 
-            methods = clazz.getDeclaredMethods();
+            DataInputStream dis = new DataInputStream(raw);
+            try {
+                if (dis.readInt() != 0xCAFEBABE) return methods;
+                dis.readUnsignedShort(); // minor version
+                dis.readUnsignedShort(); // major version
 
-            InputStream is = clazz.getClassLoader()
-                .getResourceAsStream(resource);
-
-            if (is == null) {
-                return methods;
-            }
-
-            java.util.Arrays.sort(methods,new ByLength());
-            ArrayList<byte[]> blocks = new ArrayList<byte[]>();
-            int length = 0;
-            for (;;) {
-                byte[] block = new byte[16*1024];
-                int n = is.read(block);
-                if (n > 0) {
-                    if (n < block.length) {
-                        block = java.util.Arrays.copyOf(block,n);
-                    }
-                    length += block.length;
-                    blocks.add(block);
-                } else {
-                    break;
-                }
-            }
-
-            byte[] data = new byte[length];
-            int offset = 0;
-            for (byte[] block : blocks) {
-                System.arraycopy(block,0,data,offset,block.length);
-                offset += block.length;
-            }
-
-            String sdata = new String(data,java.nio.charset.Charset.forName("UTF-8"));
-            int lnt = sdata.indexOf("LineNumberTable");
-            if (lnt != -1) sdata = sdata.substring(lnt+"LineNumberTable".length()+3);
-            int cde = sdata.lastIndexOf("SourceFile");
-            if (cde != -1) sdata = sdata.substring(0,cde);
-            
-            MethodOffset mo[] = new MethodOffset[methods.length];
-
-            
-            for (int i=0; i<methods.length; ++i) {
-                int pos = -1;
-                for (;;) {
-                    pos=sdata.indexOf(methods[i].getName(),pos);
-                    if (pos == -1) break;
-                    boolean subset = false;
-                    for (int j=0; j<i; ++j) {
-                        if (mo[j].offset >= 0 &&
-                            mo[j].offset <= pos &&
-                            pos < mo[j].offset + mo[j].method.getName().length()) {
-                            subset = true;
-                            break;
-                        }
-                    }
-                    if (subset) {
-                        pos += methods[i].getName().length();
-                    } else {
-                        break;
+                int cpCount = dis.readUnsignedShort();
+                String[] cp = new String[cpCount];
+                for (int i = 1; i < cpCount; i++) {
+                    int tag = dis.readUnsignedByte();
+                    switch (tag) {
+                        case 1: cp[i] = dis.readUTF(); break;
+                        case 3: case 4: dis.readInt(); break;
+                        case 5: case 6: dis.readLong(); i++; break;
+                        case 7: case 8: case 16: dis.readUnsignedShort(); break;
+                        case 9: case 10: case 11: case 12: case 18:
+                            dis.readUnsignedShort(); dis.readUnsignedShort(); break;
+                        case 15: dis.readUnsignedByte(); dis.readUnsignedShort(); break;
+                        default: return methods;
                     }
                 }
-                mo[i] = new MethodOffset(methods[i],pos);
-            }
-            java.util.Arrays.sort(mo);
-            for (int i=0; i<mo.length; ++i) {
-                methods[i]=mo[i].method;
+
+                dis.readUnsignedShort(); // access flags
+                dis.readUnsignedShort(); // this class
+                dis.readUnsignedShort(); // super class
+                int ifaceCount = dis.readUnsignedShort();
+                for (int i = 0; i < ifaceCount; i++) dis.readUnsignedShort();
+
+                skipMembers(dis); // fields
+
+                int methodCount = dis.readUnsignedShort();
+                HashMap<String, Integer> lineNumbers = new HashMap<String, Integer>();
+                for (int i = 0; i < methodCount; i++) {
+                    dis.readUnsignedShort(); // access flags
+                    String name = cp[dis.readUnsignedShort()];
+                    String desc = cp[dis.readUnsignedShort()];
+                    int line = firstLineNumber(dis, cp);
+                    if (line >= 0) lineNumbers.put(name + desc, line);
+                }
+
+                MethodOffset[] mo = new MethodOffset[methods.length];
+                for (int i = 0; i < methods.length; i++) {
+                    String key = methods[i].getName() + descriptor(methods[i]);
+                    Integer line = lineNumbers.get(key);
+                    mo[i] = new MethodOffset(methods[i],
+                        line != null ? line : Integer.MAX_VALUE);
+                }
+                java.util.Arrays.sort(mo);
+                for (int i = 0; i < mo.length; i++) {
+                    methods[i] = mo[i].method;
+                }
+            } finally {
+                dis.close();
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            // fall back to unordered
         }
-
         return methods;
     }
-    
+
+    private static void skipMembers(DataInputStream dis) throws java.io.IOException {
+        int count = dis.readUnsignedShort();
+        for (int i = 0; i < count; i++) {
+            dis.readUnsignedShort(); // access flags
+            dis.readUnsignedShort(); // name index
+            dis.readUnsignedShort(); // descriptor index
+            skipAttributes(dis);
+        }
+    }
+
+    private static void skipAttributes(DataInputStream dis) throws java.io.IOException {
+        int count = dis.readUnsignedShort();
+        for (int i = 0; i < count; i++) {
+            dis.readUnsignedShort(); // name index
+            skipN(dis, dis.readInt());
+        }
+    }
+
+    private static int firstLineNumber(DataInputStream dis, String[] cp) throws java.io.IOException {
+        int firstLine = -1;
+        int attrCount = dis.readUnsignedShort();
+        for (int i = 0; i < attrCount; i++) {
+            String attrName = cp[dis.readUnsignedShort()];
+            int attrLen = dis.readInt();
+            if ("Code".equals(attrName)) {
+                dis.readUnsignedShort(); // max stack
+                dis.readUnsignedShort(); // max locals
+                skipN(dis, dis.readInt()); // bytecode
+                skipN(dis, dis.readUnsignedShort() * 8); // exception table
+                int subCount = dis.readUnsignedShort();
+                for (int j = 0; j < subCount; j++) {
+                    String subName = cp[dis.readUnsignedShort()];
+                    int subLen = dis.readInt();
+                    if ("LineNumberTable".equals(subName)) {
+                        int entries = dis.readUnsignedShort();
+                        for (int k = 0; k < entries; k++) {
+                            dis.readUnsignedShort(); // start pc
+                            int line = dis.readUnsignedShort();
+                            if (firstLine < 0 || line < firstLine) firstLine = line;
+                        }
+                    } else {
+                        skipN(dis, subLen);
+                    }
+                }
+            } else {
+                skipN(dis, attrLen);
+            }
+        }
+        return firstLine;
+    }
+
+    private static void skipN(DataInputStream dis, int n) throws java.io.IOException {
+        while (n > 0) {
+            int skipped = dis.skipBytes(n);
+            if (skipped > 0) {
+                n -= skipped;
+            } else {
+                dis.readByte();
+                n--;
+            }
+        }
+    }
+
+    private static String descriptor(Method m) {
+        StringBuilder sb = new StringBuilder("(");
+        for (Class<?> p : m.getParameterTypes()) typeDesc(sb, p);
+        sb.append(")");
+        typeDesc(sb, m.getReturnType());
+        return sb.toString();
+    }
+
+    private static void typeDesc(StringBuilder sb, Class<?> c) {
+        if      (c == void.class)    sb.append("V");
+        else if (c == boolean.class) sb.append("Z");
+        else if (c == byte.class)    sb.append("B");
+        else if (c == char.class)    sb.append("C");
+        else if (c == short.class)   sb.append("S");
+        else if (c == int.class)     sb.append("I");
+        else if (c == long.class)    sb.append("J");
+        else if (c == float.class)   sb.append("F");
+        else if (c == double.class)  sb.append("D");
+        else if (c.isArray()) { sb.append("["); typeDesc(sb, c.getComponentType()); }
+        else sb.append("L").append(c.getName().replace('.', '/')).append(";");
+    }
 }

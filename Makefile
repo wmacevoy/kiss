@@ -56,6 +56,22 @@ deploy: clean all
 	mvn package
 	mvn deploy
 
+.PHONY: site
+site: lib
+	cp kiss.jar site/
+	cp site/index.html docs/
+	cp kiss.jar docs/
+
+.PHONY: serve
+serve: site
+	@echo "Open http://localhost:8080 in your browser"
+	cd docs && python3 -m http.server 8080
+
+.PHONY: docker-test
+docker-test:
+	docker build -t kiss-test .
+	docker run --rm kiss-test
+
 .PHONY: test
 test: self-test example-tests
 

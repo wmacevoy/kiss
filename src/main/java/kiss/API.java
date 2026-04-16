@@ -788,10 +788,15 @@ This prints <code>value=[2,5,6].</code> on a single line.
         IO.printVarArgs(value);
     }
 
-    /** Prints all the listed items, 
+    /** Prints all the listed items,
         separated with a blank ' ' character, follwed by a newline */
     public static final void println(Object... value) {
         IO.printlnVarArgs(value);
+    }
+
+    /** Print error message to stderr. Same calling convention as println. */
+    public static final void perror(Object... args) {
+        IO.perror(args);
     }
 
     /** <p>Format arguments like {@see PrintStream.printf()}.  This is especially helpful for formatting numbers.</p>
