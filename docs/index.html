@@ -466,7 +466,6 @@ let files = {};
 let activeFile = "App.java";
 let running = false;
 let cjReady = false;
-let stdinLines = [];  // accumulated interactive input
 
 const editor = document.getElementById("editor");
 const consoleEl = document.getElementById("console");
@@ -585,7 +584,7 @@ function loadExample(name) {
     Object.keys(ex.files).forEach(f => files[f] = ex.files[f]);
     activeFile = files["App.java"] !== undefined ? "App.java" : Object.keys(files)[0];
     editor.value = files[activeFile];
-    stdinLines = [];
+
     renderTabs();
     autoSave();
     updateRunModes();
@@ -628,7 +627,7 @@ function loadState() {
             files = state.files;
             activeFile = state.activeFile || Object.keys(files)[0];
             editor.value = files[activeFile] || "";
-            stdinLines = [];
+        
             renderTabs();
             return true;
         }
@@ -667,7 +666,7 @@ savesEl.onchange = function() {
     files = {...save.files};
     activeFile = Object.keys(files)[0];
     editor.value = files[activeFile] || "";
-    stdinLines = [];
+
     renderTabs();
     autoSave();
     updateRunModes();
@@ -748,20 +747,22 @@ editor.addEventListener("input", () => {
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => { autoSave(); updateRunModes(); }, 1000);
 });
-// Interactive stdin: Enter sends a line, re-runs with accumulated input
-stdinLineEl.addEventListener("keydown", (e) => {
-    if (e.key !== "Enter") return;
+// Interactive stdin: Enter feeds the line to the running program
+let webLib = null;  // cheerpjRunLibrary handle for calling WebInputStream.feed()
+
+stdinLineEl.addEventListener("keydown", async (e) => {
+    if (e.key !== "Enter" || !webLib) return;
     const line = stdinLineEl.value;
-    stdinLines.push(line);
     stdinLineEl.value = "";
-    stdinLineEl.disabled = true;
     conWrite("> " + line, "stdin");
-    // Abandon hung run and re-run with accumulated stdin
-    running = false;
-    compileAndRun(runModeEl.value);
+    try {
+        await webLib.kiss.util.WebInputStream.feed(line + "\n");
+    } catch(err) {
+        _error("feed error:", err);
+    }
 });
 
-document.getElementById("clear-btn").onclick = () => { conClear(); stdinLines = []; };
+document.getElementById("clear-btn").onclick = conClear;
 
 // ── CheerpJ ──────────────────────────────────────────────
 // /app/ maps to the web server root, so on GitHub Pages (/kiss/) we need the subpath
@@ -778,7 +779,7 @@ async function initCheerpJ() {
         cjReady = true;
         statusEl.textContent = "Ready";
         loadingEl.classList.add("hidden");
-        conWrite("KISS Playground v8. Ready.", "ok");
+        conWrite("KISS Playground v9. Ready.", "ok");
     } catch(e) {
         statusEl.textContent = "CheerpJ failed to load";
         loadStatusEl.textContent = "Failed to load CheerpJ: " + e.message +
@@ -867,6 +868,13 @@ async function compileAndRun(mode) {
 
             compiled = true;
             compiledSource = currentSource;
+
+            // Load library proxy for WebInputStream.feed() interop
+            if (!webLib) {
+                try {
+                    webLib = await cheerpjRunLibrary(kissJar + ":/files/");
+                } catch(e) { _error("cheerpjRunLibrary:", e); }
+            }
         }
 
         const modeLabel = mode === "all" ? "Test & Run" : mode === "test" ? "Tests"
@@ -874,13 +882,8 @@ async function compileAndRun(mode) {
         conWrite("--- " + modeLabel + " ---", "info");
         statusEl.textContent = modeLabel + "...";
 
-        // Pipe accumulated stdin lines via --stdin flag
-        let runArgs = [];
-        if (stdinLines.length > 0) {
-            const stdinPath = "/str/_stdin" + (++compileSeq) + ".txt";
-            cheerpOSAddStringFile(stdinPath, stdinLines.join("\n") + "\n");
-            runArgs.push("--stdin", stdinPath);
-        }
+        // Use WebInputStream for interactive stdin
+        let runArgs = ["--web-stdin"];
 
         // Run with kiss.API — different args per mode, no recompile needed
         if (mode === "test") runArgs.push("--norun");
@@ -931,7 +934,6 @@ async function compileAndRun(mode) {
 }
 
 document.getElementById("run-btn").onclick = () => {
-    stdinLines = [];  // fresh run clears accumulated input
     compileAndRun(runModeEl.value);
 };
 document.getElementById("stop-btn").onclick = () => location.reload();

@@ -75,6 +75,13 @@ public class Run {
                 continue;
             }
 
+            if (_args[argi].equals("--web-stdin")) {
+                WebInputStream.clear();
+                System.setIn(new WebInputStream());
+                IO.resetStdin();
+                continue;
+            }
+
             break;
         }
 
