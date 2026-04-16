@@ -792,15 +792,13 @@ async function compileAndRun(mode) {
 
     const kissJar = APP + "kiss.jar";
     const ecjJar = APP + "ecj.jar";
-    const srcDir = "/str/s" + seq + "/";
-    const outDir = "/files/o" + seq + "/";
 
     try {
-        // Write source files to unique path per run
+        // Write source files to virtual filesystem
         const fileNames = Object.keys(files);
         const srcPaths = [];
         for (const name of fileNames) {
-            const path = srcDir + name;
+            const path = "/str/" + name;
             cheerpOSAddStringFile(path, files[name]);
             srcPaths.push(path);
         }
@@ -809,28 +807,28 @@ async function compileAndRun(mode) {
         if (mode.startsWith("single:")) {
             const parts = mode.substring(7).split(".");
             const cls = parts[0], method = parts[1];
-            const runner = [
-                "import static kiss.API.*;",
-                "class _Runner_ {",
-                "    void run() {",
-                "        seed(1);",
-                "        try {",
-                "            new " + cls + "()." + method + "();",
-                "            System.out.println(\"PASS: " + cls + "." + method + "\");",
-                "        } catch (Throwable t) {",
-                "            System.out.println(\"FAIL: " + cls + "." + method + " - \" + t);",
-                "            t.printStackTrace();",
-                "        }",
-                "    }",
-                "}"
-            ].join("\n") + "\n";
-            cheerpOSAddStringFile(srcDir + "_Runner_.java", runner);
-            srcPaths.push(srcDir + "_Runner_.java");
+            const runner =
+                "import static kiss.API.*;\n" +
+                "class _Runner_ {\n" +
+                "    void run() {\n" +
+                "        seed(1);\n" +
+                "        try {\n" +
+                "            new " + cls + "()." + method + "();\n" +
+                "            System.out.println(\"PASS: " + cls + "." + method + "\");\n" +
+                "        } catch (Throwable t) {\n" +
+                "            System.out.println(\"FAIL: " + cls + "." + method + " - \" + t);\n" +
+                "            t.printStackTrace();\n" +
+                "        }\n" +
+                "    }\n" +
+                "}\n";
+            cheerpOSAddStringFile("/str/_Runner_.java", runner);
+            srcPaths.push("/str/_Runner_.java");
+            conWrite("_Runner_: new " + cls + "()." + method + "()", "info");
         }
 
         // Write stdin input
         if (inputEl.value) {
-            cheerpOSAddStringFile(srcDir + "stdin.txt", inputEl.value);
+            cheerpOSAddStringFile("/str/stdin.txt", inputEl.value);
         }
         capturing = true;
         let compileResult;
@@ -838,7 +836,7 @@ async function compileAndRun(mode) {
             compileResult = await cheerpjRunMain(
                 "org.eclipse.jdt.internal.compiler.batch.Main",
                 ecjJar + ":" + kissJar,
-                "-cp", kissJar, "-d", outDir, "-source", "1.8", "-target", "1.8",
+                "-cp", kissJar, "-d", "/files/", "-source", "1.8", "-target", "1.8",
                  "-nowarn", ...srcPaths
             );
         } catch(compileErr) {
@@ -874,7 +872,7 @@ async function compileAndRun(mode) {
         try {
             await cheerpjRunMain(
                 "kiss.API",
-                kissJar + ":" + outDir,
+                kissJar + ":/files/",
                 ...runArgs
             );
         } catch(runErr) {
