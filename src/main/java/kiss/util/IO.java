@@ -32,6 +32,15 @@ public class IO {
         }
     };
     
+    /** Reset the base stdin scanner to use the current System.in.
+        Called by Run after --stdin redirects System.in. */
+    public static void resetStdin() {
+        LinkedList<Scanner> stack = ins.get();
+        if (!stack.isEmpty()) {
+            stack.set(0, config(new Scanner(System.in)));
+        }
+    }
+
     static ThreadLocal<LinkedList<PrintStream>> outs = new ThreadLocal<LinkedList<PrintStream>>() {
        	@Override public LinkedList<PrintStream> initialValue() {
     		LinkedList<PrintStream> ans = new LinkedList<PrintStream>();

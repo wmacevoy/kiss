@@ -764,7 +764,7 @@ async function initCheerpJ() {
         cjReady = true;
         statusEl.textContent = "Ready";
         loadingEl.classList.add("hidden");
-        conWrite("KISS Playground v6. Ready.", "ok");
+        conWrite("KISS Playground v7. Ready.", "ok");
     } catch(e) {
         statusEl.textContent = "CheerpJ failed to load";
         loadStatusEl.textContent = "Failed to load CheerpJ: " + e.message +
@@ -862,15 +862,22 @@ async function compileAndRun(mode) {
         conWrite("--- " + modeLabel + " ---", "info");
         statusEl.textContent = modeLabel + "...";
 
+        // Pipe input textarea to stdin via --stdin flag
+        let runArgs = [];
+        const input = inputEl.value;
+        if (input) {
+            const stdinPath = "/str/_stdin" + (++compileSeq) + ".txt";
+            cheerpOSAddStringFile(stdinPath, input);
+            runArgs.push("--stdin", stdinPath);
+        }
+
         // Run with kiss.API — different args per mode, no recompile needed
-        let runArgs;
-        if (mode === "test") runArgs = ["--norun"];
-        else if (mode === "run") runArgs = ["--notest"];
+        if (mode === "test") runArgs.push("--norun");
+        else if (mode === "run") runArgs.push("--notest");
         else if (mode.startsWith("single:")) {
             const parts = mode.substring(7).split(".");
-            runArgs = ["--app", "kiss.util.SingleTest", "--notest", "--", parts[0], parts[1]];
+            runArgs.push("--app", "kiss.util.SingleTest", "--notest", "--", parts[0], parts[1]);
         }
-        else runArgs = [];
         capturing = true;
         try {
             await cheerpjRunMain(

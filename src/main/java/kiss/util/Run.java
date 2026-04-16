@@ -67,6 +67,14 @@ public class Run {
                 continue;
             }
 
+            if (_args[argi].equals("--stdin")) {
+                try {
+                    System.setIn(new java.io.FileInputStream(_args[++argi]));
+                    IO.resetStdin();
+                } catch (Exception e) {}
+                continue;
+            }
+
             break;
         }
 
