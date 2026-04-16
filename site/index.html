@@ -724,6 +724,9 @@ async function compileAndRun(testsOnly) {
     statusEl.textContent = "Compiling...";
     conWrite("--- Compiling ---", "info");
 
+    const kissJar = APP + "kiss.jar";
+    const ecjJar = APP + "ecj.jar";
+
     try {
         // Write source files to virtual filesystem
         const fileNames = Object.keys(files);
@@ -740,19 +743,32 @@ async function compileAndRun(testsOnly) {
         }
 
         // Compile with ECJ (Eclipse Compiler for Java)
+        conWrite("ecj: " + ecjJar, "info");
+        conWrite("kiss: " + kissJar, "info");
+        conWrite("files: " + srcPaths.join(", "), "info");
         capturing = true;
-        const kissJar = APP + "kiss.jar";
-        const ecjJar = APP + "ecj.jar";
-        const compileResult = await cheerpjRunMain(
-            "org.eclipse.jdt.internal.compiler.batch.Main",
-            ecjJar + ":" + kissJar,
-            ["-cp", kissJar, "-d", "/str/", "-source", "1.8", "-target", "1.8",
-             "-nowarn", ...srcPaths]
-        );
+        let compileResult;
+        try {
+            compileResult = await cheerpjRunMain(
+                "org.eclipse.jdt.internal.compiler.batch.Main",
+                ecjJar + ":" + kissJar,
+                ["-cp", kissJar, "-d", "/str/", "-source", "1.8", "-target", "1.8",
+                 "-nowarn", ...srcPaths]
+            );
+        } catch(compileErr) {
+            capturing = false;
+            const msg = compileErr instanceof Error ? compileErr.message
+                : (compileErr && compileErr.toString ? compileErr.toString()
+                : JSON.stringify(compileErr));
+            conWrite("Compile error: " + msg, "err");
+            _error("Compile exception:", compileErr);
+            statusEl.textContent = "Compile error";
+            return;
+        }
         capturing = false;
 
         if (compileResult !== 0 && compileResult !== undefined) {
-            conWrite("Compilation failed.", "err");
+            conWrite("Compilation failed (exit code " + compileResult + ").", "err");
             statusEl.textContent = "Compile error";
             return;
         }
@@ -763,11 +779,22 @@ async function compileAndRun(testsOnly) {
         // Run with kiss.API
         const runArgs = testsOnly ? ["--norun"] : [];
         capturing = true;
-        await cheerpjRunMain(
-            "kiss.API",
-            kissJar + ":/str/",
-            runArgs
-        );
+        try {
+            await cheerpjRunMain(
+                "kiss.API",
+                kissJar + ":/str/",
+                runArgs
+            );
+        } catch(runErr) {
+            capturing = false;
+            const msg = runErr instanceof Error ? runErr.message
+                : (runErr && runErr.toString ? runErr.toString()
+                : JSON.stringify(runErr));
+            conWrite("Runtime error: " + msg, "err");
+            _error("Runtime exception:", runErr);
+            statusEl.textContent = "Runtime error";
+            return;
+        }
         capturing = false;
 
         conWrite("--- Done ---", "ok");
@@ -775,7 +802,10 @@ async function compileAndRun(testsOnly) {
 
     } catch(e) {
         capturing = false;
-        conWrite("Error: " + e.message, "err");
+        const msg = e instanceof Error ? e.message + "\n" + e.stack
+            : (e && e.toString ? e.toString() : JSON.stringify(e));
+        conWrite("Error: " + msg, "err");
+        _error("Uncaught:", e);
         statusEl.textContent = "Error";
     } finally {
         running = false;
