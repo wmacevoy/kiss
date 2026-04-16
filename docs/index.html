@@ -763,7 +763,7 @@ async function initCheerpJ() {
         cjReady = true;
         statusEl.textContent = "Ready";
         loadingEl.classList.add("hidden");
-        conWrite("CheerpJ initialized. Ready to compile and run.", "ok");
+        conWrite("KISS Playground v2. Ready.", "ok");
     } catch(e) {
         statusEl.textContent = "CheerpJ failed to load";
         loadStatusEl.textContent = "Failed to load CheerpJ: " + e.message +
@@ -773,11 +773,15 @@ async function initCheerpJ() {
     }
 }
 
+let runSeq = 0;
+
 async function compileAndRun(mode) {
     if (!cjReady) { conWrite("CheerpJ not ready.", "err"); return; }
     if (running) { conWrite("Already running.", "warn"); return; }
 
     running = true;
+    runSeq++;
+    const seq = runSeq;
     files[activeFile] = editor.value;
     autoSave();
 
@@ -788,13 +792,15 @@ async function compileAndRun(mode) {
 
     const kissJar = APP + "kiss.jar";
     const ecjJar = APP + "ecj.jar";
+    const srcDir = "/str/s" + seq + "/";
+    const outDir = "/files/o" + seq + "/";
 
     try {
-        // Write source files to virtual filesystem
+        // Write source files to unique path per run
         const fileNames = Object.keys(files);
         const srcPaths = [];
         for (const name of fileNames) {
-            const path = "/str/" + name;
+            const path = srcDir + name;
             cheerpOSAddStringFile(path, files[name]);
             srcPaths.push(path);
         }
@@ -818,13 +824,13 @@ async function compileAndRun(mode) {
                 "    }",
                 "}"
             ].join("\n") + "\n";
-            cheerpOSAddStringFile("/str/_Runner_.java", runner);
-            srcPaths.push("/str/_Runner_.java");
+            cheerpOSAddStringFile(srcDir + "_Runner_.java", runner);
+            srcPaths.push(srcDir + "_Runner_.java");
         }
 
         // Write stdin input
         if (inputEl.value) {
-            cheerpOSAddStringFile("/str/stdin.txt", inputEl.value);
+            cheerpOSAddStringFile(srcDir + "stdin.txt", inputEl.value);
         }
         capturing = true;
         let compileResult;
@@ -832,7 +838,7 @@ async function compileAndRun(mode) {
             compileResult = await cheerpjRunMain(
                 "org.eclipse.jdt.internal.compiler.batch.Main",
                 ecjJar + ":" + kissJar,
-                "-cp", kissJar, "-d", "/files/", "-source", "1.8", "-target", "1.8",
+                "-cp", kissJar, "-d", outDir, "-source", "1.8", "-target", "1.8",
                  "-nowarn", ...srcPaths
             );
         } catch(compileErr) {
@@ -868,7 +874,7 @@ async function compileAndRun(mode) {
         try {
             await cheerpjRunMain(
                 "kiss.API",
-                kissJar + ":/files/",
+                kissJar + ":" + outDir,
                 ...runArgs
             );
         } catch(runErr) {
