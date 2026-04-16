@@ -64,6 +64,11 @@ site: lib
 serve: site
 	python3 docs/serve.py 8080
 
+.PHONY: e2e
+e2e: site
+	docker compose up --build --abort-on-container-exit --exit-code-from e2e
+	docker compose down
+
 .PHONY: docker-test
 docker-test:
 	docker build -t kiss-test .

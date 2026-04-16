@@ -77,6 +77,7 @@ footer{background:var(--surface);padding:8px 16px;display:flex;align-items:cente
     <option value="run">Run Only</option>
   </select>
   <button id="run-btn" class="primary">Go</button>
+  <button id="stop-btn" class="danger hidden">Stop</button>
 </header>
 
 <main>
@@ -763,7 +764,7 @@ async function initCheerpJ() {
         cjReady = true;
         statusEl.textContent = "Ready";
         loadingEl.classList.add("hidden");
-        conWrite("KISS Playground v5. Ready.", "ok");
+        conWrite("KISS Playground v6. Ready.", "ok");
     } catch(e) {
         statusEl.textContent = "CheerpJ failed to load";
         loadStatusEl.textContent = "Failed to load CheerpJ: " + e.message +
@@ -789,7 +790,9 @@ async function compileAndRun(mode) {
     autoSave();
 
     const runBtn = document.getElementById("run-btn");
+    const stopBtn = document.getElementById("stop-btn");
     runBtn.disabled = true;
+    stopBtn.classList.remove("hidden");
 
     conClear();
     const kissJar = APP + "kiss.jar";
@@ -900,10 +903,12 @@ async function compileAndRun(mode) {
     } finally {
         running = false;
         runBtn.disabled = false;
+        stopBtn.classList.add("hidden");
     }
 }
 
 document.getElementById("run-btn").onclick = () => compileAndRun(runModeEl.value);
+document.getElementById("stop-btn").onclick = () => location.reload();
 
 // ── Init ──────────────────────────────────────────────────
 populateExamples();

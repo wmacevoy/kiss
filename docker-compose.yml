@@ -1,0 +1,22 @@
+services:
+  server:
+    image: python:3-slim
+    working_dir: /docs
+    volumes:
+      - ./docs:/docs:ro
+    command: python3 /docs/serve.py 8080
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/')"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+
+  e2e:
+    build: ./e2e
+    depends_on:
+      server:
+        condition: service_healthy
+    environment:
+      - CI=true
