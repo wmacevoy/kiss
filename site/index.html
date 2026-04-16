@@ -736,37 +736,18 @@ async function compileAndRun(testsOnly) {
             cheerpjAddStringFile("/str/stdin.txt", inputEl.value);
         }
 
-        // Try to compile with javac
+        // Compile with ECJ (Eclipse Compiler for Java)
         capturing = true;
-        const compileArgs = ["-cp", "/app/kiss.jar", "-d", "/str/"];
-        compileArgs.push(...srcPaths);
-
-        let compileResult;
-        try {
-            compileResult = await cheerpjRunMain(
-                "com.sun.tools.javac.Main",
-                "/app/kiss.jar",
-                compileArgs
-            );
-        } catch(compErr) {
-            // javac might not be available, try ECJ
-            conWrite("javac not available, trying ECJ...", "warn");
-            try {
-                compileResult = await cheerpjRunMain(
-                    "org.eclipse.jdt.internal.compiler.batch.Main",
-                    "/app/ecj.jar",
-                    ["-cp", "/app/kiss.jar", "-d", "/str/", "-source", "1.8", "-target", "1.8", ...srcPaths]
-                );
-            } catch(ecjErr) {
-                conWrite("No compiler available.", "err");
-                conWrite("Need javac (in CheerpJ) or ecj.jar alongside this page.", "err");
-                return;
-            }
-        }
+        const compileResult = await cheerpjRunMain(
+            "org.eclipse.jdt.internal.compiler.batch.Main",
+            "/app/ecj.jar:/app/kiss.jar",
+            ["-cp", "/app/kiss.jar", "-d", "/str/", "-source", "1.8", "-target", "1.8",
+             "-nowarn", ...srcPaths]
+        );
         capturing = false;
 
         if (compileResult !== 0 && compileResult !== undefined) {
-            conWrite("Compilation failed (exit code " + compileResult + ")", "err");
+            conWrite("Compilation failed.", "err");
             statusEl.textContent = "Compile error";
             return;
         }
