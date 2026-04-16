@@ -1,41 +1,29 @@
 package kiss.util;
 
 import java.io.InputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
 
 /**
- * InputStream for browser use. Java code blocks on read() when empty.
- * JavaScript calls feed() to push data, unblocking the reader.
- * CheerpJ converts Thread.sleep to async yield, so the JS event loop
- * runs between polls and can call feed() via cheerpjRunLibrary proxy.
+ * InputStream for browser use. Reads input from sequenced files
+ * written by JavaScript via cheerpOSAddStringFile.
+ *
+ * Protocol: JS writes /str/_pipe_1, /str/_pipe_2, etc.
+ * This stream polls for the next file in sequence.
+ * No file overwriting (avoids CheerpJ /str/ corruption).
  */
 public class WebInputStream extends InputStream {
-    private static byte[] buf = new byte[0];
-    private static int pos = 0;
-    private static final Charset UTF8 = Charset.forName("UTF-8");
-
-    /** Called from JavaScript to push a line of input. */
-    public static void feed(String data) {
-        byte[] add = data.getBytes(UTF8);
-        int remaining = buf.length - pos;
-        byte[] next = new byte[remaining + add.length];
-        if (remaining > 0) System.arraycopy(buf, pos, next, 0, remaining);
-        System.arraycopy(add, 0, next, remaining, add.length);
-        buf = next;
-        pos = 0;
-    }
-
-    /** Reset buffer between runs. */
-    public static void clear() {
-        buf = new byte[0];
-        pos = 0;
-    }
+    private byte[] buf = new byte[0];
+    private int pos = 0;
+    private int fileSeq = 0;
 
     @Override
     public int read() throws IOException {
         while (pos >= buf.length) {
-            try { Thread.sleep(50); } catch (InterruptedException e) { return -1; }
+            if (!pollNext()) {
+                try { Thread.sleep(100); } catch (InterruptedException e) { return -1; }
+            }
         }
         return buf[pos++] & 0xFF;
     }
@@ -44,12 +32,33 @@ public class WebInputStream extends InputStream {
     public int read(byte[] b, int off, int len) throws IOException {
         if (len == 0) return 0;
         while (pos >= buf.length) {
-            try { Thread.sleep(50); } catch (InterruptedException e) { return -1; }
+            if (!pollNext()) {
+                try { Thread.sleep(100); } catch (InterruptedException e) { return -1; }
+            }
         }
         int n = Math.min(len, buf.length - pos);
         System.arraycopy(buf, pos, b, off, n);
         pos += n;
         return n;
+    }
+
+    private boolean pollNext() {
+        int next = fileSeq + 1;
+        File f = new File("/str/_pipe_" + next);
+        if (!f.exists()) return false;
+        try {
+            FileInputStream fis = new FileInputStream(f);
+            buf = new byte[(int) f.length()];
+            int read = fis.read(buf);
+            fis.close();
+            if (read > 0) {
+                if (read < buf.length) buf = java.util.Arrays.copyOf(buf, read);
+                pos = 0;
+                fileSeq = next;
+                return true;
+            }
+        } catch (Exception e) {}
+        return false;
     }
 
     @Override

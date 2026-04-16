@@ -747,19 +747,16 @@ editor.addEventListener("input", () => {
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => { autoSave(); updateRunModes(); }, 1000);
 });
-// Interactive stdin: Enter feeds the line to the running program
-let webLib = null;  // cheerpjRunLibrary handle for calling WebInputStream.feed()
+// Interactive stdin: Enter writes a sequenced pipe file for WebInputStream
+let pipeSeq = 0;
 
-stdinLineEl.addEventListener("keydown", async (e) => {
-    if (e.key !== "Enter" || !webLib) return;
+stdinLineEl.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" || !running) return;
     const line = stdinLineEl.value;
     stdinLineEl.value = "";
     conWrite("> " + line, "stdin");
-    try {
-        await webLib.kiss.util.WebInputStream.feed(line + "\n");
-    } catch(err) {
-        _error("feed error:", err);
-    }
+    pipeSeq++;
+    cheerpOSAddStringFile("/str/_pipe_" + pipeSeq, line + "\n");
 });
 
 document.getElementById("clear-btn").onclick = conClear;
@@ -779,7 +776,7 @@ async function initCheerpJ() {
         cjReady = true;
         statusEl.textContent = "Ready";
         loadingEl.classList.add("hidden");
-        conWrite("KISS Playground v9. Ready.", "ok");
+        conWrite("KISS Playground v10. Ready.", "ok");
     } catch(e) {
         statusEl.textContent = "CheerpJ failed to load";
         loadStatusEl.textContent = "Failed to load CheerpJ: " + e.message +
@@ -869,12 +866,6 @@ async function compileAndRun(mode) {
             compiled = true;
             compiledSource = currentSource;
 
-            // Load library proxy for WebInputStream.feed() interop
-            if (!webLib) {
-                try {
-                    webLib = await cheerpjRunLibrary(kissJar + ":/files/");
-                } catch(e) { _error("cheerpjRunLibrary:", e); }
-            }
         }
 
         const modeLabel = mode === "all" ? "Test & Run" : mode === "test" ? "Tests"
@@ -934,6 +925,7 @@ async function compileAndRun(mode) {
 }
 
 document.getElementById("run-btn").onclick = () => {
+    pipeSeq = 0;
     compileAndRun(runModeEl.value);
 };
 document.getElementById("stop-btn").onclick = () => location.reload();
