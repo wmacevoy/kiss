@@ -686,6 +686,9 @@ inputEl.addEventListener("input", () => {
 document.getElementById("clear-btn").onclick = conClear;
 
 // ── CheerpJ ──────────────────────────────────────────────
+// /app/ maps to the web server root, so on GitHub Pages (/kiss/) we need the subpath
+const APP = "/app" + new URL(".", window.location.href).pathname;
+
 async function initCheerpJ() {
     statusEl.textContent = "Loading CheerpJ...";
     loadStatusEl.textContent = "Loading CheerpJ runtime (this may take a moment)...";
@@ -727,21 +730,23 @@ async function compileAndRun(testsOnly) {
         const srcPaths = [];
         for (const name of fileNames) {
             const path = "/str/" + name;
-            cheerpjAddStringFile(path, files[name]);
+            cheerpOSAddStringFile(path, files[name]);
             srcPaths.push(path);
         }
 
         // Write stdin input
         if (inputEl.value) {
-            cheerpjAddStringFile("/str/stdin.txt", inputEl.value);
+            cheerpOSAddStringFile("/str/stdin.txt", inputEl.value);
         }
 
         // Compile with ECJ (Eclipse Compiler for Java)
         capturing = true;
+        const kissJar = APP + "kiss.jar";
+        const ecjJar = APP + "ecj.jar";
         const compileResult = await cheerpjRunMain(
             "org.eclipse.jdt.internal.compiler.batch.Main",
-            "/app/ecj.jar:/app/kiss.jar",
-            ["-cp", "/app/kiss.jar", "-d", "/str/", "-source", "1.8", "-target", "1.8",
+            ecjJar + ":" + kissJar,
+            ["-cp", kissJar, "-d", "/str/", "-source", "1.8", "-target", "1.8",
              "-nowarn", ...srcPaths]
         );
         capturing = false;
@@ -760,7 +765,7 @@ async function compileAndRun(testsOnly) {
         capturing = true;
         await cheerpjRunMain(
             "kiss.API",
-            "/app/kiss.jar:/str/",
+            kissJar + ":/str/",
             runArgs
         );
         capturing = false;
