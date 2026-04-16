@@ -763,7 +763,7 @@ async function initCheerpJ() {
         cjReady = true;
         statusEl.textContent = "Ready";
         loadingEl.classList.add("hidden");
-        conWrite("KISS Playground v4. Ready.", "ok");
+        conWrite("KISS Playground v5. Ready.", "ok");
     } catch(e) {
         statusEl.textContent = "CheerpJ failed to load";
         loadStatusEl.textContent = "Failed to load CheerpJ: " + e.message +
@@ -791,6 +791,7 @@ async function compileAndRun(mode) {
     const runBtn = document.getElementById("run-btn");
     runBtn.disabled = true;
 
+    conClear();
     const kissJar = APP + "kiss.jar";
     const ecjJar = APP + "ecj.jar";
     const currentSource = JSON.stringify(files);
