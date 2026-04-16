@@ -763,7 +763,7 @@ async function initCheerpJ() {
         cjReady = true;
         statusEl.textContent = "Ready";
         loadingEl.classList.add("hidden");
-        conWrite("KISS Playground v2. Ready.", "ok");
+        conWrite("KISS Playground v3. Ready.", "ok");
     } catch(e) {
         statusEl.textContent = "CheerpJ failed to load";
         loadStatusEl.textContent = "Failed to load CheerpJ: " + e.message +
@@ -773,89 +773,116 @@ async function initCheerpJ() {
     }
 }
 
-let runSeq = 0;
+// ECJ crashes on second invocation in CheerpJ (stale JVM state).
+// Solution: compile once (including a generic _Runner_ for single tests),
+// then run multiple times with different args. Recompile only by reloading.
+let compiled = false;
+let compiledSource = null;
+let compileSeq = 0;
+
+// Generic runner that reads class/method from APP_ARGS via reflection
+const RUNNER_SRC =
+    "import static kiss.API.*;\n" +
+    "import java.lang.reflect.*;\n" +
+    "class _Runner_ {\n" +
+    "    void run() {\n" +
+    "        String cls = APP_ARGS.length > 0 ? APP_ARGS[0] : \"App\";\n" +
+    "        String method = APP_ARGS.length > 1 ? APP_ARGS[1] : \"testRun\";\n" +
+    "        seed(1);\n" +
+    "        try {\n" +
+    "            Class<?> c = Class.forName(cls);\n" +
+    "            Constructor<?> ctor = c.getDeclaredConstructor();\n" +
+    "            ctor.setAccessible(true);\n" +
+    "            Object obj = ctor.newInstance();\n" +
+    "            Method m = c.getDeclaredMethod(method);\n" +
+    "            m.setAccessible(true);\n" +
+    "            m.invoke(obj);\n" +
+    "            System.out.println(\"PASS: \" + cls + \".\" + method);\n" +
+    "        } catch (InvocationTargetException e) {\n" +
+    "            System.out.println(\"FAIL: \" + cls + \".\" + method + \" - \" + e.getCause());\n" +
+    "            e.getCause().printStackTrace();\n" +
+    "        } catch (Exception e) {\n" +
+    "            System.out.println(\"ERROR: \" + e);\n" +
+    "            e.printStackTrace();\n" +
+    "        }\n" +
+    "    }\n" +
+    "}\n";
 
 async function compileAndRun(mode) {
     if (!cjReady) { conWrite("CheerpJ not ready.", "err"); return; }
     if (running) { conWrite("Already running.", "warn"); return; }
 
     running = true;
-    runSeq++;
-    const seq = runSeq;
     files[activeFile] = editor.value;
     autoSave();
 
     const runBtn = document.getElementById("run-btn");
     runBtn.disabled = true;
-    statusEl.textContent = "Compiling...";
-    conWrite("--- Compiling ---", "info");
 
     const kissJar = APP + "kiss.jar";
     const ecjJar = APP + "ecj.jar";
+    const currentSource = JSON.stringify(files);
 
     try {
-        // Write source files to virtual filesystem (unique names per run
-        // because CheerpJ /str/ corrupts buffers on overwrite)
-        const tag = "_r" + seq;
-        const fileNames = Object.keys(files);
-        const srcPaths = [];
-        for (const name of fileNames) {
-            const path = "/str/" + tag + name;
-            cheerpOSAddStringFile(path, files[name]);
-            srcPaths.push(path);
-        }
+        // Compile if source changed (ECJ can only run once per page load)
+        if (currentSource !== compiledSource) {
+            if (compiled) {
+                conWrite("Source changed. Reloading to recompile...", "warn");
+                sessionStorage.setItem("kiss-autorun", mode);
+                setTimeout(() => location.reload(), 500);
+                return;
+            }
 
-        // For single test mode, generate a runner class
-        if (mode.startsWith("single:")) {
-            const parts = mode.substring(7).split(".");
-            const cls = parts[0], method = parts[1];
-            const runner =
-                "import static kiss.API.*;\n" +
-                "class _Runner_ {\n" +
-                "    void run() {\n" +
-                "        seed(1);\n" +
-                "        try {\n" +
-                "            new " + cls + "()." + method + "();\n" +
-                "            System.out.println(\"PASS: " + cls + "." + method + "\");\n" +
-                "        } catch (Throwable t) {\n" +
-                "            System.out.println(\"FAIL: " + cls + "." + method + " - \" + t);\n" +
-                "            t.printStackTrace();\n" +
-                "        }\n" +
-                "    }\n" +
-                "}\n";
-            cheerpOSAddStringFile("/str/" + tag + "_Runner_.java", runner);
+            compileSeq++;
+            const tag = "_c" + compileSeq;
+            statusEl.textContent = "Compiling...";
+            conWrite("--- Compiling ---", "info");
+
+            const fileNames = Object.keys(files);
+            const srcPaths = [];
+            for (const name of fileNames) {
+                const path = "/str/" + tag + name;
+                cheerpOSAddStringFile(path, files[name]);
+                srcPaths.push(path);
+            }
+
+            // Always include generic _Runner_ for single test support
+            cheerpOSAddStringFile("/str/" + tag + "_Runner_.java", RUNNER_SRC);
             srcPaths.push("/str/" + tag + "_Runner_.java");
-        }
 
-        // Write stdin input
-        if (inputEl.value) {
-            cheerpOSAddStringFile("/str/" + tag + "stdin.txt", inputEl.value);
-        }
-        capturing = true;
-        let compileResult;
-        try {
-            compileResult = await cheerpjRunMain(
-                "org.eclipse.jdt.internal.compiler.batch.Main",
-                ecjJar + ":" + kissJar,
-                "-cp", kissJar, "-d", "/files/", "-source", "1.8", "-target", "1.8",
-                 "-nowarn", ...srcPaths
-            );
-        } catch(compileErr) {
+            if (inputEl.value) {
+                cheerpOSAddStringFile("/str/" + tag + "stdin.txt", inputEl.value);
+            }
+
+            capturing = true;
+            let compileResult;
+            try {
+                compileResult = await cheerpjRunMain(
+                    "org.eclipse.jdt.internal.compiler.batch.Main",
+                    ecjJar + ":" + kissJar,
+                    "-cp", kissJar, "-d", "/files/", "-source", "1.8", "-target", "1.8",
+                     "-nowarn", ...srcPaths
+                );
+            } catch(compileErr) {
+                capturing = false;
+                const msg = compileErr instanceof Error ? compileErr.message
+                    : (compileErr && compileErr.toString ? compileErr.toString()
+                    : JSON.stringify(compileErr));
+                conWrite("Compile error: " + msg, "err");
+                _error("Compile exception:", compileErr);
+                statusEl.textContent = "Compile error";
+                return;
+            }
             capturing = false;
-            const msg = compileErr instanceof Error ? compileErr.message
-                : (compileErr && compileErr.toString ? compileErr.toString()
-                : JSON.stringify(compileErr));
-            conWrite("Compile error: " + msg, "err");
-            _error("Compile exception:", compileErr);
-            statusEl.textContent = "Compile error";
-            return;
-        }
-        capturing = false;
 
-        if (compileResult !== 0 && compileResult !== undefined) {
-            conWrite("Compilation failed (exit code " + compileResult + ").", "err");
-            statusEl.textContent = "Compile error";
-            return;
+            if (compileResult !== 0 && compileResult !== undefined) {
+                conWrite("Compilation failed (exit code " + compileResult + ").", "err");
+                statusEl.textContent = "Compile error";
+                return;
+            }
+
+            compiled = true;
+            compiledSource = currentSource;
         }
 
         const modeLabel = mode === "all" ? "Test & Run" : mode === "test" ? "Tests"
@@ -863,11 +890,14 @@ async function compileAndRun(mode) {
         conWrite("--- " + modeLabel + " ---", "info");
         statusEl.textContent = modeLabel + "...";
 
-        // Run with kiss.API
+        // Run with kiss.API — different args per mode, no recompile needed
         let runArgs;
         if (mode === "test") runArgs = ["--norun"];
         else if (mode === "run") runArgs = ["--notest"];
-        else if (mode.startsWith("single:")) runArgs = ["--app", "_Runner_", "--notest"];
+        else if (mode.startsWith("single:")) {
+            const parts = mode.substring(7).split(".");
+            runArgs = ["--app", "_Runner_", "--notest", "--", parts[0], parts[1]];
+        }
         else runArgs = [];
         capturing = true;
         try {
@@ -918,7 +948,16 @@ updateRunModes();
 // Load CheerpJ from CDN
 const script = document.createElement("script");
 script.src = "https://cjrtnc.leaningtech.com/4.2/loader.js";
-script.onload = () => initCheerpJ();
+script.onload = async () => {
+    await initCheerpJ();
+    // Auto-run after reload (triggered by source-changed recompile)
+    const autorun = sessionStorage.getItem("kiss-autorun");
+    if (autorun) {
+        sessionStorage.removeItem("kiss-autorun");
+        runModeEl.value = autorun;
+        compileAndRun(autorun);
+    }
+};
 script.onerror = () => {
     loadStatusEl.textContent = "Failed to load CheerpJ script. Check your network connection.";
     statusEl.textContent = "CheerpJ unavailable";
