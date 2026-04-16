@@ -803,8 +803,21 @@ async function compileAndRun(mode) {
         if (mode.startsWith("single:")) {
             const parts = mode.substring(7).split(".");
             const cls = parts[0], method = parts[1];
-            const runner = "import static kiss.API.*;\nclass _Runner_ {\n" +
-                "    void run() { seed(1); new " + cls + "()." + method + "(); }\n}\n";
+            const runner = [
+                "import static kiss.API.*;",
+                "class _Runner_ {",
+                "    void run() {",
+                "        seed(1);",
+                "        try {",
+                "            new " + cls + "()." + method + "();",
+                "            System.out.println(\"PASS: " + cls + "." + method + "\");",
+                "        } catch (Throwable t) {",
+                "            System.out.println(\"FAIL: " + cls + "." + method + " - \" + t);",
+                "            t.printStackTrace();",
+                "        }",
+                "    }",
+                "}"
+            ].join("\n") + "\n";
             cheerpOSAddStringFile("/str/_Runner_.java", runner);
             srcPaths.push("/str/_Runner_.java");
         }
