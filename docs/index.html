@@ -37,6 +37,11 @@ main{flex:1;display:flex;overflow:hidden}
 #console .info{color:var(--subtext)}
 #console .ok{color:var(--green)}
 #console .warn{color:var(--yellow)}
+#console .stdin{color:var(--teal)}
+.console-input{display:flex;align-items:center;border-top:1px solid var(--overlay);padding:4px 8px;gap:6px}
+.console-input .prompt{color:var(--teal);font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:13px}
+.console-input input{flex:1;background:transparent;color:var(--text);border:none;outline:none;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:13px}
+.console-input input:disabled{opacity:0.3}
 footer{background:var(--surface);padding:8px 16px;display:flex;align-items:center;gap:10px;border-top:1px solid var(--overlay)}
 #status{font-size:13px;color:var(--subtext)}
 .loading-overlay{position:fixed;inset:0;background:rgba(30,30,46,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100}
@@ -86,16 +91,16 @@ footer{background:var(--surface);padding:8px 16px;display:flex;align-items:cente
     <textarea id="editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
   </div>
   <div class="output-panel">
-    <div class="input-section">
-      <div class="panel-header">Input (stdin)</div>
-      <textarea id="input" placeholder="Enter input for your program here..."></textarea>
-    </div>
     <div class="console-section">
       <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center">
         <span>Console</span>
         <button id="clear-btn" style="padding:2px 8px;font-size:11px">Clear</button>
       </div>
       <pre id="console"></pre>
+      <div class="console-input">
+        <span class="prompt">&gt;</span>
+        <input id="stdin-line" type="text" placeholder="type input, press Enter" disabled>
+      </div>
     </div>
   </div>
 </main>
@@ -461,10 +466,11 @@ let files = {};
 let activeFile = "App.java";
 let running = false;
 let cjReady = false;
+let stdinLines = [];  // accumulated interactive input
 
 const editor = document.getElementById("editor");
 const consoleEl = document.getElementById("console");
-const inputEl = document.getElementById("input");
+const stdinLineEl = document.getElementById("stdin-line");
 const statusEl = document.getElementById("status");
 const tabsEl = document.getElementById("file-tabs");
 const examplesEl = document.getElementById("examples");
@@ -579,7 +585,7 @@ function loadExample(name) {
     Object.keys(ex.files).forEach(f => files[f] = ex.files[f]);
     activeFile = files["App.java"] !== undefined ? "App.java" : Object.keys(files)[0];
     editor.value = files[activeFile];
-    inputEl.value = ex.input || "";
+    stdinLines = [];
     renderTabs();
     autoSave();
     updateRunModes();
@@ -611,7 +617,7 @@ function populateSaves() {
 
 function autoSave() {
     files[activeFile] = editor.value;
-    const state = { files: {...files}, activeFile, input: inputEl.value };
+    const state = { files: {...files}, activeFile };
     localStorage.setItem(CURRENT_KEY, JSON.stringify(state));
 }
 
@@ -622,7 +628,7 @@ function loadState() {
             files = state.files;
             activeFile = state.activeFile || Object.keys(files)[0];
             editor.value = files[activeFile] || "";
-            inputEl.value = state.input || "";
+            stdinLines = [];
             renderTabs();
             return true;
         }
@@ -635,7 +641,7 @@ document.getElementById("save-btn").onclick = function() {
     if (!name) return;
     files[activeFile] = editor.value;
     const saves = getSaves();
-    saves[name] = { files: {...files}, input: inputEl.value };
+    saves[name] = { files: {...files} };
     localStorage.setItem(SAVE_KEY, JSON.stringify(saves));
     populateSaves();
     conWrite("Saved: " + name, "info");
@@ -661,7 +667,7 @@ savesEl.onchange = function() {
     files = {...save.files};
     activeFile = Object.keys(files)[0];
     editor.value = files[activeFile] || "";
-    inputEl.value = save.input || "";
+    stdinLines = [];
     renderTabs();
     autoSave();
     updateRunModes();
@@ -742,12 +748,20 @@ editor.addEventListener("input", () => {
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => { autoSave(); updateRunModes(); }, 1000);
 });
-inputEl.addEventListener("input", () => {
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(autoSave, 1000);
+// Interactive stdin: Enter sends a line, re-runs with accumulated input
+stdinLineEl.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    const line = stdinLineEl.value;
+    stdinLines.push(line);
+    stdinLineEl.value = "";
+    stdinLineEl.disabled = true;
+    conWrite("> " + line, "stdin");
+    // Abandon hung run and re-run with accumulated stdin
+    running = false;
+    compileAndRun(runModeEl.value);
 });
 
-document.getElementById("clear-btn").onclick = conClear;
+document.getElementById("clear-btn").onclick = () => { conClear(); stdinLines = []; };
 
 // ── CheerpJ ──────────────────────────────────────────────
 // /app/ maps to the web server root, so on GitHub Pages (/kiss/) we need the subpath
@@ -764,7 +778,7 @@ async function initCheerpJ() {
         cjReady = true;
         statusEl.textContent = "Ready";
         loadingEl.classList.add("hidden");
-        conWrite("KISS Playground v7. Ready.", "ok");
+        conWrite("KISS Playground v8. Ready.", "ok");
     } catch(e) {
         statusEl.textContent = "CheerpJ failed to load";
         loadStatusEl.textContent = "Failed to load CheerpJ: " + e.message +
@@ -822,9 +836,7 @@ async function compileAndRun(mode) {
                 srcPaths.push(path);
             }
 
-            if (inputEl.value) {
-                cheerpOSAddStringFile("/str/" + tag + "stdin.txt", inputEl.value);
-            }
+            // stdin file not needed during compilation
 
             capturing = true;
             let compileResult;
@@ -862,12 +874,11 @@ async function compileAndRun(mode) {
         conWrite("--- " + modeLabel + " ---", "info");
         statusEl.textContent = modeLabel + "...";
 
-        // Pipe input textarea to stdin via --stdin flag
+        // Pipe accumulated stdin lines via --stdin flag
         let runArgs = [];
-        const input = inputEl.value;
-        if (input) {
+        if (stdinLines.length > 0) {
             const stdinPath = "/str/_stdin" + (++compileSeq) + ".txt";
-            cheerpOSAddStringFile(stdinPath, input);
+            cheerpOSAddStringFile(stdinPath, stdinLines.join("\n") + "\n");
             runArgs.push("--stdin", stdinPath);
         }
 
@@ -878,6 +889,10 @@ async function compileAndRun(mode) {
             const parts = mode.substring(7).split(".");
             runArgs.push("--app", "kiss.util.SingleTest", "--notest", "--", parts[0], parts[1]);
         }
+        // Enable stdin input while program runs
+        stdinLineEl.disabled = false;
+        stdinLineEl.focus();
+
         capturing = true;
         try {
             await cheerpjRunMain(
@@ -899,6 +914,7 @@ async function compileAndRun(mode) {
 
         conWrite("--- Done ---", "ok");
         statusEl.textContent = "Ready";
+        stdinLineEl.disabled = true;
 
     } catch(e) {
         capturing = false;
@@ -914,7 +930,10 @@ async function compileAndRun(mode) {
     }
 }
 
-document.getElementById("run-btn").onclick = () => compileAndRun(runModeEl.value);
+document.getElementById("run-btn").onclick = () => {
+    stdinLines = [];  // fresh run clears accumulated input
+    compileAndRun(runModeEl.value);
+};
 document.getElementById("stop-btn").onclick = () => location.reload();
 
 // ── Init ──────────────────────────────────────────────────
