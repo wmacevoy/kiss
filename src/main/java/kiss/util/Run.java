@@ -76,7 +76,8 @@ public class Run {
             }
 
             if (_args[argi].equals("--web-stdin")) {
-                System.setIn(new WebInputStream());
+                String prefix = _args[++argi];
+                System.setIn(new WebInputStream(prefix));
                 IO.resetStdin();
                 continue;
             }

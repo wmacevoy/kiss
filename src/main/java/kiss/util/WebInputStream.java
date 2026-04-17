@@ -14,9 +14,14 @@ import java.io.IOException;
  * No file overwriting (avoids CheerpJ /str/ corruption).
  */
 public class WebInputStream extends InputStream {
+    private final String prefix;
     private byte[] buf = new byte[0];
     private int pos = 0;
     private int fileSeq = 0;
+
+    public WebInputStream(String prefix) {
+        this.prefix = prefix;
+    }
 
     @Override
     public int read() throws IOException {
@@ -44,7 +49,7 @@ public class WebInputStream extends InputStream {
 
     private boolean pollNext() {
         int next = fileSeq + 1;
-        File f = new File("/str/_pipe_" + next);
+        File f = new File(prefix + next);
         if (!f.exists()) return false;
         try {
             FileInputStream fis = new FileInputStream(f);

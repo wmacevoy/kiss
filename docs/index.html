@@ -749,6 +749,7 @@ editor.addEventListener("input", () => {
 });
 // Interactive stdin: Enter writes a sequenced pipe file for WebInputStream
 let pipeSeq = 0;
+let pipeRun = 0;  // unique per run so old pipe files don't interfere
 
 stdinLineEl.addEventListener("keydown", (e) => {
     if (e.key !== "Enter" || !running) return;
@@ -756,7 +757,7 @@ stdinLineEl.addEventListener("keydown", (e) => {
     stdinLineEl.value = "";
     conWrite("> " + line, "stdin");
     pipeSeq++;
-    cheerpOSAddStringFile("/str/_pipe_" + pipeSeq, line + "\n");
+    cheerpOSAddStringFile("/str/_pipe_r" + pipeRun + "_" + pipeSeq, line + "\n");
 });
 
 document.getElementById("clear-btn").onclick = conClear;
@@ -776,7 +777,7 @@ async function initCheerpJ() {
         cjReady = true;
         statusEl.textContent = "Ready";
         loadingEl.classList.add("hidden");
-        conWrite("KISS Playground v10. Ready.", "ok");
+        conWrite("KISS Playground v11. Ready.", "ok");
     } catch(e) {
         statusEl.textContent = "CheerpJ failed to load";
         loadStatusEl.textContent = "Failed to load CheerpJ: " + e.message +
@@ -873,8 +874,8 @@ async function compileAndRun(mode) {
         conWrite("--- " + modeLabel + " ---", "info");
         statusEl.textContent = modeLabel + "...";
 
-        // Use WebInputStream for interactive stdin
-        let runArgs = ["--web-stdin"];
+        // Use WebInputStream for interactive stdin (pass run prefix)
+        let runArgs = ["--web-stdin", "/str/_pipe_r" + pipeRun + "_"];
 
         // Run with kiss.API — different args per mode, no recompile needed
         if (mode === "test") runArgs.push("--norun");
@@ -926,6 +927,7 @@ async function compileAndRun(mode) {
 
 document.getElementById("run-btn").onclick = () => {
     pipeSeq = 0;
+    pipeRun++;
     compileAndRun(runModeEl.value);
 };
 document.getElementById("stop-btn").onclick = () => location.reload();

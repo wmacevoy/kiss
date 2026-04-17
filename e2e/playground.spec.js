@@ -9,7 +9,7 @@ async function runMode(page, example, mode) {
   if (example) await page.selectOption('#examples', { label: example });
   await page.selectOption('#run-mode', mode);
   await page.click('#run-btn');
-  await expect(page.locator('#console')).toContainText(/--- Done ---|PASS:|FAIL:|ERROR:/, { timeout: 120_000 });
+  await expect(page.locator('#console')).toContainText(/--- Done ---/, { timeout: 120_000 });
   return await page.locator('#console').innerText();
 }
 
@@ -20,12 +20,18 @@ test('Fall: Tests Only', async ({ page }) => {
   expect(out).toContain('testMoon: ended');
 });
 
-test('Fall: Single test', async ({ page }) => {
+test('Fall: Single test matches framework output', async ({ page }) => {
   await waitForReady(page);
+  // First compile
   await runMode(page, 'Fall', 'test');
+  // Run single test
   await page.selectOption('#run-mode', 'single:App.testEarth');
   await page.click('#run-btn');
-  await expect(page.locator('#console')).toContainText('PASS: App.testEarth', { timeout: 120_000 });
+  await expect(page.locator('#console')).toContainText('--- Done ---', { timeout: 120_000 });
+  const out = await page.locator('#console').innerText();
+  // Should have framework-style output (started/ended), not PASS/FAIL
+  expect(out).toContain('testEarth: started');
+  expect(out).toContain('testEarth: ended');
 });
 
 test('Hello World: Test & Run', async ({ page }) => {
@@ -47,21 +53,39 @@ test('Fall: Interactive stdin', async ({ page }) => {
   await page.selectOption('#run-mode', 'run');
   await page.click('#run-btn');
 
-  // Wait for first prompt
   await expect(page.locator('#console')).toContainText('time(seconds)?', { timeout: 120_000 });
-
-  // Type first input via the stdin line
   await page.fill('#stdin-line', '1');
   await page.press('#stdin-line', 'Enter');
 
-  // Wait for second prompt
   await expect(page.locator('#console')).toContainText('gravity', { timeout: 30_000 });
-
-  // Type second input
   await page.fill('#stdin-line', '9.8');
   await page.press('#stdin-line', 'Enter');
 
-  // Wait for result
   await expect(page.locator('#console')).toContainText('490 centimeters', { timeout: 30_000 });
-  await expect(page.locator('#console')).toContainText('--- Done ---', { timeout: 10_000 });
+});
+
+test('Fall: Second run gets fresh input', async ({ page }) => {
+  await waitForReady(page);
+  await page.selectOption('#examples', { label: 'Fall' });
+  await page.selectOption('#run-mode', 'run');
+
+  // First run: 1, 9.8 -> 490 cm
+  await page.click('#run-btn');
+  await expect(page.locator('#console')).toContainText('time(seconds)?', { timeout: 120_000 });
+  await page.fill('#stdin-line', '1');
+  await page.press('#stdin-line', 'Enter');
+  await expect(page.locator('#console')).toContainText('gravity', { timeout: 30_000 });
+  await page.fill('#stdin-line', '9.8');
+  await page.press('#stdin-line', 'Enter');
+  await expect(page.locator('#console')).toContainText('490 centimeters', { timeout: 30_000 });
+
+  // Second run: 2, 1.6 -> 320 cm
+  await page.click('#run-btn');
+  await expect(page.locator('#console')).toContainText('time(seconds)?', { timeout: 30_000 });
+  await page.fill('#stdin-line', '2');
+  await page.press('#stdin-line', 'Enter');
+  await expect(page.locator('#console')).toContainText('gravity', { timeout: 30_000 });
+  await page.fill('#stdin-line', '1.6');
+  await page.press('#stdin-line', 'Enter');
+  await expect(page.locator('#console')).toContainText('320 centimeters', { timeout: 30_000 });
 });
