@@ -65,6 +65,7 @@ docker-deploy: docker-test
 	  eclipse-temurin:8-jdk \
 	  bash -c '\
 	    apt-get update -qq && apt-get install -y -qq maven gnupg > /dev/null && \
+	    mkdir -p ~/.gnupg && chmod 700 ~/.gnupg && \
 	    echo "allow-loopback-pinentry" > ~/.gnupg/gpg-agent.conf && \
 	    echo "$$MAVEN_GPG_PASSPHRASE" | gpg --batch --passphrase-fd 0 --import /tmp/secring.gpg 2>/dev/null && \
 	    mvn clean deploy -Dgpg.passphrase="$$MAVEN_GPG_PASSPHRASE" \
