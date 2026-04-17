@@ -128,9 +128,11 @@
               <goal>sign</goal>
             </goals>
             <configuration>
-              <!-- Use Bouncy Castle signer - no gpg binary or agent needed -->
-              <signer>bc</signer>
-              <bcSignerSecretKeyPath>${user.home}/.gnupg/secring.asc</bcSignerSecretKeyPath>
+              <gpgArguments>
+                <arg>--batch</arg>
+                <arg>--pinentry-mode</arg>
+                <arg>loopback</arg>
+              </gpgArguments>
             </configuration>
           </execution>
 	</executions>

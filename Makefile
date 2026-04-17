@@ -55,17 +55,19 @@ deploy: clean all
 
 .PHONY: docker-deploy
 docker-deploy: docker-test
-	@test -n "$$GPG_PASSPHRASE" || (echo "Set GPG_PASSPHRASE env var first" && exit 1)
+	@test -n "$$MAVEN_GPG_PASSPHRASE" || (echo "Set MAVEN_GPG_PASSPHRASE env var first" && exit 1)
 	docker run --rm \
 	  -v "$$HOME/.m2:/root/.m2" \
-	  -v "$$HOME/.gnupg:/root/.gnupg" \
+	  -v "$$HOME/.gnupg/secring.gpg:/tmp/secring.gpg:ro" \
 	  -v "$$(pwd):/kiss" \
-	  -e MAVEN_GPG_PASSPHRASE="$$GPG_PASSPHRASE" \
+	  -e MAVEN_GPG_PASSPHRASE="$$MAVEN_GPG_PASSPHRASE" \
 	  -w /kiss \
 	  eclipse-temurin:8-jdk \
 	  bash -c '\
-	    apt-get update -qq && apt-get install -y -qq maven > /dev/null && \
-	    mvn clean deploy \
+	    apt-get update -qq && apt-get install -y -qq maven gnupg > /dev/null && \
+	    echo "allow-loopback-pinentry" > ~/.gnupg/gpg-agent.conf && \
+	    echo "$$MAVEN_GPG_PASSPHRASE" | gpg --batch --passphrase-fd 0 --import /tmp/secring.gpg 2>/dev/null && \
+	    mvn clean deploy -Dgpg.passphrase="$$MAVEN_GPG_PASSPHRASE" \
 	  '
 
 .PHONY: site
