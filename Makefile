@@ -53,6 +53,16 @@ deploy: clean all
 	git push
 	mvn clean deploy
 
+.PHONY: docker-deploy
+docker-deploy: docker-test
+	docker run --rm \
+	  -v "$$HOME/.m2:/root/.m2" \
+	  -v "$$HOME/.gnupg:/root/.gnupg" \
+	  -v "$$(pwd):/kiss" \
+	  -w /kiss \
+	  eclipse-temurin:8-jdk \
+	  bash -c "apt-get update -qq && apt-get install -y -qq maven gnupg > /dev/null && mvn clean deploy"
+
 .PHONY: site
 site: lib
 	cp kiss.jar docs/
