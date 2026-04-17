@@ -60,16 +60,12 @@ docker-deploy: docker-test
 	  -v "$$HOME/.m2:/root/.m2" \
 	  -v "$$HOME/.gnupg:/root/.gnupg" \
 	  -v "$$(pwd):/kiss" \
-	  -e GPG_PASSPHRASE \
+	  -e MAVEN_GPG_PASSPHRASE="$$GPG_PASSPHRASE" \
 	  -w /kiss \
 	  eclipse-temurin:8-jdk \
 	  bash -c '\
-	    apt-get update -qq && apt-get install -y -qq maven gnupg > /dev/null && \
-	    mkdir -p ~/.gnupg && chmod 700 ~/.gnupg && \
-	    echo "no-autostart" > ~/.gnupg/gpg.conf && \
-	    echo "allow-loopback-pinentry" > ~/.gnupg/gpg-agent.conf && \
-	    gpg-agent --daemon --allow-loopback-pinentry 2>/dev/null; \
-	    mvn clean deploy -Dgpg.passphrase="$$GPG_PASSPHRASE" \
+	    apt-get update -qq && apt-get install -y -qq maven > /dev/null && \
+	    mvn clean deploy \
 	  '
 
 .PHONY: site

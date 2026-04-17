@@ -128,12 +128,8 @@
               <goal>sign</goal>
             </goals>
             <configuration>
-              <gpgArguments>
-                <arg>--batch</arg>
-                <arg>--no-tty</arg>
-                <arg>--pinentry-mode</arg>
-                <arg>loopback</arg>
-              </gpgArguments>
+              <!-- Use Bouncy Castle signer - no gpg binary or agent needed -->
+              <signer>bc</signer>
             </configuration>
           </execution>
 	</executions>
