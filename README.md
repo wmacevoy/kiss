@@ -12,7 +12,7 @@
   ...
   <dependencies>
       <dependency>
-        <groupId>com.github.wmacevoy</groupId>
+        <groupId>io.github.wmacevoy</groupId>
         <artifactId>kiss</artifactId>
         <version>LATEST</version>
       </dependency>
