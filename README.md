@@ -14,7 +14,7 @@
       <dependency>
         <groupId>io.github.wmacevoy</groupId>
         <artifactId>kiss</artifactId>
-        <version>LATEST</version>
+        <version>1.3.0</version>
       </dependency>
       ...
   </dependencies>
@@ -279,6 +279,56 @@ Simple to use, but strong symmetric key encryption.
 * String decrypt(String key, String secret) --- Decrypt a hex encoded string (like those made by encrypt) to recreate the message (changed in v1.1 compared to previous version).
 
 * String sha256(String text) --- Common secure hash.
+
+### Try it in your browser
+
+[KISS Java Playground](https://wmacevoy.github.io/kiss/) --- edit, compile, and run KISS programs directly in the browser using CheerpJ. No install needed.
+
+## Development
+
+### Build and test (requires Docker)
+
+```bash
+make docker-test    # build + run all tests in Docker
+make e2e            # run Playwright browser tests
+```
+
+### Deploy to Maven Central
+
+One-time setup:
+
+1. Generate a token at https://central.sonatype.com (Account > Generate User Token)
+2. Add to `~/.m2/settings.xml`:
+```xml
+<settings>
+  <servers>
+    <server>
+      <id>central</id>
+      <username>YOUR_TOKEN_USERNAME</username>
+      <password>YOUR_TOKEN_PASSWORD</password>
+    </server>
+  </servers>
+</settings>
+```
+3. Export your GPG secret key (will prompt for passphrase):
+```bash
+gpg --export-secret-keys --armor > ~/.gnupg/secring.asc
+```
+4. Publish your GPG key to a keyserver:
+```bash
+gpg --keyserver keyserver.ubuntu.com --send-keys YOUR_KEY_ID
+```
+
+To deploy:
+
+```bash
+read -s MAVEN_GPG_PASSPHRASE && export MAVEN_GPG_PASSPHRASE
+make docker-deploy
+```
+
+The `read -s` command prompts for your passphrase without echoing it. The deploy runs all tests, signs the artifacts with GPG inside Docker, and publishes to Maven Central.
+
+---
 
 [logo]: kiss/java-kiss.png "Java Duke with Kiss"
 
