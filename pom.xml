@@ -119,7 +119,7 @@
       <plugin>
 	<groupId>org.apache.maven.plugins</groupId>
 	<artifactId>maven-gpg-plugin</artifactId>
-	<version>1.5</version>
+	<version>3.2.4</version>
 	<executions>
           <execution>
             <id>sign-artifacts</id>
@@ -129,6 +129,8 @@
             </goals>
             <configuration>
               <gpgArguments>
+                <arg>--batch</arg>
+                <arg>--no-tty</arg>
                 <arg>--pinentry-mode</arg>
                 <arg>loopback</arg>
               </gpgArguments>
