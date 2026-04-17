@@ -51,10 +51,7 @@ deploy: clean all
 	           kiss-with-tests.jar kiss-with-tests.jar.sha256
 	git commit --allow-empty -m "deploy `date -u`"
 	git push
-	mvn clean
-	mvn compile
-	mvn package
-	mvn deploy
+	mvn clean deploy
 
 .PHONY: site
 site: lib
