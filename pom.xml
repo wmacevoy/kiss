@@ -130,7 +130,7 @@
             <configuration>
               <!-- Use Bouncy Castle signer - no gpg binary or agent needed -->
               <signer>bc</signer>
-              <bcSignerSecretKeyPath>${user.home}/.gnupg/secring.gpg</bcSignerSecretKeyPath>
+              <bcSignerSecretKeyPath>${user.home}/.gnupg/secring.asc</bcSignerSecretKeyPath>
             </configuration>
           </execution>
 	</executions>
