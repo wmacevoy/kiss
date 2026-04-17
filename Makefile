@@ -55,13 +55,15 @@ deploy: clean all
 
 .PHONY: docker-deploy
 docker-deploy: docker-test
+	@test -n "$$GPG_PASSPHRASE" || (echo "Set GPG_PASSPHRASE env var first" && exit 1)
 	docker run --rm \
 	  -v "$$HOME/.m2:/root/.m2" \
 	  -v "$$HOME/.gnupg:/root/.gnupg" \
 	  -v "$$(pwd):/kiss" \
+	  -e GPG_PASSPHRASE \
 	  -w /kiss \
 	  eclipse-temurin:8-jdk \
-	  bash -c "apt-get update -qq && apt-get install -y -qq maven gnupg > /dev/null && mvn clean deploy"
+	  bash -c "apt-get update -qq && apt-get install -y -qq maven gnupg > /dev/null && mvn clean deploy -Dgpg.passphrase=\$$GPG_PASSPHRASE"
 
 .PHONY: site
 site: lib
